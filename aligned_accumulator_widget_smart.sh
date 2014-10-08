@@ -29,7 +29,7 @@ if [ -s shemp.bed ]; then
 	else
 		head curly.bed >> ../rejects.bed
 		flag=FAIL
-		echo "fuck you"
+		echo 'fail'
 	fi
 
 else
