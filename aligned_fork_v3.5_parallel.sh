@@ -74,7 +74,7 @@ for script in `ls | grep -v lsf | grep .sh`;
 #bsub -J align_grind_$4 -o bundle_$BUN_NUM.lsf.out sh bundle_$BUN_NUM.sh
 #bsub -K -J chillout -w "done(align_grind_$4)" echo 'over and out'
 
-while [ bjobs -w | grep align_grind_$4 | wc -l -gt 0 ]
+while [ `bjobs -w | grep align_grind_$4 | wc -l` -gt 0 ]
 
 		do sleep 60;
 
