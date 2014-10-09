@@ -24,7 +24,6 @@ touch monitor.txt											#
 #############################################################
 
 sh ../the_mapsplicer.sh $1
-while [ `bjobs -w | grep -c alert_$1` -gt 0 ]
-		do sleep 3600;
-	done
+sleep 30
+bsub -J brief_intermission_$1 -K -o intermission.lsf.out echo derp
 sh ../post_mapsplice.sh $1 
