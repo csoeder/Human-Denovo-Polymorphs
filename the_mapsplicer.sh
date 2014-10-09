@@ -40,4 +40,4 @@ bsub -J bam2bed_$1 -w "done(bamsort_$1)" -o bam2bed.lsf.out "bedtools bamtobed -
 #########################################
 
 
-bsub -J alert_$1 -w "done(bam2bed_$1)" echo $1 has successfully mapsplutted
+bsub -J alert_$1 -w "done(bam2bed_$1) && done(splutDex_$1)" echo $1 has successfully mapsplutted
