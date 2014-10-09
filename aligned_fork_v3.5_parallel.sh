@@ -76,9 +76,13 @@ for script in `ls | grep -v lsf | grep .sh`;
 
 while [ `bjobs -w | grep align_grind_$4 | wc -l` -gt 0 ]
 
-		do sleep 60;
+		do echo "chillin...";
+		sleep 60;
 
 	done
+
+mkdir detritus
+mv bundle_* detritus/
 
 
 touch clean_assemblies.fa
