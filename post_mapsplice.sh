@@ -5,6 +5,9 @@
 #	as separate forks; the unaligned fork is underdeveloped.
 
 #############################################################################
+DATA_DIR='/netscr/csoeder/1kGen/data'
+SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
+#############################################################################
 ### Index the Trinity fasta #################################
 bsub -J bwaInducks_$1 -o bwaInducks.lsf.out bwa index Trinity_files.Trinity.fasta
 bsub -J faidx_$1 -w "done(bwaInducks_$1)" -o faidx.lsf.out samtools faidx Trinity_files.Trinity.fasta
