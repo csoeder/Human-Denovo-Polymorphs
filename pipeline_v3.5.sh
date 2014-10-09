@@ -25,4 +25,4 @@ touch monitor.txt											#
 
 sh ../the_mapsplicer.sh $1
 sleep 30
-bsub -J brief_intermission_$1 -w "done(alert_$1)" -K -o intermission.lsf.out sh ../post_mapsplice.sh $1 
+bsub -J brief_intermission_$1 -w "done(alert_$1)" -o intermission.lsf.out sh ../post_mapsplice.sh $1 
