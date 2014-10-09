@@ -23,8 +23,8 @@ touch ticktock.txt 		#log files 							#
 touch monitor.txt											#
 #############################################################
 
-sh the_mapsplicer.sh $1
+sh ../the_mapsplicer.sh $1
 while [ `bjobs -w | grep -c alert_$1` -gt 0 ]
 		do sleep 3600;
 	done
-sh post_mapsplice.sh $1 
+sh ../post_mapsplice.sh $1 
