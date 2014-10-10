@@ -1,6 +1,5 @@
 #!/bin/sh
 ###	A script to automate the MapSplicing and post-mapsplice processing
-
 #############################################################
 DATA_DIR='/netscr/csoeder/1kGen/data'
 SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
@@ -13,7 +12,7 @@ bsub -J bamsort_$1 -w "done(splutvert_$1)" -o bamsort.lsf.out samtools sort $1_m
 bsub -J splutDex_$1 -w "done(bamsort_$1)" -o splutDex.lsf.out samtools index $1_mapsplice_alignment.sort.bam
 bsub -J bam2bed_$1 -w "done(bamsort_$1)" -o bam2bed.lsf.out "bedtools bamtobed -bed12 -i $1_mapsplice_alignment.sort.bam > $1_mapsplice_alignment.bed"
 #############################################################
-
+echo "$(date)	MAPSPLICER:		MapSplice jobs submitted"	>> monitor.log
 #########################################
 ###Assemble the reads####################
 #this has already been done in v1; otherwise 
