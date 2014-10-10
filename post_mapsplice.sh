@@ -27,13 +27,13 @@ bsub -J sambam_$1 -w "done(sampe_$1)" -o sambam.lsf.out "samtools view -Sbh RNAS
 bsub -J RNAsort_$1 -w "done(sambam_$1)" -o rnasort.lsf.out "samtools sort RNASeq_vs_Trinity.bam RNASeq_vs_Trinity.sort"
 bsub -J rnaInducks_$1 -w "done(RNAsort_$1)" -o rnaInducks.lsf.out samtools index RNASeq_vs_Trinity.sort.bam
 #############################################################################
-### Partition the Transcripts into those which align and 	# 
-### those which do not. #####################################
+### Partition the Transcripts into those which align and # 
+### those which do not. ##################################
 bsub -J gather_maps_$1 -w "done(bamsort2_$1)" -o gather_maps.lsf.out "samtools view -h -F4 $1_Assembly_Alignment.sorted.bam > $1_Assemblies_mapped.sam"
 bsub -J gather_unmaps_$1 -w "done(bamsort2_$1)" -o gather_unmaps.lsf.out "samtools view -h -f4 $1_Assembly_Alignment.sorted.bam > $1_Assemblies_unmapped.sam"
 #############################################################################
 ### Fork a job on each partition ############################
-bsub -J $1_aligned_fork -q week -w "done(faidx_$1) && done(gather_maps_$1)" -q week "sh $SCRIPT_DIR/aligned_fork_v3.5_parallel.sh $1_Assemblies_mapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta $1"
+bsub -J $1_aligned_fork -q week -w "done(faidx_$1) && done(gather_maps_$1)" -q week -o aligned_fork.lsf.out "sh $SCRIPT_DIR/aligned_fork_v3.5_parallel.sh $1_Assemblies_mapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta $1"
 bsub -J $1_unaligned_fork -q week -w "done(faidx_$1) && done(gather_unmaps_$1) && done(rnaInducks_$1)" -o unaligned_fork.lsf.out -q week "sh $SCRIPT_DIR/unaligned_fork_v3.5_parallel.sh $1_Assemblies_unmapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta RNASeq_vs_Trinity.sort.bam $1_mapsplice_alignment.bed $1"
 #############################################################################
 ### Is it done? Email me. ###################################
