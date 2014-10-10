@@ -1,3 +1,8 @@
+'''
+A script to BLAST every sequence in a file...
+'''
+########################################################
+###	Gather the tools
 from subprocess import call, check_output
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
@@ -6,32 +11,21 @@ from Bio.Seq import Seq
 import re
 import os
 import sys
-
-
-filein = sys.argv[1]
-
-
-handle = SeqIO.parse(filein, "fasta")
+########################################################
+filein = sys.argv[1]	#	File to be processed
+handle = SeqIO.parse(filein, "fasta")	#	Construct parser
 count = 0
 while 1:
 	try:
-
 		record = handle.next()
 		SeqIO.write([record], 'temp.fa', 'fasta')
-#		blastx_cline = NcbiblastxCommandline(query="temp.fa", db="/netscr/csoeder/1kGen/data/blastdb/hg19", outfmt=7, 
-#out="BLASTs/blasted%i.tbl"%count)#evalue=0.001
-		#blastx_cline = NcbiblastnCommandline(query="temp.fa", 
-#db="/netscr/csoeder/1kGen/data/blastdb/hg19", outfmt=7,out="BLASTs/blasted%i.tbl"%count, 
-#evalue=0.001)
 		blastx_cline = NcbiblastxCommandline(query="temp.fa", db="/nas02/data/blast/pdbaa", outfmt=7, out="BLASTs/blasted%i.tbl"%count)#evalue=0.001
 		stdout, stderr = blastx_cline()
-
 		call(['rm', 'temp.fa'])
 		count += 1
-
 	except StopIteration:
 		break
-
+########################################################
 
 
 

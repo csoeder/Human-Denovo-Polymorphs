@@ -1,4 +1,9 @@
+'''
+A script to pull ORFs out of transcripts
+'''
+##This is a modified ORF extractor. For use on transcriptomes, not genomes. 
 
+########################################################
 ###open your toolbox
 import Bio
 from Bio import SeqIO
@@ -6,36 +11,24 @@ from Bio.SeqRecord import SeqRecord
 from Bio.Seq import Seq
 import numpy as np
 import re
-#import matplotlib.pyplot as plt
 import random as rn
 import sys
-
-fasta_in= sys.argv[1]	
-fasta_out = sys.argv[2]
-
-
-#########################################
-##This is a modified ORF extractor. For use on transcriptomes, not genomes. 
-
+########################################################
+fasta_in= sys.argv[1]	#	File to be processed
+fasta_out = sys.argv[2]	#	Where the ORFs go
+########################################################
 
 def extractor(record):
 	#extract ORFs from record; outputs a list of record objects containing the ORFs
 	desc = record.description
 	seek = record.seq.tostring()
-	#rev_seek = record.reverse_complement().seq.tostring()
-	#irrelevent for transcriptomes - they read forward to back.
-
+	########################################################
 	#####Modular dictionary of start and stop codons
 	start_dict = {0:[], 1:[], 2:[]}
 	stop_dict = {0:[], 1:[], 2:[]}
-	#rev_start_dict = {0:[], 1:[], 2:[]}
-	#rev_stop_dict = {0:[], 1:[], 2:[]}
-
 	###Define start and stop codons
 	start = re.compile(r'ATG')#start codon, aka Methionine. Alternatives rare in eukaryotes. Source: Wikipedia
 	stop = re.compile(r'T(?!GG)[AG][AG]')
-
-
 	###Scan the given seqeunce for instances of codon, tags their locations in a dictionary dic
 	def scanner(codon, seq, dic):
 		finds = re.finditer(codon, seq)
@@ -45,11 +38,8 @@ def extractor(record):
 				dic[rec.start()%3].append(rec.start())
 			except StopIteration:
 				break
-
 	scanner(start, seek, start_dict)
 	scanner(stop, seek, stop_dict)
-	#scanner(start, rev_seek, rev_start_dict)
-	#scanner(stop, rev_seek, rev_stop_dict)
 
 
 	def find_ORFs(start_dict, stop_dict, mod):
@@ -65,7 +55,6 @@ def extractor(record):
 				seq = seek[begin:end+3]
 				rec = SeqRecord(Seq(seq))
 				
-
 				#######################################################
 				##This is different. ORFs haven't been aligned yet. 
 				#chro = desc.split('\t')[0][1:]#grab the chromosome name

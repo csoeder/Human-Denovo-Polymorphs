@@ -22,7 +22,7 @@ cd $1
 touch ticktock.txt 		#log files 							#
 touch monitor.txt											#
 #############################################################
-
-sh ../the_mapsplicer.sh $1
-sleep 30
+sh ../the_mapsplicer.sh $1 	#	Run the MapSplice script	#
+sleep 30					#	Chill out for a bit, then submit the post-mapsplice script
 bsub -J brief_intermission_$1 -w "done(alert_$1)" -o intermission.lsf.out sh ../post_mapsplice.sh $1 
+#############################################################

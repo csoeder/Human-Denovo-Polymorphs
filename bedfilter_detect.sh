@@ -10,15 +10,8 @@ module load bedtools 						#
 
 DATA_DIR='/netscr/csoeder/1kGen/data'
 SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
-
-
-echo INPUT:
-head $1
-
 #	$1 = input BED file
 #	$2 = output BED file
-
-
 #####################################################################################################################################################################
 ###More filtration: remove overlap with annotated genomic locations																									#
 ##################################################################################																					#
@@ -27,27 +20,21 @@ head $1
 bedtools intersect -split -a $1 -b $DATA_DIR/human_genes.bed > no_genes.bed	#
 if [[ -s no_genes.bed ]]; then
 	mv no_genes.bed $2
-	echo "GENE FOUND"
+#	echo "GENE FOUND"
 	exit
 fi
-#echo Known human genes removed >> monitor.txt									#																					#
-###																				#																					#
 #################################################################################																					#
 ###		Remove repetitive elements												#																					#
 ###			-	UCSC Repeat Masker												#																					#
 bedtools intersect -split -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.bed								#
 if [[ -s no_rpts.bed ]]; then
 	mv no_rpts.bed $2
-	echo "ITS REPETITIVE"
+#	echo "ITS REPETITIVE"
 	exit
 fi
-#echo Repetitive elements removed >> monitor.txt									#																					#
-###																				#																					#
 #################################################################################																					#
 ###		Current version admits known ESTs.	##########							#																					#
 #Complement of ESTs in the sorted bed file 										#																					#
-#bsub -J bed3_$1 -K -q week -o bed3_$1.lsf.out -M 10 'bedtools intersect -v -a no_rpts.bed -b $DATA_DIR/ESTs.bed > no_rpts_no_EST.bed'								
-#
 #human ESTs - all_EST at UCSC													#																					#
 #echo ESTs removed >> monitor.txt												#																					#
 #################################################################################																					#
@@ -56,11 +43,9 @@ fi
 bedtools intersect -split -a $1 -b $DATA_DIR/human_mRNA.bed > no_rpts_no_est_no_mRNA.bed
 if [[ -s no_rpts_no_est_no_mRNA.bed ]]; then
 	mv no_rpts_no_est_no_mRNA.bed $2
-	echo "mRNA"
+#	echo "mRNA"
 	exit
 fi
-#echo mRNAs removed >> monitor.txt												#																					#
-###																				#																					#
 #################################################################################																					#
 ###		Remove retroelements													#																					#
 ###			-	UCSC retroAli5													#																					#
@@ -73,19 +58,12 @@ bedtools intersect -a $1 -b $DATA_DIR/retroposed3.bed > no_rpts_no_est_no_mRNA_n
 ###			-	UCSC YalePseudo60												#																					#
 bedtools intersect -a $1 -b $DATA_DIR/yalepseudo.bed > no_rpts_no_est_no_mRNA_no_retro_no_pseudo.bed
 cat no_rpts_no_est_no_mRNA_no_retro* > no_retros.bed
-
 if [[ -s no_retros.bed ]]; then
 	mv no_retros.bed $2
-	echo "HOW RETRO"
+#	echo "HOW RETRO"
 	exit
 fi
 #################################################################################																					#
-#echo Retrogenes removed >> monitor.txt							#																									#
 touch $2	#																									
-#
-#echo filtering done hello filtered.bed  >> monitor.txt 			#																									#
-#echo FILTERING END >> ticktock.txt								#																									#
-#date >> ticktock.txt											#																									#
-#echo >> ticktock.txt											#																									#
 #################################################################																									#
 ####################################################################################################################################################################

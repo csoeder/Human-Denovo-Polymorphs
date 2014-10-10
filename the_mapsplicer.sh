@@ -1,12 +1,9 @@
 #!/bin/sh
-
-
-DATA_DIR='/netscr/csoeder/1kGen/data'
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
-
+###	A script to automate the MapSplicing and post-mapsplice processing
 
 #############################################################
-
+DATA_DIR='/netscr/csoeder/1kGen/data'
+SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 #############################################################
 ###Mapsplice the reads######################################
 bsub -J mapsplut_$1 -o mapsplut.lsf.out -M 75 -q week python /nas02/apps/mapsplice-2.1.4/src/MapSplice-v2.1.4/mapsplice.py -c /netscr/csoeder/1kGen/data/hg19_split/ -x /netscr/csoeder/1kGen/data/hg19_bowtieindex/hg19 -1 ERR*_1.fastq -2 ERR*_2.fastq 
@@ -38,6 +35,5 @@ bsub -J bam2bed_$1 -w "done(bamsort_$1)" -o bam2bed.lsf.out "bedtools bamtobed -
 #du -sk Trinity_files.Trinity.fasta >> ticktock.txt
 #echo >> ticktock.txt					#
 #########################################
-
-
 bsub -J alert_$1 -w "done(bam2bed_$1) && done(splutDex_$1)" echo $1 has successfully mapsplutted
+#############################################################

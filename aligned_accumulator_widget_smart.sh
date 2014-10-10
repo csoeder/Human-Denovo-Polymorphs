@@ -7,41 +7,27 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 
 
 date1=$(date +"%s")
-#tr ' ' '\t' < temp.bed > shemp.bed
 cp temp.bed shemp.bed
+
 #Gather the Accumulation - use smart_churn!
-echo ACCUMULATE
-#date
-#echo
-#ls
-#echo
 
-if [ -s shemp.bed ]; then
+if [ -s shemp.bed ]; then	#	If there's data in the file; ie, it's nonempty
+	sh $SCRIPT_DIR/Accumulator2_smart.sh shemp.bed $1 	#	Run the accumulator on it
 
-	sh $SCRIPT_DIR/Accumulator2_smart.sh shemp.bed $1
-#echo
-#ls
-#if there is no overlap detected between the Accumulation and annotations, add it to the clean assemblies
-	if [[ ! -s overlap.bed ]]; then
-		head curly.bed >> ../clean_assemblies.bed
+	if [[ ! -s overlap.bed ]]; then 	#	if there is no overlap detected between the Accumulation and annotations
+		head curly.bed >> ../clean_assemblies.bed #	then add it to the clean assemblies
 		flag="PASS"
-		echo "w00t pass"
-	else
-		head curly.bed >> ../rejects.bed
-		flag=FAIL
-		echo 'fail'
+	else	#								otherwise,
+		head curly.bed >> ../rejects.bed #	"Rejected", by Don Hertzfeldt
+		flag="FAIL"
 	fi
 
-else
+else						#	Flag all empties
 	flag="MT";
-
 fi
 
-
-echo $flag
 cd ..
-#rm -rf $2
-date2=$(date +"%s")
-diff=$(($date2-$date1))
+date2=$(date +"%s")	#	Log your Productivity 
+diff=$(($date2-$date1)) #	in tick.tock
 echo "$2   $(($diff / 60))m   $(($diff % 60))s   $flag" >> tick.tock
-flag="DERP"
+echo "$2 Accumulated!"
