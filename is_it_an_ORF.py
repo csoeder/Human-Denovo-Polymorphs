@@ -24,7 +24,8 @@ def orf_check(seq):
 	for cod in codons: #if it terminates early
 		if cod in stops:
 			yes *= 0
-	if not yes:
+	if False:
+#	if not yes:
 		rev = Seq(seq).reverse_complement().tostring()
 		if rev[0:3]=="ATG":
 			yes = 1
