@@ -85,6 +85,11 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 						if nextCodon in ['TAG', 'TAA', 'TGA']:
 							codSeq = False
 							print "EARLY TERMINATION!"
+			else:
+				"underped, then cleared"
+		else:
+			print "cleared"
+
 
 
 		print "Percent match:	%s" 	%	tuple([float(matches)/float(qsize)*100])
