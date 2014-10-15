@@ -73,8 +73,8 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 							codSeq = False
 							print "START CODON WIPEOUT WITH RESTART"
 
-		print "Percent match:	%s" 	%	float(matches)/float(qsize)
-		print "Indel length:	%s" 	%	float(qinsert + tinsert)/float(qsize)
+		print "Percent match:	%s" 	%	tuple([float(matches)/float(qsize)*100])
+		print "Indel fraction:	%s" 	%	tuple([float(qinsert + tinsert)/float(qsize)])
 
 	except StopIteration:
 #		DNE:	If there is no alignment, there is no coding sequence
