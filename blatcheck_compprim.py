@@ -16,6 +16,7 @@ import re
 import sys
 import csv
 from Bio import SeqIO
+from Bio import Seq
 from is_it_an_ORF import orf_check
 ########################################################
 codSeq = True							#	flag to track the status of this potential coding sequence
@@ -41,9 +42,12 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		qsize = int(row[10])	#	query size
 		qinsert = int(row[5])	#	number of bases inserted in query
 		tinsert = int(row[7])	#	number of bases inserted in target
+		strand = row[8]			#	the strand
 
 		seq_query = check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start, stop])])
 		seq = ''.join(seq_query.split('\n')[1:]).upper()
+		if strand == '-':	#	if the hit is to the opposite strand...
+			seq = Seq.Seq(seq).reverse_complement().to_string()
 		print seq
 		#		Does the sequence map to an ORF as it stands?
 		if not orf_check(seq):	#	if this sequence doesn't cleanly map to an ORF
