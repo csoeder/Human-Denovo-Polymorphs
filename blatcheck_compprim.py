@@ -47,7 +47,7 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		seq_query = check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start, stop])])
 		seq = ''.join(seq_query.split('\n')[1:]).upper()
 		if strand == '-':	#	if the hit is to the opposite strand...
-			seq = Seq.Seq(seq).reverse_complement().to_string()
+			seq = Seq.Seq(seq).reverse_complement().tostring()
 		print seq
 		#		Does the sequence map to an ORF as it stands?
 		if not orf_check(seq):	#	if this sequence doesn't cleanly map to an ORF
