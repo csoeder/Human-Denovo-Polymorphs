@@ -76,6 +76,16 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 						if nextCodon == 'ATG':
 							codSeq = False
 							print "START CODON WIPEOUT WITH RESTART"
+				else:	#If the start codon is intact...
+					forward = 0 #	begin at the beginning...
+					nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*forward, start+3*forward+2])]).split('\n')[1:]).upper()
+					while forward*3 < 0.5 * qsize:#	and see if there's an early termination
+						forward += 1
+						nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*forward, start+3*forward+2])]).split('\n')[1:]).upper()
+						if nextCodon in ['TAG', 'TAA', 'TGA']:
+							codSeq = False
+							print "EARLY TERMINATION!"
+
 
 		print "Percent match:	%s" 	%	tuple([float(matches)/float(qsize)*100])
 		print "Indel fraction:	%s" 	%	tuple([float(qinsert + tinsert)/float(qsize)])
