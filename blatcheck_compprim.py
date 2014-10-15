@@ -35,8 +35,8 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		row = csv.reader(csvfile, delimiter='\t').next()
 
 		chrom = row[13]			#	Genome coords
-		start = int(row[14])	#
-		stop = int(row[15])		#	
+		start = int(row[15])	#
+		stop = int(row[16])		#	
 		matches = int(row[0])	#	number of matching bases
 		qsize = int(row[10])	#	query size
 		qinsert = int(row[5])	#	number of bases inserted in query
