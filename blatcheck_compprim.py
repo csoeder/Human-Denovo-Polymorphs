@@ -21,7 +21,7 @@ from is_it_an_ORF import orf_check
 codSeq = True							#	flag to track the status of this potential coding sequence
 totalPoints = 0 						#	The score for this potential coding sequnce
 phial  = sys.argv[1]
-genome  = sys.argv[1]
+genome  = sys.argv[2]
 index = re.compile('\w*blat(\d*).psl')	#	what does a BLAT result look like?
 number = index.match(phial).groups()[0]	#	scrape the ID number
 ##########################################	Slice and dice...
