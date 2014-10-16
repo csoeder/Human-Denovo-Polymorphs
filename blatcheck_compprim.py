@@ -26,12 +26,13 @@ genome  = sys.argv[2]
 index = re.compile('\w*blat(\d*).psl')	#	what does a BLAT result look like?
 number = index.match(phial).groups()[0]	#	scrape the ID number
 ##########################################	Slice and dice...
-os.system('sed 1,5d compprimBLATs/%s | grep chr[1-9,X,Y][0-9]*"\s" > compprimBLATs/%s.snipt'%tuple([phial, phial]))	#remove header; remove chrXXrandomY_blahblahblah hits
+os.system('sed 1,5d compprimBLATs/%s | grep chr[1-9,X,Y,M][0-9,A,B]*"\s" > compprimBLATs/%s.snipt'%tuple([phial, phial]))	#remove header; remove chrXXrandomY_blahblahblah hits
 os.system('sort -k1,1 -r compprimBLATs/%s.snipt > compprimBLATs/%s.snipt.sortd'%tuple([phial, phial]))				#sort the hits
 os.system('head -n1 compprimBLATs/%s.snipt.sortd > compprimBLATs/%s.snipt.sortd.clipt'%tuple([phial, phial]))		#select the top score - is this correct? what if the top hit
 ########################################################																doesn't code, but a marginally weaker hit does?
 
 with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
+
 	try:
 		row = csv.reader(csvfile, delimiter='\t').next()
 
