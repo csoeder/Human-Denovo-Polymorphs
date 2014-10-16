@@ -121,7 +121,7 @@ for candidate in `ls chunked_genes | grep exon`; do
 	region=$(head -n 1 chunked_genes/exons_$num.bed | cut -f 4);
 	echo $region is the best!
 	samtools faidx ../Trinity_files.Trinity.fasta $region > compprimBLATs/temp_$num.fa
-	python $SCRIPT_DIR/autoblat_compprim.py compprimBLATs/temp_$num.fa $4;
+	python $SCRIPT_DIR/autoblat_compprim.py $num $4;
 done
 
 while [ `bjobs -w | grep BLAT_pan_$4 | wc -l` -gt 0 && `bjobs -w | grep BLAT_gor_$4 | wc -l` -gt 0 ]
