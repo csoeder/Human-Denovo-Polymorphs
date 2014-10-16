@@ -119,6 +119,7 @@ mkdir compprimBLATs
 for candidate in `ls chunked_genes | grep exon`; do 
 	num=$(echo $candidate | cut -f 2 -d '_' |cut -f 1 -d '.');
 	region=$(head -n 1 chunked_genes/exons_$num.bed | cut -f 4);
+	echo $region is the best!
 	samtools faidx ../Trinity_files.Trinity.fasta $region > compprimBLATs/temp_$num.fa
 	python $SCRIPT_DIR/autoblat_compprim.py compprimBLATs/temp_$num.fa $4;
 done
