@@ -31,6 +31,42 @@ os.system('sort -k1,1 -r compprimBLATs/%s.snipt > compprimBLATs/%s.snipt.sortd'%
 os.system('head -n1 compprimBLATs/%s.snipt.sortd > compprimBLATs/%s.snipt.sortd.clipt'%tuple([phial, phial]))		#select the top score - is this correct? what if the top hit
 ########################################################																doesn't code, but a marginally weaker hit does?
 
+
+def sequence_sniffer(seq, begin):
+	if seq[:3] != 'ATG':
+		back = 0 	#	Pull out the codon before and check that one.
+		prevCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*back, begin-3*back+2])]).split('\n')[1:]).upper()
+		while prevCodon != 'ATG' and prevCodon not in ['TAG', 'TAA', 'TGA']:	#	While the codon is neither start nor stop
+			back +=1
+			prevCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*back, begin-3*back+2])]).split('\n')[1:]).upper()
+			if prevCodon == 'ATG':	#	If there is a start codon upstream of the missing start 
+				codSeq = True		#	Then the coding sequence is 'rescued'
+				print "START CODON WIPEOUT WITH REPLACEMENT"
+			elif prevCodon in ['TAG', 'TAA', 'TGA']:
+				codSeq = False		#	If there's a stop codon first, it's not!
+				print "START CODON WIPEOUT W/O REPLACEMENT"
+	#	better check for restart!	(ie, a new start codon upstream which brings 1/2 or more of the ORF back)
+		forward = 0
+		nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+		while forward*3 < 0.5 * qsize:	#	While there is still half a peptide left....
+			forward += 1
+			nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+			if nextCodon == 'ATG':
+				codSeq = False
+				print "START CODON WIPEOUT WITH RESTART"
+	else:	#If the start codon is intact...
+		forward = 0 #	begin at the beginning...
+		nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+		while forward*3 < 0.5 * qsize:#	and see if there's an early termination
+			forward += 1
+			nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+			if nextCodon in ['TAG', 'TAA', 'TGA']:
+				codSeq = False
+				print "EARLY TERMINATION!"
+
+
+
+
 with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 
 	try:
@@ -53,48 +89,34 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		#		Does the sequence map to an ORF as it stands?
 		if not orf_check(seq):	#	if this sequence doesn't cleanly map to an ORF
 				#	BLAT results can be greedy and include extra nucleotides at the edges. Try clipping these!
+			print "raw sequence isn't an ORF..."
 			codSeq=False
-			if not (orf_check(seq[:-1]) or orf_check(seq[1:-1]) or orf_check(seq[1:])):
-				codSeq=False
+			sequence_sniffer(seq, start)
+
+			if not codSeq:
+				print "raw sequence appears non-coding"
+				print "attempting to underp the sequence, 1/3"
+				if orf_check(seq[:-1]):
+					codSeq = True
+				else:
+					sequence_sniffer(seq[:-1], start)
+
+			if not codSeq:
+				print "attempting to underp the sequence, 2/3"
+				if orf_check(seq[1:-1]):
+					codSeq = True
+				else:
+					sequence_sniffer(seq[1:-1], start+1)
+
+			if not codSeq:
+				print "attempting to underp the sequence, 3/3"
+				if orf_check(seq[1:]):
+					codSeq = True
+				else:
+					sequence_sniffer(seq[1:], start+1)
+
 				#	is it missing a start codon?
 				#	better check for replacement!	(ie, a new start codon upstream which takes the place of the missing one)
-				if seq[:3] != 'ATG':
-					back = 0 	#	Pull out the codon before and check that one.
-					prevCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*back, start-3*back+2])]).split('\n')[1:]).upper()
-					while prevCodon != 'ATG' and prevCodon not in ['TAG', 'TAA', 'TGA']:	#	While the codon is neither start nor stop
-						back +=1
-						prevCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*back, start-3*back+2])]).split('\n')[1:]).upper()
-						if prevCodon == 'ATG':	#	If there is a start codon upstream of the missing start 
-							codSeq = True		#	Then the coding sequence is 'rescued'
-							print "START CODON WIPEOUT WITH REPLACEMENT"
-						elif prevCodon in ['TAG', 'TAA', 'TGA']:
-							codSeq = False		#	If there's a stop codon first, it's not!
-							print "START CODON WIPEOUT W/O REPLACEMENT"
-				#	better check for restart!	(ie, a new start codon upstream which brings 1/2 or more of the ORF back)
-					forward = 0
-					nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*forward, start+3*forward+2])]).split('\n')[1:]).upper()
-					while forward*3 < 0.5 * qsize:	#	While there is still half a peptide left....
-						forward += 1
-						nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*forward, start+3*forward+2])]).split('\n')[1:]).upper()
-						if nextCodon == 'ATG':
-							codSeq = False
-							print "START CODON WIPEOUT WITH RESTART"
-				else:	#If the start codon is intact...
-					forward = 0 #	begin at the beginning...
-					nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*forward, start+3*forward+2])]).split('\n')[1:]).upper()
-					while forward*3 < 0.5 * qsize:#	and see if there's an early termination
-						forward += 1
-						nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start-3*forward, start+3*forward+2])]).split('\n')[1:]).upper()
-						if nextCodon in ['TAG', 'TAA', 'TGA']:
-							codSeq = False
-							print "EARLY TERMINATION!"
-			else:
-				codSeq=True
-				"underped, then cleared"
-		else:
-			codSeq = True
-			print "cleared"
-
 
 
 		print "Percent match:	%s" 	%	tuple([float(matches)/float(qsize)*100])
