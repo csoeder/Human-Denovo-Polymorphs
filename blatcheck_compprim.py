@@ -41,10 +41,10 @@ def sequence_sniffer(seq, begin):
 			prevCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*back, begin-3*back+2])]).split('\n')[1:]).upper()
 			if prevCodon == 'ATG':	#	If there is a start codon upstream of the missing start 
 				codSeq = True		#	Then the coding sequence is 'rescued'
-				print "START CODON WIPEOUT WITH REPLACEMENT"
+				#print "START CODON WIPEOUT WITH REPLACEMENT"
 			elif prevCodon in ['TAG', 'TAA', 'TGA']:
 				codSeq = False		#	If there's a stop codon first, it's not!
-				print "START CODON WIPEOUT W/O REPLACEMENT"
+				#print "START CODON WIPEOUT W/O REPLACEMENT"
 	#	better check for restart!	(ie, a new start codon upstream which brings 1/2 or more of the ORF back)
 		forward = 0
 		nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
@@ -53,7 +53,7 @@ def sequence_sniffer(seq, begin):
 			nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
 			if nextCodon == 'ATG':
 				codSeq = False
-				print "START CODON WIPEOUT WITH RESTART"
+				#print "START CODON WIPEOUT WITH RESTART"
 	else:	#If the start codon is intact...
 		forward = 0 #	begin at the beginning...
 		nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
@@ -62,7 +62,7 @@ def sequence_sniffer(seq, begin):
 			nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
 			if nextCodon in ['TAG', 'TAA', 'TGA']:
 				codSeq = False
-				print "EARLY TERMINATION!"
+				#print "EARLY TERMINATION!"
 
 
 
@@ -89,27 +89,27 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		#		Does the sequence map to an ORF as it stands?
 		if not orf_check(seq):	#	if this sequence doesn't cleanly map to an ORF
 				#	BLAT results can be greedy and include extra nucleotides at the edges. Try clipping these!
-			print "raw sequence isn't an ORF..."
+#			print "raw sequence isn't an ORF..."
 			codSeq=False
 			sequence_sniffer(seq, start)
 
 			if not codSeq:
-				print "raw sequence appears non-coding"
-				print "attempting to underp the sequence, 1/3"
+#				print "raw sequence appears non-coding"
+#				print "attempting to underp the sequence, 1/3"
 				if orf_check(seq[:-1]):
 					codSeq = True
 				else:
 					sequence_sniffer(seq[:-1], start)
 
 			if not codSeq:
-				print "attempting to underp the sequence, 2/3"
+#				print "attempting to underp the sequence, 2/3"
 				if orf_check(seq[1:-1]):
 					codSeq = True
 				else:
 					sequence_sniffer(seq[1:-1], start+1)
 
 			if not codSeq:
-				print "attempting to underp the sequence, 3/3"
+#				print "attempting to underp the sequence, 3/3"
 				if orf_check(seq[1:]):
 					codSeq = True
 				else:
@@ -119,15 +119,20 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 				#	better check for replacement!	(ie, a new start codon upstream which takes the place of the missing one)
 
 
-		print "Percent match:	%s" 	%	tuple([float(matches)/float(qsize)*100])
-		print "Indel fraction:	%s" 	%	tuple([float(qinsert + tinsert)/float(qsize)])
+		#print "Percent match:	%s" 	%	tuple([float(matches)/float(qsize)*100])
+		#print "Indel fraction:	%s" 	%	tuple([float(qinsert + tinsert)/float(qsize)])
 
 	except StopIteration:
 #		DNE:	If there is no alignment, there is no coding sequence
 		codSeq = False
-		print "NO HOMOLOG"
+		#print "NO HOMOLOG"
 
+print phial
 print "Coding sequence status:	%s"	%	codSeq
+
+if codSeq:
+	os.system('cp chunked_genes/exons_%s.bed primate_homologs/'%number)	
+
 
 
 
