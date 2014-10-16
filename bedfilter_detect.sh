@@ -17,7 +17,9 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 ##################################################################################																					#
 ###		Remove annotated human genes 											#																					#
 ###			-	UCSC Genes 														#																					#
-bedtools intersect -split -a $1 -b $DATA_DIR/human_genes.bed > no_genes.bed	#
+bedtools intersect -split -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed	#
+bedtools intersect -split -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed	#
+cat no_UCSC.bed no_refSeq.bed > no_genes.bed
 if [[ -s no_genes.bed ]]; then
 	mv no_genes.bed $2
 #	echo "GENE FOUND"
@@ -40,12 +42,13 @@ fi
 #################################################################################																					#
 ###		Remove annotated human mRNAs 											#																					#
 ###			-	UCSC Human mRNA (all_mrna)										#																					#
-bedtools intersect -split -a $1 -b $DATA_DIR/human_mRNA.bed > no_rpts_no_est_no_mRNA.bed
-if [[ -s no_rpts_no_est_no_mRNA.bed ]]; then
-	mv no_rpts_no_est_no_mRNA.bed $2
-#	echo "mRNA"
-	exit
-fi
+###		mRNAs are currently being soft-filtered - they pass here.
+#bedtools intersect -split -a $1 -b $DATA_DIR/human_mRNA.bed > no_rpts_no_est_no_mRNA.bed
+#if [[ -s no_rpts_no_est_no_mRNA.bed ]]; then
+#	mv no_rpts_no_est_no_mRNA.bed $2
+##	echo "mRNA"
+#	exit
+#fi
 #################################################################################																					#
 ###		Remove retroelements													#																					#
 ###			-	UCSC retroAli5													#																					#
