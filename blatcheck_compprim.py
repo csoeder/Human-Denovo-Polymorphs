@@ -53,7 +53,9 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		#		Does the sequence map to an ORF as it stands?
 		if not orf_check(seq):	#	if this sequence doesn't cleanly map to an ORF
 				#	BLAT results can be greedy and include extra nucleotides at the edges. Try clipping these!
+			codSeq=False
 			if not (orf_check(seq[:-1]) or orf_check(seq[1:-1]) or orf_check(seq[1:])):
+				codSeq=False
 				#	is it missing a start codon?
 				#	better check for replacement!	(ie, a new start codon upstream which takes the place of the missing one)
 				if seq[:3] != 'ATG':
@@ -87,8 +89,10 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 							codSeq = False
 							print "EARLY TERMINATION!"
 			else:
+				codSeq=True
 				"underped, then cleared"
 		else:
+			codSeq = True
 			print "cleared"
 
 
