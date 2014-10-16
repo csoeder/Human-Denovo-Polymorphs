@@ -98,6 +98,7 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 	except StopIteration:
 #		DNE:	If there is no alignment, there is no coding sequence
 		codSeq = False
+		print "NO HOMOLOG"
 
 print "Coding sequence status:	%s"	%	codSeq
 
