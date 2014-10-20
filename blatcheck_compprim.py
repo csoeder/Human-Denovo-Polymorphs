@@ -131,7 +131,7 @@ print phial
 print "Coding sequence status:	%s"	%	codSeq
 
 if codSeq:
-	os.system('cp chunked_genes/exons_%s.bed primate_homologs/'%number)	
+	os.system('cp exons_%s.bed primate_homologs/'%number)	
 
 
 
