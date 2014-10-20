@@ -116,31 +116,31 @@ sh $SCRIPT_DIR/remove_overlaps.sh
 ########################################################
 
 mkdir compprimBLATs
-for candidate in `ls | grep exon`; do 
-	num=$(echo $candidate | cut -f 2 -d '_' |cut -f 1 -d '.');
-	region=$(head -n 1 chunked_genes/exons_$num.bed | cut -f 4);
-	echo $region is the best!
-	samtools faidx ../Trinity_files.Trinity.fasta $region > compprimBLATs/temp_$num.fa
-	python $SCRIPT_DIR/autoblat_compprim.py $num $4;
+for candidate in `ls | grep exon`; do
+        num=$(echo $candidate | cut -f 2 -d '_' |cut -f 1 -d '.');
+        region=$(head -n 1 exons_$num.bed | cut -f 4);
+        echo $region is the best!
+        samtools faidx ../../Trinity_files.Trinity.fasta $region > compprimBLATs/temp_$num.fa
+        python $SCRIPT_DIR/autoblat_compprim.py $num $4;
 done
 
 while [ `bjobs -w | grep BLAT_pan_$4 | wc -l` -gt 0 && `bjobs -w | grep BLAT_gor_$4 | wc -l` -gt 0 ]
-		do echo "chillin...";
-		sleep 60;
+                do echo "chillin...";
+                sleep 60;
 done
 
 mkdir primate_homologs
-for candidate in `ls | grep exon`; do 
-	num=$(echo $candidate | cut -f 2 -d '_' |cut -f 1 -d '.');
-	python $SCRIPT_DIR/blatcheck_compprim.py pan_blat$num.psl $DATA_DIR/chimp/panTro4.fa
-	python $SCRIPT_DIR/blatcheck_compprim.py gor_blat$num.psl $DATA_DIR/gorilla/gorGor3.fa
+for candidate in `ls | grep exon`; do
+        num=$(echo $candidate | cut -f 2 -d '_' |cut -f 1 -d '.');
+        python $SCRIPT_DIR/blatcheck_compprim.py pan_blat$num.psl $DATA_DIR/chimp/panTro4.fa
+        python $SCRIPT_DIR/blatcheck_compprim.py gor_blat$num.psl $DATA_DIR/gorilla/gorGor3.fa
 done
 
 mkdir deNovos
-for candidate in `ls | grep exon`; do 
-	if [ ! -e  primate_homologs/$candidate ];
-		then cp chunked_genes/$candidate deNovos/
-	fi
+for candidate in `ls | grep exon`; do
+        if [ ! -e  primate_homologs/$candidate ];
+                then cp $candidate deNovos/
+        fi
 
 done
 
