@@ -116,7 +116,7 @@ sh $SCRIPT_DIR/remove_overlaps.sh
 ########################################################
 
 mkdir compprimBLATs
-for candidate in `ls chunked_genes | grep exon`; do 
+for candidate in `ls | grep exon`; do 
 	num=$(echo $candidate | cut -f 2 -d '_' |cut -f 1 -d '.');
 	region=$(head -n 1 chunked_genes/exons_$num.bed | cut -f 4);
 	echo $region is the best!
@@ -130,14 +130,14 @@ while [ `bjobs -w | grep BLAT_pan_$4 | wc -l` -gt 0 && `bjobs -w | grep BLAT_gor
 done
 
 mkdir primate_homologs
-for candidate in `ls chunked_genes | grep exon`; do 
+for candidate in `ls | grep exon`; do 
 	num=$(echo $candidate | cut -f 2 -d '_' |cut -f 1 -d '.');
 	python $SCRIPT_DIR/blatcheck_compprim.py pan_blat$num.psl $DATA_DIR/chimp/panTro4.fa
 	python $SCRIPT_DIR/blatcheck_compprim.py gor_blat$num.psl $DATA_DIR/gorilla/gorGor3.fa
 done
 
 mkdir deNovos
-for candidate in `ls chunked_genes | grep exon`; do 
+for candidate in `ls | grep exon`; do 
 	if [ ! -e  primate_homologs/$candidate ];
 		then cp chunked_genes/$candidate deNovos/
 	fi
