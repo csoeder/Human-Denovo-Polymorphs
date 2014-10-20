@@ -124,7 +124,7 @@ for candidate in `ls | grep exon`; do
         python $SCRIPT_DIR/autoblat_compprim.py $num $4;
 done
 
-while [ `bjobs -w | grep BLAT_pan_$4 | wc -l` -gt 0 && `bjobs -w | grep BLAT_gor_$4 | wc -l` -gt 0 ]
+while [ `bjobs -w | grep BLAT_pan_$4 | wc -l` -gt 0 ] && [ `bjobs -w | grep BLAT_gor_$4 | wc -l` -gt 0 ]
                 do echo "chillin...";
                 sleep 60;
 done
