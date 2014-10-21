@@ -4,6 +4,7 @@ import string
 import csv
 import sys
 import os
+from subprocess import call, check_output
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
