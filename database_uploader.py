@@ -30,7 +30,7 @@ for rho in dats:
 	try:	#	Try adding the finds from each person.
 		prim_homs = os.listdir('%s/mapt/chunked_genes/primate_homologs/'%ide)
 		for exon in prim_homs:
-			dats = csv.reader( open(exon,'r'), delimiter='\t').next()
+			dats = csv.reader( open('%s/mapt/chunked_genes/primate_homologs/%s'%ide%tuple([ide, exon]),'r'), delimiter='\t').next()
 			chro, begin, end, script_tag = dats[:4]
 			seq_query = check_output(['samtools', 'faidx', '%s/Trinity_files.Trinity.fasta'%ide, script_tag])
 			transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
