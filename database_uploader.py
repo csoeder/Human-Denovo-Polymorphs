@@ -69,7 +69,7 @@ for rho in dats:
 				curr.execute("INSERT INTO find (source, seq, loc) VALUES (%s, %s, %s);", tuple([person_pk, trans_seq_pk, loc_pk]) )
 
 		#de_novs = os.listdir('%s/mapt/chunked_genes/deNovos/'%ide)
-	print "%s dumped to database" % tuple([ide])
+		print "%s dumped to database" % tuple([ide])
 	except OSError:	#	in case the person's hits haven't been found yet. 
 		print "No file %s" % ide
 
