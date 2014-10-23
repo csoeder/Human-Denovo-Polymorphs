@@ -25,8 +25,8 @@ date >> monitor.log
 echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
 du ERR* >> monitor.log								#
 echo "git commit #" >> monitor.log				#
-head .git/FETCH_HEAD | cut -f1 >> monitor.log #
-head .git/FETCH_HEAD | cut -f3 >> monitor.log 
+head ../.git/FETCH_HEAD | cut -f1 >> monitor.log #
+head ../.git/FETCH_HEAD | cut -f3 >> monitor.log 
 #############################################
 #Load relevant modules 						#
 . /nas02/apps/Modules/default/init/bash		#
