@@ -5,7 +5,19 @@
 
 #############################################################
 #Enter the folder containing the files to be processed.		#
-cd $1
+cd $1 	#####################################################
+###	Cleanup any prior runs					#
+rm *.lsf.out
+rm *.sai
+rm *_aligned.sam
+rm *_Assembl*
+rm -rf mapt
+rm -rf unmapt
+rm *.log
+rm *.txt
+rm RNASeq_vs_Trinity*
+rm Trinity_files.Trinity.fasta.*
+#############################################################
 touch ticktock.log 		#log files 							#
 touch monitor.log											#
 echo "de novo search begin: subject $1" >> monitor.log

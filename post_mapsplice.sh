@@ -34,8 +34,9 @@ bsub -J gather_unmaps_$1 -w "done(bamsort2_$1)" -o gather_unmaps.lsf.out "samtoo
 #############################################################################
 ### Fork a job on each partition ############################
 bsub -J $1_aligned_fork -q week -w "done(faidx_$1) && done(gather_maps_$1)" -q week -o aligned_fork.lsf.out "sh $SCRIPT_DIR/aligned_fork_v3.5_parallel.sh $1_Assemblies_mapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta $1"
-bsub -J $1_unaligned_fork -q week -w "done(faidx_$1) && done(gather_unmaps_$1) && done(rnaInducks_$1)" -o unaligned_fork.lsf.out -q week "sh $SCRIPT_DIR/unaligned_fork_v3.5_parallel.sh $1_Assemblies_unmapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta RNASeq_vs_Trinity.sort.bam $1_mapsplice_alignment.bed $1"
-#############################################################################
+#bsub -J $1_unaligned_fork -q week -w "done(faidx_$1) && done(gather_unmaps_$1) && done(rnaInducks_$1)" -o unaligned_fork.lsf.out -q week "sh $SCRIPT_DIR/unaligned_fork_v3.5_parallel.sh $1_Assemblies_unmapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta RNASeq_vs_Trinity.sort.bam $1_mapsplice_alignment.bed $1"
+#	ignore the unaligned fork
+############################################################################
 ### Is it done? Email me. ###################################
 bsub -J $1_alert -w "done($1_aligned_fork)" echo $1 has successfully completed
 #############################################################################
