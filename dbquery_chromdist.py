@@ -15,7 +15,7 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr= conn.cursor()
 curr.execute('SELECT chrom, start, stop FROM location;')
 locations = curr.fetchall()
-chrom_list = arange(1,23)
+chrom_list = list(arange(1,23))
 chrom_list.extend(['X','Y'])
 chrm_dict={}
 for chrom in chrom_list:
