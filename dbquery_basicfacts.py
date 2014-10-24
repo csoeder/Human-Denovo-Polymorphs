@@ -24,7 +24,7 @@ for find in all_finds:
 transcriber_ids = list(set(transcriber_ids))
 for thing in transcriber_ids:
 	curr.execute("SELECT pk, id, sex, pop FROM person where pk=%s;"%thing)
-trascribers = curr.fetchall()
+transcribers = curr.fetchall()
 
 
 phial = open('genelist.dat', 'w')
