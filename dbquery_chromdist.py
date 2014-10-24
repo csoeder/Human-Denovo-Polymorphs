@@ -1,3 +1,5 @@
+import matplotlib 
+matplotlib.use('agg')
 import psycopg2
 from Bio import SeqIO
 import string

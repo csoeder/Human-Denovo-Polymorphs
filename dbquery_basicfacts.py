@@ -35,7 +35,7 @@ for place in all_places:
 phial.close()
 
 phial = open('Basic_Facts.txt','w')
-phial.write('%s\n'%'~'*50)
+phial.write('%s%s'%tuple(['%s'%'~'*50, '\n']))
 
 
 phial.write('Transcriptome measurements, processed through the pipeline, were collected from %s individuals. Of these, %s (%s percent) were observed transcribing at least one polymorphic de novo gene.\n'%tuple([len(all_peeps), len(transcribers),  len(transcribers)*100./len(all_peeps)] ))
