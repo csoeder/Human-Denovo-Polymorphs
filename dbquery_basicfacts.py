@@ -23,7 +23,7 @@ for find in all_finds:
 	transcriber_ids.append(find[1])
 transcriber_ids = list(set(transcriber_ids))
 for thing in transcriber_ids:
-	curr.execute("SELECT pk, id, sex, pop FROM person where id=%s;"%thing)
+	curr.execute("SELECT pk, id, sex, pop FROM person where pk=%s;"%thing)
 trascribers = curr.fetchall()
 
 
