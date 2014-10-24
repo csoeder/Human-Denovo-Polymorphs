@@ -13,7 +13,7 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr= conn.cursor()
 curr.execute('SELECT chrom, start, stop FROM location;')
-locations = curr.selectall()
+locations = curr.fetchall()
 chrm_dict={'X':0, 'Y':0}
 for place in locations:
 	if place[0] in chrm_dict.keys():
