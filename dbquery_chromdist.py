@@ -6,6 +6,7 @@ import string
 import csv
 import sys
 import os
+from numpy import arange
 from subprocess import call, check_output
 import matplotlib.pyplot as plt
 
