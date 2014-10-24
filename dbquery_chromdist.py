@@ -43,7 +43,7 @@ for key in chrm_dict:
 	else:
 		nonzero.append(key) 
 phial.write('The %s genomic locations were spread across %s chromosomes. %s chromosomes contained no sites.'%tuple([len(locations), len(nonzero), len(zero)]))
-phial.write('The least populated chromosome had %s sites. The most populated had %s. The mean and median were %s and %s sites, respectively.'%tuple([min(nonzero), max(nonzero), mean(nonzero), median(nonzero)]))
+phial.write('The least populated chromosome had %s sites. The most populated had %s. The mean and median were %s and %s sites, respectively.'%tuple([min(bars), max(bars), mean(bars), median(bars)]))
 phial.close()
 
 conn.commit()
