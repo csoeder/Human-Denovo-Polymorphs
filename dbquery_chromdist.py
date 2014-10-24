@@ -27,7 +27,7 @@ for place in locations:
 
 bars=[] 
 for i in chrom_list:
-	bars.append(chrm_dict[i])
+	bars.append(chrm_dict['chr%s'%i])
 plt.bar(arange(len(chrm_dict)), bars)
 plt.xticks(arange(len(chrm_dict)), chrom_list, rotation=30)
 plt.xlabel('Chromosome')
