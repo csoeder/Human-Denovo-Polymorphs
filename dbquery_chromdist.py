@@ -24,7 +24,7 @@ for place in locations:
 ###	Add in support for any empty chromosomes.
 
 plt.bar(arange(len(chrm_dict)), chrm_dict.values())
-plt.xticks(arange(len(chrm_dict)), chrm_dict.key(), rotation=30)
+plt.xticks(arange(len(chrm_dict)), chrm_dict.keys(), rotation=30)
 plt.xlabel('Chromosome')
 plt.ylabel('# genes')
 plt.title('Number of Polymorphic de novo Genes, by Chromosome')
