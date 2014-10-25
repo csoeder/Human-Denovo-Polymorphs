@@ -52,7 +52,7 @@ for jean in gene_dict:
 
 phial = open('Individuals_per_gene.txt','w')
 phial.write('One or more of the %s gene sites were seen expressed in %s individuals, from a total population of %s.\n'%tuple([len(gene_dict.keys()), len(transcribers), numpeeps]))
-phial.write('The most commonly expressed gene was %s, observed in %s individuals.\n'%tuple([stats[1], mackses]))
+phial.write('The most commonly expressed gene was %s, observed in %s individuals.\n'%tuple([mackses, stats[1]]))
 phial.write('There were %s genes sighted which were seen only in a single individual.\n'%tuple([singletons]))
 phial.write('The mean individuals expressing an individual gene was %s and the median was %s.\n'%tuple([stats[2], stats[3]]))
 phial.close()
