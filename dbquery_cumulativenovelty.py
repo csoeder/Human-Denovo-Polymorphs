@@ -38,8 +38,8 @@ def stochastic_sampler(lust):
 	abcissa = [0]
 	truffle_shuffle = list(chunks(lust, bin_size))
 	counted = 0
+	nov=0
 	for members in truffle_shuffle:
-		nov=0
 		for goonie in members:
 			curr.execute("SELECT id FROM location WHERE id IN (SELECT loc FROM find WHERE source=%s);"%goonie)
 			all_genes = curr.fetchall()
