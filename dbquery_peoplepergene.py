@@ -57,7 +57,7 @@ phial.write('There were %s genes sighted which were seen only in a single indivi
 phial.write('The mean individuals expressing an individual gene was %s and the median was %s.\n'%tuple([stats[2], stats[3]]))
 phial.close()
 
-plt.hist(gene_dict.values(), bins=mackses[0])
+plt.hist(gene_dict.values(), bins=stats[1])
 plt.xlabel('Individuals per Gene')
 plt.ylabel('# Genes')
 plt.title('Number of Individuals Expressing a Gene')
