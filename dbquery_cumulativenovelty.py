@@ -54,10 +54,10 @@ def stochastic_sampler(lust):
 		abcissa.append(counted)
 	return novelty, abcissa
 
-run1 = stochastic_sampler(peeplist)
-run2 = stochastic_sampler(peeplist)
-run3 = stochastic_sampler(peeplist)
-run4 = stochastic_sampler(peeplist)
+run1, axis = stochastic_sampler(peeplist)
+run2, axis = stochastic_sampler(peeplist)
+run3, axis = stochastic_sampler(peeplist)
+run4, axis = stochastic_sampler(peeplist)
 run5, axis = stochastic_sampler(peeplist)
 
 
