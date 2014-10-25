@@ -20,6 +20,8 @@ curr.execute("SELECT id, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
 curr.execute("SELECT pk FROM person;")
 peeps = curr.fetchall()
+curr.execute("SELECT count(*) FROM location;")
+numjeanz = curr.fetchone()[0]
 
 person_dict = {}
 for d00d in peeps:
@@ -34,7 +36,8 @@ for d00d in person_dict:
 		mackses = '%s %s,'%tuple([mackses, d00d])
 
 phial = open('Genes_per_person.txt','w')
-phial.write('Of the %s people investigated, %s had no polymorphic denovo genes detected.'%tuple([len(person_dict.keys()), person_dict.values().count(0)]))
+phial.write('The %s genes found were distributed across %s individuals.'%tuple([numjeanz, len(person_dict.keys())]))
+phial.write('Of these %s people investigated, %s had no polymorphic denovo genes detected.'%tuple([len(person_dict.keys()), person_dict.values().count(0)]))
 phial.write('The most genes detected in an individual was %s, in %s'%tuple([stats[0], mackses]))
 phial.write('The mean genes sighted per individual was %s; the median was %s.'%tuple([stats[1], stats[2]]))
 phial.close()
