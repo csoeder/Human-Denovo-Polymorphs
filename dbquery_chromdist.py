@@ -6,6 +6,7 @@ import string
 import csv
 import sys
 import os
+
 from numpy import arange, mean, median
 from subprocess import call, check_output
 import matplotlib.pyplot as plt
@@ -41,8 +42,9 @@ for key in chrm_dict:
 	if chrm_dict[key] == 0:
 		zero.append(key)
 	else:
-		nonzero.append(key) 
-phial.write('The %s genomic locations were spread across %s chromosomes. %s chromosomes contained no sites.'%tuple([len(locations), len(nonzero), len(zero)]))
+		nonzero.append(key)
+	
+phial.write('The %s genomic locations were spread across %s chromosomes. %s chromosomes contained no sites. (%s)'%tuple([len(locations), len(nonzero), len(zero), '%s'*len(zero)%tuple(zero)]))
 phial.write('The least populated chromosome had %s sites. The most populated had %s. The mean and median were %s and %s sites, respectively.'%tuple([min(bars), max(bars), mean(bars), median(bars)]))
 phial.close()
 
