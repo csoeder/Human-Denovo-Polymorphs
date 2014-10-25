@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
+curr= conn.cursor()
+
+
 
 curr.execute("SELECT id, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
