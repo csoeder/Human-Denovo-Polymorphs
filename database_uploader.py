@@ -26,13 +26,13 @@ for rho in dats:
 
 
 	try:	#	Try adding the finds from each person.
-		prim_homs = os.listdir('%s/mapt/chunked_genes/deNovos/'%ide)
+		deNovos = os.listdir('%s/mapt/chunked_genes/deNovos'%ide)
 
 		curr.execute('INSERT INTO person (id, access, sex, pop, mother, father) VALUES (%s, %s, %s, %s, 1, 1);', tuple([rho[2], rho[1], string.capitalize(rho[4][0]), rho[0]]))
 		curr.execute('SELECT pk FROM person WHERE id = %s;', tuple([ide]))
 		person_pk = curr.fetchone()[0]
-
-		for exon in prim_homs:
+		print deNovos
+		for exon in deNovos:
 			dats = csv.reader( open('%s/mapt/chunked_genes/deNovos/%s'%tuple([ide, exon]),'r'), delimiter='\t').next()
 			chro, begin, end, script_tag = dats[:4]
 			seq_query = check_output(['samtools', 'faidx', '%s/Trinity_files.Trinity.fasta'%ide, script_tag])
