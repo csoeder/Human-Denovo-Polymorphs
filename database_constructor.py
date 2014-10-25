@@ -12,7 +12,7 @@ curr.execute("CREATE TABLE person ( pk serial PRIMARY KEY, id varchar(20), acces
 curr.execute("CREATE TABLE sequence ( id serial PRIMARY KEY, seq text, ref varchar(20), meta text);")
 #Define a sequence as basically a string of ATCGs ("text") which is derived from some reference genome "ref"
  
-curr.execute("CREATE TABLE location ( id serial PRIMARY KEY, chrom varchar(20), start bigint, stop bigint, ref varchar(20), var serial references variant(id), meta text ) ;")
+curr.execute("CREATE TABLE location ( id serial PRIMARY KEY, chrom varchar(20), start bigint, stop bigint, ref varchar(20), var text, meta text ) ;")
 #Define a chromosomal location as an entity which has a chromosome, a start site, and an end site
 
 curr.execute("CREATE TABLE find (id serial PRIMARY KEY, source serial references person(pk), seq serial references sequence(id), loc serial references location(id), meta text )")
