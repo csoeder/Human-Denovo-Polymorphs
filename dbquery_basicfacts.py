@@ -22,6 +22,7 @@ transcriber_ids = []
 for find in all_finds:
 	transcriber_ids.append(find[1])
 transcriber_ids = list(set(transcriber_ids))
+transcribers=[]
 for thing in transcriber_ids:
 	curr.execute("SELECT pk, id, sex, pop FROM person where pk=%s;"%thing)
 	transcribers.extend(curr.fetchall())
