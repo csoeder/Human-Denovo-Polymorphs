@@ -5,6 +5,18 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr = conn.cursor()
 
+###	tables, calling little johnny tables....
+
+curr.execute("DROP TABLE find;")
+curr.execute("DROP TABLE antifind;")
+curr.execute("DROP TABLE person;")
+curr.execute("DROP TABLE location;")
+curr.execute("DROP TABLE sequence;")
+curr.execute("DROP TABLE variant;")
+curr.execute("DROP TYPE sex;")
+conn.commit()
+
+
 curr.execute("CREATE TYPE sex AS ENUM ('M', 'F')")#Define the concept of sex
 curr.execute("CREATE TABLE person ( pk serial PRIMARY KEY, id varchar(20), access varchar(20), sex sex, mother serial references person(pk), father serial references person(pk), pop varchar(20), meta text);")#a human is described as a sample ID and an accession number.
 #parents are listed; a search will return the siblings. 
