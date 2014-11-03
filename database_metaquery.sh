@@ -5,7 +5,7 @@ mkdir metaquery
 cd metaquery
 
 python ../dbquery_basicfacts.py $pswd
-python ../dbquery_chromdist $pswd
+python ../dbquery_chromdist.py $pswd
 
 
 #dbquery_associativity.py
