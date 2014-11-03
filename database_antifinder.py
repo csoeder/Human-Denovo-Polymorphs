@@ -9,7 +9,7 @@ curr.execute("SELECT id FROM location;")
 all_genes = curr.fetchall()
 
 for jean in all_genes:
-	curr.execute('SELECT seq FROM find WHERE find.loc=%s;')
+	curr.execute('SELECT seq FROM find WHERE find.loc=%s;', tuple([jean[0]]))
 	squeak = curr.fetchone()[0]
 	curr.execute('SELECT pk FROM person WHERE person.pk NOT IN (SELECT source FROM find WHERE find.loc = %s);', tuple([jean[0]]))
 	nonexpressives = curr.fetchall()
