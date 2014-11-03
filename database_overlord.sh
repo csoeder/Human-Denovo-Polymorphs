@@ -10,7 +10,7 @@ python database_uploader.py $pswd
 #		DATABASE LOOKBACK
 #python database_lookback.py
 #		Database antifinder		<----	
-python database_antifinder.py
+python database_antifinder.py $pswd
 #		Compare to chimp, gorilla transcriptomes
 #python database_checkprimates.py
 #		Get coverage data
