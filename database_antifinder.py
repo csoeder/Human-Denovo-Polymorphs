@@ -14,11 +14,7 @@ for jean in all_genes:
 	curr.execute('SELECT pk FROM person WHERE person.pk NOT IN (SELECT source FROM find WHERE find.loc = %s);', tuple([jean[0]]))
 	nonexpressives = curr.fetchall()
 	for d00d in nonexpressives:
-<<<<<<< HEAD
-		curr.execute("INSERT INTO antifind (source, seq, loc) VALUES (%s, '', %s);", tuple([d00d, jean[0]]))
-=======
 		curr.execute("INSERT INTO antifind (source, seq, loc) VALUES (%s, %s, %s);", tuple([d00d, squeak, jean[0]]))
->>>>>>> b7224b0cd903f059ff7786eb5d3fc5cd089c037e
 		conn.commit()
 
 curr.close()
