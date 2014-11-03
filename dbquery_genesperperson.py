@@ -36,15 +36,17 @@ for d00d in person_dict:
 		mackses = '%s %s,'%tuple([mackses, d00d])
 
 phial = open('Genes_per_person.txt','w')
-phial.write('The %s genes found were distributed across %s individuals.'%tuple([numjeanz, len(person_dict.keys())]))
-phial.write('Of these %s people investigated, %s had no polymorphic denovo genes detected.'%tuple([len(person_dict.keys()), person_dict.values().count(0)]))
-phial.write('The most genes detected in an individual was %s, in %s'%tuple([stats[0], mackses]))
-phial.write('The mean genes sighted per individual was %s; the median was %s.'%tuple([stats[1], stats[2]]))
+phial.write('The %s genes found were distributed across %s individuals.\n'%tuple([numjeanz, len(person_dict.keys())]))
+phial.write('Of these %s people investigated, %s had no polymorphic denovo genes detected.\n'%tuple([len(person_dict.keys()), person_dict.values().count(0)]))
+phial.write('The most genes detected in an individual was %s, in %s\n'%tuple([stats[0], mackses]))
+phial.write('The mean genes sighted per individual was %s; the median was %s.\n'%tuple([stats[1], stats[2]]))
+phial.write('\n')
 phial.close()
 
 plt.hist(person_dict.values(), bins=stats[0])
 plt.xlabel('Genes per Individual')
 plt.ylabel('# Individuals')
+plt.xticks(list(arange(0.5, stats[0])), list(arange(stats[0])), rotation=30)
 plt.title('Polymorphic De Novo Genes per Individual')
 plt.savefig('Genes_per_person.png')
 
