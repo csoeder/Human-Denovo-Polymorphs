@@ -1,11 +1,13 @@
 #!/bin/sh
+$pswd=$1
+
 #############################################
 ###	Build the database
-python database_constructor.py
-python database_uploader.py
+python database_constructor.py $pswd
+python database_uploader.py $pswd
 #		DATABASE LOOKBACK
 #python database_lookback.py
-#		Database antifinder
+#		Database antifinder		<----	
 #python database_antifind.py
 #		Compare to chimp, gorilla transcriptomes
 #python database_checkprimates.py
@@ -16,5 +18,5 @@ python database_uploader.py
 
 #############################################
 ###	Do some analytics
-python database_metaquery.py
+sh database_metaquery.sh
 #############################################
