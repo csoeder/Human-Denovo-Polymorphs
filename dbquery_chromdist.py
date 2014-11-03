@@ -30,7 +30,7 @@ bars=[]
 for i in chrom_list:
 	bars.append(chrm_dict['chr%s'%i])
 plt.bar(arange(len(chrm_dict)), bars)
-plt.xticks(arange(arange(1.5, 25.5)), chrom_list, rotation=30)
+plt.xticks(list(arange(1.5, 25.5)), chrom_list, rotation=30)
 plt.xlabel('Chromosome')
 plt.ylabel('# genes')
 plt.title('Number of Polymorphic de novo Genes, by Chromosome')
