@@ -5,81 +5,14 @@ import sys
 import os
 from numpy import mean
 import csv
-from Bio import SeqIO
-from Bio.SeqRecord import SeqRecord
-import pysam
+
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr = conn.cursor()
 
-missing_dict = {}	#	Were any sequences missing when the transcriptomes were reexamined?
-unexpected_dict = {}#	Did any sequences appear in new individuals when the transcriptomes were reexamined?
-start_dict = {}	#		All finds from the DB
-
-###	0	:	DBpull
-
 curr.execute("SELECT id, chrom, start, stop FROM location;")
-all_places = curr.fetchall()
-curr.execute("SELECT id, source, loc, seq FROM find;")
-all_finds = curr.fetchall()
-curr.execute("SELECT id, pk FROM person;")
-all_peeps = curr.fetchall()
-
-###	1	:	Grep the sequence
-
-rex = []
-for find in all_finds:
-	if find[2] in start_dict.keys():
-		start_dict[find[2]].append(find[1])
-	else:
-		start_dict[find[2]] = [find[1]]
-		curr.execute("SELECT seq FROM sequence WHERE sequence.id=%s"%find[3])	
-		seq = curr.fetchone()[0]
-		rex.append(SeqRecord(seq, find[2]))	#	create FASTA record with id = location pk; sequence = sequence
-SeqIO.write(rex, 'lookback.fasta', 'fasta')
-
-###	2	:	align it to ALL the transcriptomes
-
-for d00d in all_peeps:
-	os.system('bsub -J DBlookback_%s bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta > %s/%s_lookback.sam'%tuple([d00d[0]]*4))
-	os.system('bsub -J retromap_%s -w "done(DBlookback_%s)" samtools view -S -F4 %s/%s_lookback.sam > %s/%s_lookback_found.sam')
-os.system('if [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; then sleep 60; fi' )
-
-
-
-###	3	:	play hide and seq
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+all_genes = curr.fetchall()
 
 phial = open('db_gene_sites.bed','w')
 for jean in all_genes:

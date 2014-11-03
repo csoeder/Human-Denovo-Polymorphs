@@ -49,7 +49,7 @@ def stochastic_sampler(lust):
 				else:
 					nov+=1
 					old_news.append(jean[0])
-		counted+=bin_size
+		counted+=len(members)
 		novelty.append(nov)
 		abcissa.append(counted)
 	return novelty, abcissa
