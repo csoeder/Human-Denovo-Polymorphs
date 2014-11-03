@@ -16,7 +16,7 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr= conn.cursor()
 curr.execute('SELECT chrom, start, stop FROM location;')
 locations = curr.fetchall()
-chrom_list = list(arange(1.5,23.5))
+chrom_list = list(arange(1,23))
 chrom_list.extend(['X','Y'])
 chrm_dict={}
 for chrom in chrom_list:
@@ -30,7 +30,7 @@ bars=[]
 for i in chrom_list:
 	bars.append(chrm_dict['chr%s'%i])
 plt.bar(arange(len(chrm_dict)), bars)
-plt.xticks(arange(len(chrm_dict)), chrom_list, rotation=30)
+plt.xticks(arange(arange(1.5, 25.5)), chrom_list, rotation=30)
 plt.xlabel('Chromosome')
 plt.ylabel('# genes')
 plt.title('Number of Polymorphic de novo Genes, by Chromosome')
