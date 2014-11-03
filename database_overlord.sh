@@ -9,7 +9,7 @@ python database_uploader.py $pswd
 #python database_blacklist.py
 #		DATABASE LOOKBACK
 #python database_lookback.py
-#		Database antifinder		<----	
+#		Database antifinder		<----	FUNCTIONAL!
 python database_antifinder.py $pswd
 #		Compare to chimp, gorilla transcriptomes
 #python database_checkprimates.py
