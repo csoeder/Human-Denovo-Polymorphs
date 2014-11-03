@@ -16,7 +16,7 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr= conn.cursor()
 curr.execute('SELECT chrom, start, stop FROM location;')
 locations = curr.fetchall()
-chrom_list = list(arange(1,23))
+chrom_list = list(arange(1.5,23.5))
 chrom_list.extend(['X','Y'])
 chrm_dict={}
 for chrom in chrom_list:
@@ -43,9 +43,9 @@ for key in chrm_dict:
 		zero.append(key)
 	else:
 		nonzero.append(key)
-	
+
 phial.write('The %s genomic locations were spread across %s chromosomes. %s chromosomes contained no sites. (%s)'%tuple([len(locations), len(nonzero), len(zero), '%s'*len(zero)%tuple(zero)]))
-phial.write('The least populated chromosome had %s sites. The most populated had %s. The mean and median were %s and %s sites, respectively.'%tuple([min(bars), max(bars), mean(bars), median(bars)]))
+phial.write('The least populated chromosome had %s sites. The most populated had %s. The mean and median were %s and %s sites, respectively.\n'%tuple([min(bars), max(bars), mean(bars), median(bars)]))
 phial.close()
 
 conn.commit()
