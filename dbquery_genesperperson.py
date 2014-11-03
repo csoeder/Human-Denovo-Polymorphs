@@ -42,7 +42,7 @@ phial.write('The most genes detected in an individual was %s, in %s'%tuple([stat
 phial.write('The mean genes sighted per individual was %s; the median was %s.'%tuple([stats[1], stats[2]]))
 phial.close()
 
-plt.hist(person_dict.values(), bins=mackses[0])
+plt.hist(person_dict.values(), bins=stats[0])
 plt.xlabel('Genes per Individual')
 plt.ylabel('# Individuals')
 plt.title('Polymorphic De Novo Genes per Individual')
