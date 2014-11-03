@@ -20,5 +20,5 @@ python database_antifinder.py $pswd
 
 #############################################
 ###	Do some analytics
-sh database_metaquery.sh
+sh database_metaquery.sh $pswd
 #############################################
