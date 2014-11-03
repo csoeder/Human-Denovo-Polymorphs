@@ -29,8 +29,8 @@ for thing in transcriber_ids:
 
 
 phial = open('genelist.dat', 'w')
-phial.write('A list of genes observed in the database.')
-phial.write('#\tChromosome\tStart\tStop\n')
+phial.write('A list of genes observed in the database.\n')
+phial.write('primary_key\tChromosome\tStart\tStop\n')
 for place in all_places:
 	phial.write('%s\t%s\t%s\t%s\n'%tuple(place))
 phial.close()
@@ -48,13 +48,13 @@ for person in all_peeps:
 		pop_dict[person[3]] +=1
 	else:
 		pop_dict[person[3]] = 1
-phial.write('These %s included the following populations:'%len(all_peeps))
+phial.write('These %s included the following populations:\n'%len(all_peeps))
 for key in pop_dict.keys():
 	phial.write('\t%s\t%s\n'%tuple([key, pop_dict[key]]))
 phial.write('\nand the following sex distribution:\n')
 for key in sex_dict.keys():
 	phial.write('\t%s\t%s\n'%tuple([key, sex_dict[key]]))
-phial.write('The %s transcribers included the following populations:'%len(transcribers))
+phial.write('The %s transcribers included the following populations:\n'%len(transcribers))
 pop_dict = {}
 sex_dict = {'M':0, 'F':0}
 for person in transcribers:
