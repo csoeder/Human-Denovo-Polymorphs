@@ -17,7 +17,7 @@ try:#is the location already entered in the database, ie, this site has been det
 	loc_sites = curr.fetchall()
 
 	for site in loc_sites:
-		parser = vcf.Reader(open('vcf_file','r'))
+		parser = vcf.Reader(open('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1],'r'))
 		fetch = parser.fetch(loc_sites[1], loc_sites[2], loc_sites[3])
 		for rec in fetch:
 			alts = ''
@@ -25,7 +25,6 @@ try:#is the location already entered in the database, ie, this site has been det
 				alts = '%s%s,'%tuple([alts, var])
 			curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (chr%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple([rec.CHROM, rec.POS, rec.REF, alts]))
 			alts = ''
-
 
 
 except TypeError:#if not, put it into the appropriate table
