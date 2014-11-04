@@ -87,7 +87,7 @@ if __name__ == '__main__':
 	demog = []
 	for i in range(0, pop_size):
 		d00d = []
-		for i in range(jeanz):
+		for i in range(0, jeanz):
 			u = uniform(0.0,1.0)
 			if u < flat_prob:
 				d00d.append(i)
