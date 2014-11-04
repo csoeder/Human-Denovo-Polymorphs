@@ -79,9 +79,9 @@ plt.close()
 if __name__ == '__main__':
 
 	#run a simulation to demonstrate saturation
-	num_genes = 15
-	pop_size = 75
-	flat_prob = 0.08
+	num_genes = 45
+	pop_size = 50
+	flat_prob = 0.05
 	bun_size = 5
 	jeanz = range(0, num_genes)
 	demog = []
@@ -100,10 +100,13 @@ if __name__ == '__main__':
 	for sub in samples:
 		for d00d in sub:
 			observed.extend(d00d)
-		saturation.append( len( set( observed)))
+		saturation.append( len( set( observed)) * 100.0/num_genes)
 		counted += len(sub)
-		abcis.append(counted)
+		abcis.append(counted*100.0/pop_size)
 	plt.plot(abcis, saturation, 'bo-')
+	plt.title("Saturation of Novelty as Population is Queried\n(Simulated Data)")
+	plt.xlabel("Percentage of Population Examined")
+	plt.ylabel("Percentage of Existing Genes Found")
 	plt.savefig('Cumulative_Novelty_Saturation_Simulation.png')
 
 
