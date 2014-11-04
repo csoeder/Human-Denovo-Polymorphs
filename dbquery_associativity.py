@@ -35,7 +35,7 @@ for jean in all_genes:
 	assoc_list.append( list(set(associates)).remove(jean[0]))
 
 
-
+#
 phial = open('Associativity_and_Avoidance.txt','w')
 phial.write('Association relationships amongst the %s genes were investigated. \n'%tuple([len(all_genes)]))
 num_assoc = []
