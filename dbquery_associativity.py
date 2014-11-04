@@ -32,7 +32,9 @@ for jean in all_genes:
 		some_neighbors = curr.fetchall()
 		for nay in some_neighbors:
 			associates.append(nay[0])
-	assoc_list.append( list(set(associates)).remove(jean[0]))
+	a = list(set(associates))
+	a.remove(jean[0])
+	assoc_list.append(a)
 
 
 #
