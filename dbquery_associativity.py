@@ -45,7 +45,7 @@ for assocs in assoc_list:
 	num_assoc.append(len(assocs))
 num_assoc = array(num_assoc)
 phial.write('%s genes (%s percent) appeared entirely alone, unassociated with any other polymorphic de novo.\n'%tuple([len(num_assoc[num_assoc==0]), len(num_assoc[num_assoc==0])*100.0/len(all_genes)]) )
-phial.write('The most highly associative genes associated with %s other genes. This represents %s (%s percent)\n'%tuple([]))
+phial.write('The most highly associative genes associated with %s other genes. This represents %s (%s percent)\n'%tuple([max(num_assoc), len(num_assoc[num_assoc==max(num_assoc)]), len(num_assoc[num_assoc==max(num_assoc)])*100.0/len(all_genes)]))
 phial.close()
 
 ###########################################################################
