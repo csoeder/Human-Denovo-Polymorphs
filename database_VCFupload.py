@@ -17,7 +17,7 @@ try:#is the location already entered in the database, ie, this site has been det
 	loc_sites = curr.fetchall()
 
 	for site in loc_sites:
-		parser = vcf.Reader(open('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1],'r'))
+		parser = vcf.Reader(open('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1][3:],'r'))
 		fetch = parser.fetch(loc_sites[1], loc_sites[2], loc_sites[3])
 		for rec in fetch:
 			alts = ''
