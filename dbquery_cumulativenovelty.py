@@ -7,7 +7,7 @@ import csv
 import sys
 import os
 from numpy import arange, mean, median
-from random import shuffle
+from random import shuffle, uniform
 from subprocess import call, check_output
 import matplotlib.pyplot as plt
 
@@ -72,7 +72,39 @@ plt.ylabel('# New Genes')
 plt.title('Cumulative Novel Genes Observed')
 plt.savefig('Cumulativenovelty.png')
 
+plt.hold(False)
+plt.close()
 
+
+if __name__ == '__main__':
+
+	#run a simulation to demonstrate saturation
+	num_genes = 15
+	pop_size = 75
+	flat_prob = 0.08
+	bun_size = 5
+	jeanz = range(0, num_genes)
+	demog = []
+	for i in range(0, pop_size):
+		d00d = []
+		for i in range(jeanz):
+			u = uniform(0.0,1.0)
+			if u < flat_prob:
+				d00d.append(i)
+		demog.append(d00d)
+	counted = 0
+	saturation = []
+	observed = []
+	abcis = []
+	samples = list(chunks(demog, bun_size))	
+	for sub in samples:
+		for d00d in sub:
+			observed.extend(d00d)
+		saturation.append( len( set( observed)))
+		counted += len(sub)
+		abcis.append(counted)
+	plt.plot(abcis, saturation, 'bo-')
+	plt.savefig('Cumulative_Novelty_Saturation_Simulation.png')
 
 
 
