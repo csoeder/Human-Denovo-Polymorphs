@@ -9,9 +9,9 @@ python ../dbquery_chromdist.py $pswd #	Please note! np.median returns an average
 python ../dbquery_genesperperson.py $pswd
 python ../dbquery_peoplepergene.py $pswd
 python ../dbquery_cumulativenovelty.py $pswd
+python ../dbquery_associativity.py $pswd
 
-
-#dbquery_associativity.py
+#
 #dbquery_compareexpression.py
 #
 

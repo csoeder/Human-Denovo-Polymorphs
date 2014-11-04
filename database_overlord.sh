@@ -16,7 +16,7 @@ python database_uploader.py $pswd
 #		Get coverage data
 #python database_coveragecalc.py
 #		add variation info to DB
-#python database_vcf_upload.py
+python database_VCFupload.py
 
 #############################################
 ###	Do some analytics
