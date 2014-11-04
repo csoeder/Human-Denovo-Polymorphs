@@ -71,7 +71,7 @@ plt.close()
 ###############		Network figure!		(make it fancier...)
 ###########################################################################
 
-network = nx.Graph
+network = nx.Graph()
 for jean in all_genes:
 	network.add_node(jean[0])
 for i in range(0, len(all_genes)):
