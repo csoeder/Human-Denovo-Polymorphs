@@ -76,7 +76,7 @@ for jean in all_genes:
 	network.add_node(jean[0])
 for i in range(0, len(all_genes)):
 	for j in assoc_list[i]:
-		network.add_edge(all_genes[i], j)
+		network.add_edge(all_genes[i][0], j)
 nx.draw_spring(network)
 plt.savefig('AssociationNetwork.png')
 
