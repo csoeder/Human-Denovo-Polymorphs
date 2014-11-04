@@ -28,7 +28,7 @@ for jean in all_genes:
 	num_expressers.append(len(peeps))
 	associates = []
 	for d00d in peeps:
-		curr.execute('SELECT id FROM location WHERE location.id IN (SELECT loc FROM find WHERE find.source=%s);'%d00d[0])
+		curr.execute('SELECT loc FROM find WHERE find.source=%s;'%d00d[0])
 		some_neighbors = curr.fetchall()
 		for nay in some_neighbors:
 			associates.append(nay[0])
