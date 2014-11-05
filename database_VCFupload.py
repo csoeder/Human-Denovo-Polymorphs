@@ -33,8 +33,8 @@ for site in loc_sites:
 			hetz = '%s%s,'%tuple([hetz, var.sample])
 		try:
 			curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple(['chr%s'%rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, rec.heterozygosity, rec.is_snp, rec.is_indel, rec.nucl_diversity]))
-		except IndexError:#PyVCF not playing nice with some of the 1kGen VCFs....
-			curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple(['chr%s'%rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, 0, rec.is_snp, rec.is_indel, rec.nucl_diversity]))
+		except IndexError:#PyVCF not playing nice with some of the 1kGen VCFs.... heterozygosity, pi_hat are giving errors
+			curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple(['chr%s'%rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, 0, rec.is_snp, rec.is_indel, 0]))
 
 
 
