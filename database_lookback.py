@@ -43,8 +43,8 @@ phial.close()
 ###	2	:	align it to ALL the transcriptomes
 
 for d00d in all_peeps:
-	os.system('bsub -J DBlookback_%s bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta > %s/%s_lookback.sam'%tuple([d00d[0]]*4))
-	os.system('bsub -J retromap_%s -w "done(DBlookback_%s)" samtools view -S -F4 %s/%s_lookback.sam > %s/%s_lookback_found.sam')
+	os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta > %s/%s_lookback.sam'%tuple([d00d[0]]*5))
+	os.system('bsub -J retromap_%s -w "done(DBlookback_%s)" -o retromap_%s.lsf.out samtools view -S -F4 %s/%s_lookback.sam > %s/%s_lookback_found.sam'%tuple([d00d[0]*7]))
 os.system('if [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; then sleep 60; fi' )
 
 
