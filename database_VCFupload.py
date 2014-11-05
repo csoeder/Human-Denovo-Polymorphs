@@ -47,7 +47,7 @@ loc_sites = curr.fetchall()
 for site in loc_sites:
 	if site[1]=='chrY':
 		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chrY.phase1_samtools_si.20101123.snps.low_coverage.genotypes.vcf.gz')
-		Parsley('ALL.chrY.genome_strip_hq.20101123.svs.low_coverage.genotypes.vcf.gz')
+		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chrY.genome_strip_hq.20101123.svs.low_coverage.genotypes.vcf.gz')
 	else:
 		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1][3:])
 
