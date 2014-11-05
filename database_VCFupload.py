@@ -13,7 +13,7 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 
 
 def Parsley(vcf_file):
-	parser = vcf.Reader(open(vcf_file),'r')
+	parser = vcf.Reader(open(vcf_file,'r'))
 	print site, site[1][3:]
 	fetch = parser.fetch(site[1][3:], site[2], site[3])
 	for rec in fetch:
