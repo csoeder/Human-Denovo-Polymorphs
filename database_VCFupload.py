@@ -31,7 +31,7 @@ for site in loc_sites:
 			hom_refs = '%s%s,'%tuple([hom_refs, var.sample])
 		for var in rec.get_hets():
 			hetz = '%s%s,'%tuple([hetz, var.sample])
-		curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (chr%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple([rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, rec.heterozygosity, rec.is_snp, rec.is_indel, rec.nucl_diversity]))
+		curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple(['chr%s'%rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, rec.heterozygosity, rec.is_snp, rec.is_indel, rec.nucl_diversity]))
 
 
 
