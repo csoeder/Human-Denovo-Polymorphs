@@ -24,6 +24,19 @@ done
 
 
 
+for folder in `ls | grep NA | grep -v redirect`; do #For each individual...
+	cd $folder/mapt/chunked_genes/deNovos/
+	for file in `ls | grep -v blklst`; do
+		bedtools intersect -v -a $file -b $here/blk.lst > $file.blklst;
+		#	Pull out every element of $file which does not overlap a blacklisted site
+		if [[ -s $file.blklst ]]; then #	If this is empty, there's overlap. 
+			mv $file ../primate_homologs/
+		fi
+	done; 
+	rm *.blklst #	Cleanup
+	cd $here 	#	GTFO, next folder.
+done
+
 
 
 
