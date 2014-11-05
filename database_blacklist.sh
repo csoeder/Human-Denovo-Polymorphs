@@ -7,26 +7,21 @@
 module load bedtools						#
 #############################################
 
+here=$(pwd)
+
 for folder in `ls | grep HG | grep -v redirect`; do #For each individual...
-	for file in `ls $folder/mapt/chunked_genes/deNovos/`; do #For each candidate gene...
-		bedtools intersect -wa -a blk.lst -b $folder/mapt/chunked_genes/deNovos/$file > overlups.bed; #check for overlaps with the blacklist.
-		if [[ -s overlups.bed ]]; then #if there's an overlap, move it out!
-			head $folder/mapt/chunked_genes/deNovos/$file
-			mv $folder/mapt/chunked_genes/deNovos/$file $folder/mapt/chunked_genes/primate_homologs/$file
+	cd $folder/mapt/chunked_genes/deNovos/
+	for file in `ls | grep -v blklst`; do
+		bedtools intersect -v -a $file -b $here/blk.lst > $file.blklst;
+		#	Pull out every element of $file which does not overlap a blacklisted site
+		if [[ -s $file.blklst ]]; then #	If this is empty, there's overlap. 
+			mv $file ../primate_homologs/
 		fi
 	done; 
+	rm *.blklst #	Cleanup
+	cd $here 	#	GTFO, next folder.
 done
 
-
-for folder in `ls | grep NA | grep -v redirect`; do #For each individual...
-	for file in `ls $folder/mapt/chunked_genes/deNovos/`; do #For each candidate gene...
-		bedtools intersect -wa -a blk.lst -b $folder/mapt/chunked_genes/deNovos/$file > overlups.bed; #check for overlaps with the blacklist.
-		if [[ -s overlups.bed ]]; then #if there's an overlap, move it out!
-			head $folder/mapt/chunked_genes/deNovos/$file
-			mv $folder/mapt/chunked_genes/deNovos/$file $folder/mapt/chunked_genes/primate_homologs/$file
-		fi
-	done; 
-done
 
 
 
