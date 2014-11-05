@@ -9,13 +9,11 @@ import vcf
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 
-curr = conn.cursor()
 
-curr.execute("SELECT id, chrom, start, stop FROM location;")
-loc_sites = curr.fetchall()
 
-for site in loc_sites:
-	parser = vcf.Reader(open('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1][3:],'r'))
+
+def Parsley(vcf_file):
+	parser = vcf.Reader(open(vcf_file),'r'))
 	print site, site[1][3:]
 	fetch = parser.fetch(site[1][3:], site[2], site[3])
 	for rec in fetch:
@@ -40,11 +38,21 @@ for site in loc_sites:
 
 
 
+curr = conn.cursor()
+curr.execute("SELECT id, chrom, start, stop FROM location;")
+loc_sites = curr.fetchall()
 
+
+
+for site in loc_sites:
+	if site[1]=='chrY':
+		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chrY.phase1_samtools_si.20101123.snps.low_coverage.genotypes.vcf.gz')
+		Parsley('ALL.chrY.genome_strip_hq.20101123.svs.low_coverage.genotypes.vcf.gz')
+	else:
+		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1][3:])
 
 
 conn.commit()
-
 curr.close()
 conn.close()
 
