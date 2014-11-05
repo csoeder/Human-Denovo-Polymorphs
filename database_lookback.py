@@ -36,7 +36,7 @@ for find in all_finds:
 		start_dict[find[2]] = [find[1]]
 		curr.execute("SELECT seq FROM sequence WHERE sequence.id=%s"%find[3])	
 		seq = curr.fetchone()[0]
-		rex.append(SeqRecord(seq, find[2]))	#	create FASTA record with id = location pk; sequence = sequence
+		rex.append(SeqRecord(str(seq), find[2]))	#	create FASTA record with id = location pk; sequence = sequence
 SeqIO.write(rex, 'lookback.fasta', 'fasta')
 
 ###	2	:	align it to ALL the transcriptomes
@@ -49,17 +49,6 @@ os.system('if [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; then sleep 60; fi
 
 
 ###	3	:	play hide and seq
-
-
-
-
-
-
-
-
-
-
-
 
 
 

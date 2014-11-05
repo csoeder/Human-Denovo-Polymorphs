@@ -3,7 +3,7 @@ pswd=$1
 
 
 #		DATABASE BLACKLIST -  Mask any known imposters
-#sh database_blacklist.sh
+#sh database_blacklist.sh	# <-------	Appears functional!
 
 
 #############################################
@@ -17,7 +17,7 @@ python database_uploader.py $pswd
 #		Compare to chimp, gorilla transcriptomes
 #python database_checkprimates.py
 #		Get coverage data
-#python database_coveragecalc.py
+#python database_coverage.py
 #		add variation info to DB
 python database_VCFupload.py   #<------FUNCTIONAL! would be good to add a primary key field referencing the location items each variants occur within
 
