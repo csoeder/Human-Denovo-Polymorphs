@@ -17,15 +17,15 @@ bsub -J TrinAlign_$1 -M 50 -w "done(faidx_$1)" -o TrinAlign.lsf.out bowtie2 -f -
 bsub -J bamvert2_$1 -w "done(TrinAlign_$1)" -o bamvert2.lsf.out "samtools view -bS $1_aligned.sam > $1_Assembly_Alignment.bam"
 bsub -J bamsort2_$1 -w "done(bamvert2_$1)" -o bamsort2.lsf.out "samtools sort $1_Assembly_Alignment.bam $1_Assembly_Alignment.sorted"
 #############################################################################
-###	Align the paired-end reads to the Trinity transcripts;	#
-###	hopefully rescue unaligned assemblies in the unaligned 	#
+###	Align the paired-end reads to the Trinity transcripts;	#						As long as the unmapped fork is disabled, these jobs are a 
+###	hopefully rescue unaligned assemblies in the unaligned 	#						waste of gigaflops & gigabytes
 ###	fork ####################################################
-bsub -J aln1_$1 -w "done(bwaInducks_$1)" -o aln_1.lsf.out "bwa aln Trinity_files.Trinity.fasta ERR*_1.fastq > ERR_1.sai"
-bsub -J aln2_$1 -w "done(bwaInducks_$1)" -o aln_2.lsf.out "bwa aln Trinity_files.Trinity.fasta ERR*_2.fastq > ERR_2.sai"
-bsub -J sampe_$1 -w "done(aln1_$1) && done(aln2_$1)" -o sampe.lsf.out "bwa sampe Trinity_files.Trinity.fasta ERR_1.sai ERR_2.sai ERR*_1.fastq ERR*_2.fastq > RNASeq_vs_Trinity.sam"
-bsub -J sambam_$1 -w "done(sampe_$1)" -o sambam.lsf.out "samtools view -Sbh RNASeq_vs_Trinity.sam > RNASeq_vs_Trinity.bam"
-bsub -J RNAsort_$1 -w "done(sambam_$1)" -o rnasort.lsf.out "samtools sort RNASeq_vs_Trinity.bam RNASeq_vs_Trinity.sort"
-bsub -J rnaInducks_$1 -w "done(RNAsort_$1)" -o rnaInducks.lsf.out samtools index RNASeq_vs_Trinity.sort.bam
+#bsub -J aln1_$1 -w "done(bwaInducks_$1)" -o aln_1.lsf.out "bwa aln Trinity_files.Trinity.fasta ERR*_1.fastq > ERR_1.sai"
+#bsub -J aln2_$1 -w "done(bwaInducks_$1)" -o aln_2.lsf.out "bwa aln Trinity_files.Trinity.fasta ERR*_2.fastq > ERR_2.sai"
+#bsub -J sampe_$1 -w "done(aln1_$1) && done(aln2_$1)" -o sampe.lsf.out "bwa sampe Trinity_files.Trinity.fasta ERR_1.sai ERR_2.sai ERR*_1.fastq ERR*_2.fastq > RNASeq_vs_Trinity.sam"
+#bsub -J sambam_$1 -w "done(sampe_$1)" -o sambam.lsf.out "samtools view -Sbh RNASeq_vs_Trinity.sam > RNASeq_vs_Trinity.bam"
+#bsub -J RNAsort_$1 -w "done(sambam_$1)" -o rnasort.lsf.out "samtools sort RNASeq_vs_Trinity.bam RNASeq_vs_Trinity.sort"
+#bsub -J rnaInducks_$1 -w "done(RNAsort_$1)" -o rnaInducks.lsf.out samtools index RNASeq_vs_Trinity.sort.bam
 #############################################################################
 ### Partition the Transcripts into those which align and # 
 ### those which do not. ##################################
