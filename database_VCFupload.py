@@ -32,11 +32,8 @@ loc_sites = curr.fetchall()
 				hetz = '%s%s,'%tuple([hetz, var.sample])
 			curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (chr%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple([rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, rec.heterozygosity, rec.is_snp, rec.is_indel, rec.nucl_diversity]))
 
-while False:
-#except TypeError:#if not, put it into the appropriate table
-	curr.execute('INSERT INTO location (chrom, start, stop, ref) VALUES (%s, %s, %s, %s);', tuple([chro, begin, end, 'hg19']))
-	curr.execute("SELECT id FROM location WHERE chrom = %s AND start = %s AND stop = %s AND ref = 'hg19';", tuple([chro, begin, end]))
-	loc_pk = curr.fetchone()[0]
+
+
 
 
 
