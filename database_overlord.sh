@@ -1,12 +1,15 @@
 #!/bin/sh
 pswd=$1
 
+
+#		DATABASE BLACKLIST -  Mask any known imposters
+#sh database_blacklist.sh
+
+
 #############################################
 ###	Build the database
 python database_constructor.py $pswd
 python database_uploader.py $pswd
-#		DATABASE BLACKLIST 
-#python database_blacklist.py
 #		DATABASE LOOKBACK
 #python database_lookback.py
 #		Database antifinder		<----	FUNCTIONAL!
@@ -16,7 +19,8 @@ python database_uploader.py $pswd
 #		Get coverage data
 #python database_coveragecalc.py
 #		add variation info to DB
-python database_VCFupload.py
+python database_VCFupload.py   #<------FUNCTIONAL! would be good to add a primary key field referencing the location items each variants occur within
+
 
 #############################################
 ###	Do some analytics
