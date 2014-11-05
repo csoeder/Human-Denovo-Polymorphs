@@ -37,6 +37,7 @@ module load blast 							#
 module load blat 							#
 module load bowtie2 						#
 module load bwa 							#
+module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
 #############################################################
