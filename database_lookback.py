@@ -45,7 +45,7 @@ phial.close()
 for d00d in all_peeps:
 	os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta > %s/%s_lookback.sam"'%tuple([d00d[0]]*5))
 	os.system('bsub -J retromap_%s -w "done(DBlookback_%s)" -o retromap_%s.lsf.out "samtools view -S -F4 %s/%s_lookback.sam > %s/%s_lookback_found.sam"'%tuple([d00d[0]]*7))
-os.system('while [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; do sleep 60; bar=$(); f="#"; percent=$((100*$(bjobs -w | grep retromap_ | wc -l)/%s)) ; for i in {1..$((50*$(bjobs -w | grep retromap_ | wc -l)/%s))}; do bar=$bar$f; done; echo -ne "$percent%% done $bar\r" ; done; echo "\n" '%tuple([len(all_peeps), len(all_peeps)]) )
+os.system('while [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; do sleep 60; bar=$(); f="#"; percent=$((100*$(bjobs -w | grep retromap_ | wc -l)/%s)) ; for i in {1..$((100-$percent))}; do bar=$bar$f; done; echo -ne "$percent%% remaining $bar\r" ; done; echo "\n" '%tuple([len(all_peeps), len(all_peeps)]) )
 
 
 ###	3	:	play hide and seq
