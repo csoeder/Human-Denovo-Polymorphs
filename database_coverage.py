@@ -44,7 +44,7 @@ for d00d in all_peeps:
 	os.system('bedtools coverage -d -abam %s/%s_mapsplice_alignment.sort.bam -b db_gene_sites.bed > %s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*4))
 	for jean in all_genes:
 		cov = []
-		eff= open('%s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*2), 'w')
+		eff= open('%s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*2), 'r')
 		for row in csv.reader(eff, delimiter='\t'):
 			if row[3] == jean[0]:
 				cov.append(int(row[5]))
