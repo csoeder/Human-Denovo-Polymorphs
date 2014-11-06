@@ -17,7 +17,7 @@ all_genes = curr.fetchall()
 
 phial = open('db_gene_sites.bed','w')
 for jean in all_genes:
-	phial.write('%s\t%s\t%s\t%s\n'%tuple(jean[1], jean[2], jean[3], jean[0]))
+	phial.write('%s\t%s\t%s\t%s\n'%tuple([jean[1], jean[2], jean[3], jean[0]]))
 phial.close()
 
 
