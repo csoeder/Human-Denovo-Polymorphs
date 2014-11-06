@@ -52,9 +52,9 @@ for jean in all_genes:
 	else:
 		popS[total].append(S(pop_dict.values()))
 	if total not in sexS.keys():
-		sexS[total] = [S(sex_dict.values())]
+		sexS[total] = [S(sax_dict.values())]
 	else:
-		sexS[total].append(S(sex_dict.values()))
+		sexS[total].append(S(sax_dict.values()))
 
 all_pop_S = []
 for i in popS.values:
