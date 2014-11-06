@@ -57,10 +57,10 @@ for jean in all_genes:
 		sexS[total].append(S(sax_dict.values()))
 
 all_pop_S = []
-for i in popS.values:
+for i in popS.values():
 	all_pop_S.extend(i)
 all_sex_S = []
-for i in sexS.values:
+for i in sexS.values():
 	all_sex_S.extend(i)
 
 
