@@ -41,7 +41,8 @@ phial.write('%s\n'%columnz)
 inc = 0
 for d00d in all_peeps:
 	rho = '%s\t'%d00d[0]
-	os.system('bedtools coverage -d -abam %s/%s_mapsplice_alignment.sort.bam -b db_gene_sites.bed > %s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*4))
+	if not os.path.isfile('%s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*2)):
+		os.system('bedtools coverage -d -abam %s/%s_mapsplice_alignment.sort.bam -b db_gene_sites.bed > %s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*4))
 	for jean in all_genes:
 		cov = []
 		eff= open('%s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*2), 'r')
