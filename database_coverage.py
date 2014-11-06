@@ -68,7 +68,7 @@ parser.next()
 for d00d in all_peeps:
 	million_mapped_reads = float(check_output('samtools idxstats HG00096/HG00096_mapsplice_alignment.sort.bam | grep -v chrUn | grep -v random | grep -v hap | cut -f 3 | paste -sd+ | bc' , shell = True))/(10.**6)
 	rho = '%s\t'%d00d[0]
-	dats = parser.next([1:])
+	dats = parser.next()[1:]
 	dats.reverse()
 	for jean in all_genes:
 		absolute = float(dats.pop()[0])#Get the next absolute coverage datum - USING THE MEAN
