@@ -46,7 +46,7 @@ for d00d in all_peeps:
 		cov = []
 		eff= open('%s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*2), 'r')
 		for row in csv.reader(eff, delimiter='\t'):
-			if row[3] == jean[0]:
+			if row[3] == str(jean[0]):
 				cov.append(int(row[5]))
 			rho = '%s\t%s,%s,%s'%tuple([min(cov), mean(cov), max(cov)])
 		phial.write('%s\n'%rho)
