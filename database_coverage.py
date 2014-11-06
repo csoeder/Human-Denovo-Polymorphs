@@ -8,6 +8,7 @@ from numpy import mean
 import csv
 from subprocess import check_output
 
+print "fetching from database...\n"
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr = conn.cursor()
@@ -23,21 +24,21 @@ phial.close()
 
 curr.execute("SELECT id FROM person;")
 all_peeps = curr.fetchall()
+print "done fetching.\n"
 
 
 
 ##################################################################################################
 ############################	ABSOLUTE COVERAGE CALCULATIONS ##########################################
 ##################################################################################################
-
+print "calculating absolute coverage...\n"
 phial = open('absolute_coverage.matrix','w')#			This will contain a labeled m*n matrix, with columns representing gene sites and rows representing individuals
 columnz = ' \t'
 for jean in all_genes:
 	columnz = '%s%s\t'%tuple([columnz, jean[0]])
 phial.write('%s\n'%columnz)
 
-
-
+inc = 0
 for d00d in all_peeps:
 	rho = '%s\t'%d00d[0]
 	os.system('bedtools coverage -d -abam %s/%s_mapsplice_alignment.sort.bam -b db_gene_sites.bed > %s/%s_site_coverage.bedgraph'%tuple([d00d[0]]*4))
@@ -49,20 +50,23 @@ for d00d in all_peeps:
 				cov.append(int(row[5]))
 			rho = '%s\t%s,%s,%s'%tuple([min(cov), mean(cov), max(cov)])
 		phial.write('%s\n'%rho)
-
+	inc +=1
+	per = inc*100./len(all_peeps)
+	os.system( 'echo -ne "%s%% done\t%s\t#\r"'%tuple([per, '%s%s'%tuple(['*'*round(per/2), ' '*(1-round(per/2))]) ) 
 phial.close()
-
+print "... done.\n"
 
 ##################################################################################################
 ############################	RELATIVE COVERAGE CALCULATIONS ##########################################
 ##################################################################################################
-
+print "calculating relative coverage...\n"
 phial = open('relative_coverage.matrix','w')#			This will contain a labeled m*n matrix, with columns representing gene sites and rows representing individuals
 columnz = ' \t'
 for jean in all_genes:
 	columnz = '%s%s\t'%tuple([columnz, jean[0]])
 phial.write('%s\n'%columnz)
 
+inc=0
 parser = csv.reader(open('absolute_coverage.matrix','r') , delimiter='\t')
 parser.next()
 for d00d in all_peeps:
@@ -76,6 +80,10 @@ for d00d in all_peeps:
 		relative = absolute /(kb * million_mapped_reads)
 		rho = '%s\t%s'%tuple([rho, relative])
 	phial.write('%s\n'%rho)
+	inc += 1
+	per = inc*100./len(all_peeps)
+	os.system( 'echo -ne "%s%% done\t%s\t#\r"'%tuple([per, '%s%s'%tuple(['*'*round(per/2), ' '*(1-round(per/2))]) ) 
+
 phial.close()
 
 
