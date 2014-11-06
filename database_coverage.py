@@ -52,7 +52,7 @@ for d00d in all_peeps:
 		phial.write('%s\n'%rho)
 	inc +=1
 	per = inc*100./len(all_peeps)
-	os.system( 'echo -ne "%s%% done\t%s\t#\r"'%tuple([per, '%s%s'%tuple(['*'*round(per/2), ' '*(1-round(per/2))])])  
+	os.system( 'echo -ne "%s%% done\t%s\t#\r"'%tuple([per, '%s%s'%tuple(['*'*round(per/2), ' '*(1-round(per/2))])]))
 phial.close()
 print "... done.\n"
 
