@@ -13,6 +13,12 @@ import matplotlib.pyplot as plt
 from scipy.stats import ttest_ind
 from math import log as ln 
 
+
+pwd = sys.argv[1]	#password
+conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
+curr= conn.cursor()
+
+
 num_seqs = {}
 seq_lens = {}
 span = 0
