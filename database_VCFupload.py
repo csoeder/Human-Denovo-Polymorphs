@@ -16,6 +16,7 @@ def Parsley(vcf_file):
 	parser = vcf.Reader(open(vcf_file,'r'))
 	print site, site[1][3:]
 	fetch = parser.fetch(site[1][3:], site[2], site[3])
+	count =0
 	for rec in fetch:
 		alts = ''
 		hom_alts = ''
@@ -33,8 +34,10 @@ def Parsley(vcf_file):
 			curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple(['chr%s'%rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, rec.heterozygosity, rec.is_snp, rec.is_indel, rec.nucl_diversity]))
 		except IndexError:#PyVCF not playing nice with some of the 1kGen VCFs.... heterozygosity, pi_hat are giving errors
 			curr.execute('INSERT INTO variant (chrom, pos, ref_allele, alt_alleles, hom_refs, hom_alts, hets, heterozygosity, is_snp, is_indel, pi_hat) VALUES (%s, %s, %s, %s, %s,%s,%s,%s,%s,%s,%s);', tuple(['chr%s'%rec.CHROM, rec.POS, rec.REF, alts, hom_refs, hom_alts, hetz, 0, rec.is_snp, rec.is_indel, 0]))
-
-
+	if count == 0 :#if there are no variants!
+		return False
+	else:
+		return True
 
 
 
@@ -46,10 +49,12 @@ loc_sites = curr.fetchall()
 
 for site in loc_sites:
 	if site[1]=='chrY':
-		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chrY.phase1_samtools_si.20101123.snps.low_coverage.genotypes.vcf.gz')
-		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chrY.genome_strip_hq.20101123.svs.low_coverage.genotypes.vcf.gz')
+		if not (Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chrY.phase1_samtools_si.20101123.snps.low_coverage.genotypes.vcf.gz') or Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chrY.genome_strip_hq.20101123.svs.low_coverage.genotypes.vcf.gz')):
+			curr.execute("UPDATE location SET poly = %s WHERE location.id = %s;"%tuple([False, site[0]]))
+
 	else:
-		Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1][3:])
+		if not Parsley('/netscr/csoeder/1kGen/data/variation/ALL.chr%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%site[1][3:]):
+			curr.execute("UPDATE location SET poly = %s WHERE location.id = %s;"%tuple([False, site[0]]))
 
 
 conn.commit()

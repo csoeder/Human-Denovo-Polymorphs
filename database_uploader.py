@@ -44,7 +44,7 @@ for rho in dats:
 				curr.execute("SELECT id FROM location WHERE chrom = %s AND start = %s AND stop = %s AND ref = 'hg19';", tuple([chro, begin, end]))
 				loc_pk = curr.fetchone()[0]
 			except TypeError:#if not, put it into the appropriate table
-				curr.execute('INSERT INTO location (chrom, start, stop, ref) VALUES (%s, %s, %s, %s);', tuple([chro, begin, end, 'hg19']))
+				curr.execute('INSERT INTO location (chrom, start, stop, ref, poly) VALUES (%s, %s, %s, %s, %s);', tuple([chro, begin, end, 'hg19', True]))
 				curr.execute("SELECT id FROM location WHERE chrom = %s AND start = %s AND stop = %s AND ref = 'hg19';", tuple([chro, begin, end]))
 				loc_pk = curr.fetchone()[0]
 
