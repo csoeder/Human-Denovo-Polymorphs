@@ -6,7 +6,7 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr = conn.cursor()
 
 ###	tables, calling little johnny tables....
-
+print "Jettison old data..."
 curr.execute("DROP TABLE find;")
 curr.execute("DROP TABLE antifind;")
 curr.execute("DROP TABLE person;")
@@ -39,7 +39,7 @@ curr.execute("CREATE TABLE variant (id serial PRIMARY KEY, chrom varchar(20), po
 #		primkey	chromosome	position	referenceallele	alternateallele	homozygousreferenceindividuals	homozygousalternateindividuals	heterozygousinidividuals	heterozygosity	isitaSNP?	isitanIndel?	nucleotideDiversity
 
 
-
+print "... base rebuilt."
 
  
 
