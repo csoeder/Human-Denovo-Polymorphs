@@ -14,7 +14,7 @@ import matplotlib.pyplot as plt
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr= conn.cursor()
-curr.execute('SELECT chrom, start, stop FROM location;')
+curr.execute('SELECT chrom, start, stop FROM location WHERE location.poly IS TRUE;')
 locations = curr.fetchall()
 chrom_list = list(arange(1,23))
 chrom_list.extend(['X','Y'])

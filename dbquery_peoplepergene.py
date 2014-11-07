@@ -18,7 +18,7 @@ curr= conn.cursor()
 
 curr.execute("SELECT id, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
-curr.execute("SELECT id FROM location;")
+curr.execute("SELECT id FROM location WHERE location.poly IS TRUE;")
 genes = curr.fetchall()
 curr.execute("SELECT count(*) FROM person;")
 numpeeps = curr.fetchone()[0]

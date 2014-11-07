@@ -17,7 +17,7 @@ from math import log as ln
 
 num_seqs = {}
 span = 0
-curr.execute("SELECT id, start, stop FROM location;")
+curr.execute("SELECT id, start, stop FROM location WHERE location.poly IS TRUE;")
 all_genes = curr.fetchall()
 for jean in all_genes:
 	span += jean[2]-jean[1]

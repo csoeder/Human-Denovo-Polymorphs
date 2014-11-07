@@ -14,7 +14,7 @@ curr= conn.cursor()
 
 curr.execute("SELECT id, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
-curr.execute("SELECT id, chrom, start, stop FROM location;")
+curr.execute("SELECT id, chrom, start, stop FROM location WHERE location.poly IS TRUE;")
 all_places = curr.fetchall()
 curr.execute("SELECT pk, id, sex, pop FROM person;")
 all_peeps = curr.fetchall()

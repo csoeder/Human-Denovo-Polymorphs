@@ -20,7 +20,7 @@ curr.execute("SELECT id, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
 curr.execute("SELECT pk FROM person;")
 peeps = curr.fetchall()
-curr.execute("SELECT count(*) FROM location;")
+curr.execute("SELECT count(*) FROM location WHERE location.poly IS TRUE;")
 numjeanz = curr.fetchone()[0]
 
 person_dict = {}

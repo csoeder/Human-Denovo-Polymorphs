@@ -41,7 +41,7 @@ def stochastic_sampler(lust):
 	nov=0
 	for members in truffle_shuffle:
 		for goonie in members:
-			curr.execute("SELECT id FROM location WHERE id IN (SELECT loc FROM find WHERE source=%s);"%goonie)
+			curr.execute("SELECT id FROM location WHERE id IN (SELECT loc FROM find WHERE source=%s) AND WHERE location.poly IS TRUE;"%goonie)
 			all_genes = curr.fetchall()
 			for jean in all_genes:
 				if jean[0] in old_news:

@@ -17,7 +17,7 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr= conn.cursor()
 
-curr.execute('SELECT id FROM location;')
+curr.execute('SELECT id FROM location WHERE location.poly IS TRUE;')
 all_genes = curr.fetchall()
 
 assoc_list = []
