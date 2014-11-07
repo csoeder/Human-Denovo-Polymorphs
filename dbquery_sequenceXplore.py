@@ -41,7 +41,7 @@ for jean in all_genes:
 	seq_lens[jean[0]].append(mean(lens))
 
 
-phial.open('Sequence_Basicfacts.txt','w')
+phial = open('Sequence_Basicfacts.txt','w')
 phial.write('The %s genomic sites were expressed in the form of %s unique RNA sequences. The maximum number of sequences per location was %s.\n'%tuple([len(all_genes), sum(num_seqs), max(num_seqs)]))
 phial.write('\nThe sequence length varied from %s bp to %s bp, with a mean and median of %s and %s bp, respectively. (ORFs shorter than 75 bp were rejected.)\n'%tuple([min(seq_lens), max(seq_lens), mean(seq_lens), median(seq_lens)]))
 phial.close()
