@@ -29,24 +29,25 @@ num_seqs = {}
 varz_dict={}
 numSnps = 0
 numIndels = 0
-curr.execute("SELECT id, start, stop, chrom FROM location;")
+curr.execute("SELECT id, start, stop, chrom FROM location WHERE location.poly IS TRUE;")
 all_genes = curr.fetchall()
 for jean in all_genes:
-	num_seqs[jean[0]] = []
+	num_seqs[jean[0]] = []#snps, indels, total
 	varz_dict[jean[0]]=[]
 	span += jean[2]-jean[1]
 	curr.execute("SELECT id, is_snp, is_indel FROM variant WHERE variant.chrom=%s AND variant.pos<%s AND variant.pos>%s;"%tuple([jean[3], jean[2], jean[1]]))
 	all_varz = curr.fetchall()
 	for vee in all_varz:
-
 		varz_dict[jean[0]].append(vee[0])
 		totVar+=1
+		num_seqs[jean[0]][2]+=1
 		if vee[1]:
 			numSnps+=1
 		elif vee[2]:
 			numIndels+=1
 
-
+curr.execute("SELECT id FROM location WHERE location.poly IS FALSE;")
+monogs = curr.fetchall()
 
 
 phial = open('Variation_BasicFacts.txt', 'w')
@@ -57,6 +58,12 @@ phial.write('\nThis includes %s SNPs (%s%%, %s per kilobase) and %s indels (%s%%
 ###		compare to the genome at large???
 ###						known genes?
 
+varz_per_site=[]
+for jean in all_genes:
+	varz_per_site.append(len(num_seqs[jean[0]]))
+phial.write('\nThe number of variant sites per gene ranged from %s to %s. The mean was %s and the median was %s.\n'%tuple([min(varz_per_site), max(varz_per_site), mean(varz_per_site), median(varz_per_site)]))
+
+phial.write('\nAn additional %s sites met the criteria for a de novo human gene, but were not polymorphic.\n'%tuple([len(monogs)]))
 phial.write('\n'%tuple([]))
 phial.write('\n'%tuple([]))
 phial.close()
