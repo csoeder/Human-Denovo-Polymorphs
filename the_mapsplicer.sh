@@ -34,5 +34,6 @@ fi 										#
 #du -sk Trinity_files.Trinity.fasta >> ticktock.txt
 #echo >> ticktock.txt					#
 #########################################
+touch a.fastq
 bsub -J alert_$1 -w "done(bam2bed_$1) && done(splutDex_$1) && done(Trinity_$1)" rm *.fastq
 #############################################################
