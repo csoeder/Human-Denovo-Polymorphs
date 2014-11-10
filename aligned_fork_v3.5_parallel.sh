@@ -144,8 +144,8 @@ for candidate in `ls | grep exon`; do
 
 done
 
-
-
+mkdir ~/Denovo_Candidates/$4/
+cp deNovos/* ~/Denovo_Candidates/$4/
 
 
 echo DONE
