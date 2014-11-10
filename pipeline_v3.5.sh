@@ -22,8 +22,6 @@ touch ticktock.log 		#log files 							#
 touch monitor.log											#
 echo "de novo search begin: subject $1" >> monitor.log
 date >> monitor.log
-echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
-du ERR* >> monitor.log								#
 echo "git commit #" >> monitor.log				#
 head ../.git/FETCH_HEAD | cut -f1 >> monitor.log #
 head ../.git/FETCH_HEAD | cut -f3 >> monitor.log 
@@ -40,6 +38,10 @@ module load bwa 							#
 module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
+if [[ ! -f Trinity_files.Trinity.fasta || ! -f $1_mapsplice_alignment.sam ]; then
+	for fastq in `grep $s dwnld_list.txt | cut -f 29`; do wget $fastq; gzip -d $fastq; done
+echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
+du ERR* >> monitor.log								#
 #############################################################
 sh ../the_mapsplicer.sh $1 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log

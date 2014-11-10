@@ -31,7 +31,7 @@ for rho in dats:
 		curr.execute('INSERT INTO person (id, access, sex, pop, mother, father) VALUES (%s, %s, %s, %s, 1, 1);', tuple([rho[2], rho[1], string.capitalize(rho[4][0]), rho[0]]))
 		curr.execute('SELECT pk FROM person WHERE id = %s;', tuple([ide]))
 		person_pk = curr.fetchone()[0]
-		print deNovos
+		#print deNovos
 		for exon in deNovos:
 			dats = csv.reader( open('%s/mapt/chunked_genes/deNovos/%s'%tuple([ide, exon]),'r'), delimiter='\t').next()
 			chro, begin, end, script_tag = dats[:4]
