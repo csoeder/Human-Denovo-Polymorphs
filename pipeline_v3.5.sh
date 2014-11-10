@@ -42,6 +42,7 @@ if [[ ! -f Trinity_files.Trinity.fasta || ! -f $1_mapsplice_alignment.sam ]]; th
 	for fastq in `grep $s dwnld_list.txt | cut -f 29`; do wget $fastq; gzip -d $fastq; done
 echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
 du ERR* >> monitor.log								#
+fi
 #############################################################
 sh ../the_mapsplicer.sh $1 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log
