@@ -27,6 +27,8 @@ all_finds = curr.fetchall()
 curr.execute("SELECT id, pk FROM person;")
 all_peeps = curr.fetchall()
 
+
+
 ###	1	:	Grep the sequence
 
 phial = open('lookback.fasta', 'w')
