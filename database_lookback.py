@@ -8,6 +8,7 @@ import csv
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 import pysam
+import numpy as np
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
@@ -68,3 +69,5 @@ for key in retro_dict.keys():
 
 curr.close()
 conn.close()
+
+os.remove('lookback.fasta')
