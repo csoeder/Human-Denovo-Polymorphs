@@ -15,6 +15,7 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr = conn.cursor()
 
+
 missing_dict = {}	#	Were any sequences missing when the transcriptomes were reexamined?
 unexpected_dict = {}#	Did any sequences appear in new individuals when the transcriptomes were reexamined?
 start_dict = {}	#		All finds from the DB
@@ -27,6 +28,8 @@ curr.execute("SELECT id, source, loc, seq FROM find;")
 all_finds = curr.fetchall()
 curr.execute("SELECT id, pk FROM person;")
 all_peeps = curr.fetchall()
+
+
 
 
 
@@ -60,11 +63,24 @@ for d00d in all_peeps:
 	ret_list =np.array(check_output('cut -f 4 %s/%s_lookback.bed | sort | uniq'%tuple([d00d[0]]*2), shell=True).split('\n'))
 	retro_dict[d00d[1]] = list(ret_list[ret_list!=''])
 
+print retro_dict
+old_dict = {}
+for i in retro_dict.keys():
+	old_dict[i] = len(retro_dict[i])
+
 for fund in all_finds:
-	retro_dict[fund[1]].pop(retro_dict[fund[1]].index(fund[2]))
+	retro_dict[fund[1]].pop(retro_dict[fund[1]].index(str(fund[2])))
+
+new_dict = {}
+for i in retro_dict.keys():
+        new_dict[i] = len(retro_dict[i])
+
 
 for key in retro_dict.keys():
-	print "%s had was retroactively detected in %s individuals.\n"%tuple([key, len(retro_dict[key])])
+	#print "%s had was retroactively detected in %s individuals.\n"%tuple([key, len(retro_dict[key])])
+	print i, old_dict[i], new_dict[i]
+
+
 
 
 ###	4	:	add a flag field to the DB?
