@@ -79,7 +79,7 @@ for i in retro_dict.keys():
 
 for key in retro_dict.keys():
 	#print "%s had was retroactively detected in %s individuals.\n"%tuple([key, len(retro_dict[key])])
-	print i, old_dict[key], new_dict[key]
+	print key, old_dict[key], new_dict[key], retro_dict[key][:5]
 
 
 
