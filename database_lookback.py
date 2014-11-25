@@ -78,12 +78,15 @@ for i in retro_dict.keys():
 
 for key in retro_dict.keys():
 	#print "%s had was retroactively detected in %s individuals.\n"%tuple([key, len(retro_dict[key])])
-	print i, old_dict[i], new_dict[i]
+	print i, old_dict[key], new_dict[key]
 
 
 
 
 ###	4	:	add a flag field to the DB?
+
+
+
 
 
 curr.close()
