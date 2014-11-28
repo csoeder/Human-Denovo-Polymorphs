@@ -39,7 +39,7 @@ module load bwa 							#
 module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
-if [[ ! -f Trinity_files.Trinity.fasta || ! -f $1_mapsplice_alignment.sam ]]; then
+if [[ ! -f Trinity_files.Trinity.fasta || ! -f $1_mapsplice_alignment.sort.bam ]]; then
 	for fastq in `grep $1 ../dwnld_list.txt | cut -f 29`; do wget $fastq; gzip -d $(echo $fastq | cut -f 8 -d'/'); done
 echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
 du ERR* >> monitor.log								#
