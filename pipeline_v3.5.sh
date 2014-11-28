@@ -12,6 +12,7 @@ rm *.sai
 rm *_aligned.sam
 rm *_Assembl*
 rm -rf mapt
+rm -rf mapsplice_out
 rm -rf unmapt
 rm *.log
 rm *.txt

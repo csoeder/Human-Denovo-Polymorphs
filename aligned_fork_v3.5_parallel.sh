@@ -49,9 +49,9 @@ samtools view ../$1 -Sb | bamToBed -bed12 -i - | while read line;
 		done
 		### Lay down the data ########################################################
 		mkdir $comp
-		cd $comp
-		samtools view -b ../../$2 $chrom:$start-$stop | bamToBed -bed12 -i - > temp.bed
-		echo $line | tr ' ' '\t' > curly.bed
+		cd $compprimBLATs
+		echo $line | tr ' ' '\t' > curly.bed		
+		samtools view -b ../../$2 $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -a stdin -b curly.bed > temp.bed
 		cd ..
 		### Lay down the script ########################################################
 		echo "cd $comp" >> bundle_$BUN_NUM.sh 		#	push
