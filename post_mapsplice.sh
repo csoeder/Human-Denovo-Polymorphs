@@ -31,6 +31,7 @@ bsub -J bamsort2_$1 -w "done(bamvert2_$1)" -o bamsort2.lsf.out "samtools sort $1
 ### those which do not. ##################################
 bsub -J gather_maps_$1 -w "done(bamsort2_$1)" -o gather_maps.lsf.out "samtools view -h -F4 $1_Assembly_Alignment.sorted.bam > $1_Assemblies_mapped.sam"
 #bsub -J gather_unmaps_$1 -w "done(bamsort2_$1)" -o gather_unmaps.lsf.out "samtools view -h -f4 $1_Assembly_Alignment.sorted.bam > $1_Assemblies_unmapped.sam"
+#	ignore unaligned fork
 #############################################################################
 ### Fork a job on each partition ############################
 bsub -J $1_aligned_fork -q week -w "done(faidx_$1) && done(gather_maps_$1)" -q week -o aligned_fork.lsf.out "sh $SCRIPT_DIR/aligned_fork_v3.5_parallel.sh $1_Assemblies_mapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta $1"
