@@ -10,6 +10,7 @@ from Bio.SeqRecord import SeqRecord
 import pysam
 from subprocess import call, check_output
 from time import sleep
+import numpy as np
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
