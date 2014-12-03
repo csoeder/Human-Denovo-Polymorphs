@@ -69,9 +69,9 @@ os.system('while [[ `bjobs -w | grep primmap_ | wc -l` -gt 0 ]]; do sleep 60; ba
 
 
 for sample in check_output('ls %s | grep -v the | grep -v out | grep pan'%primate_omes, shell=True).split('\n'):
-	chumps = set(np.array(check_output('cut -f 4 %s%s_lookback.bed | sort | uniq'%tuple([primate_omes, sample]), shell=True).split('\n')))
+	chumps = set(np.array(check_output('cut -f 4 %s%s/%s_lookback.bed | sort | uniq'%tuple([primate_omes, sample, sample]), shell=True).split('\n')))
 for sample in check_output('ls %s | grep -v the | grep -v out | grep gor'%primate_omes, shell=True).split('\n'):
-	gorillaz = set(np.array(check_output('cut -f 4 %s%s_lookback.bed | sort | uniq'%tuple([primate_omes, sample]), shell=True).split('\n')))
+	gorillaz = set(np.array(check_output('cut -f 4 %s%s/%s_lookback.bed | sort | uniq'%tuple([primate_omes, sample, sample]), shell=True).split('\n')))
 
 print "%s candidates observed in the transcriptomes of both chimp and gorilla: %s\n"%tuple([len(chumps.intersection(gorillaz)), '%s, '*len(chumps.intersection(gorillaz))%tuple(chumps.intersection(gorillaz))])
 print "%s candidates were observed in chimps only: %s\n"%tuple([len(chumps.difference(gorillaz)), '%s, '*len(chumps.difference(gorillaz))%tuple(chumps.difference(gorillaz))])
