@@ -39,6 +39,7 @@ phial = open('lookback.fasta', 'w')
 for find in all_finds:
 	if find[2] in start_dict.keys():
 		start_dict[find[2]].append(find[1])
+		tot_count+=1
 	else:
 		start_dict[find[2]] = [find[1]]
 		curr.execute("SELECT seq FROM sequence WHERE sequence.id=%s"%find[3])	
@@ -72,6 +73,15 @@ for sample in check_output('ls %s | grep -v the | grep -v out | grep pan'%primat
 	chumps = set(np.array(check_output('cut -f 4 %s%s/%s_lookback.bed | sort | uniq'%tuple([primate_omes, sample, sample]), shell=True).split('\n')))
 for sample in check_output('ls %s | grep -v the | grep -v out | grep gor'%primate_omes, shell=True).split('\n'):
 	gorillaz = set(np.array(check_output('cut -f 4 %s%s/%s_lookback.bed | sort | uniq'%tuple([primate_omes, sample, sample]), shell=True).split('\n')))
+
+try:
+	chumps.remove('')
+except KeyError:
+	pass
+try:
+	gorillaz.remove('')
+except KeyError:
+	pass
 
 print "%s candidates observed in the transcriptomes of both chimp and gorilla: %s\n"%tuple([len(chumps.intersection(gorillaz)), '%s, '*len(chumps.intersection(gorillaz))%tuple(chumps.intersection(gorillaz))])
 print "%s candidates were observed in chimps only: %s\n"%tuple([len(chumps.difference(gorillaz)), '%s, '*len(chumps.difference(gorillaz))%tuple(chumps.difference(gorillaz))])
