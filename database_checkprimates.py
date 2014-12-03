@@ -8,7 +8,7 @@ import csv
 from Bio import SeqIO
 from Bio.SeqRecord import SeqRecord
 import pysam
-from subprocess import call, check
+from subprocess import call, check_output
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
