@@ -64,7 +64,8 @@ for d00d in all_peeps:
 	ret_list =np.array(check_output('cut -f 4 %s/%s_lookback.bed | sort | uniq'%tuple([d00d[0]]*2), shell=True).split('\n'))
 	retro_dict[d00d[1]] = list(ret_list[ret_list!=''])
 
-print retro_dict
+
+#print retro_dict
 old_dict = {}
 for i in retro_dict.keys():
 	old_dict[i] = len(retro_dict[i])
@@ -80,6 +81,23 @@ for i in retro_dict.keys():
 for key in retro_dict.keys():
 	#print "%s had was retroactively detected in %s individuals.\n"%tuple([key, len(retro_dict[key])])
 	print key, old_dict[key], new_dict[key], retro_dict[key][:5]
+
+
+problem_children = {}
+for redundant_carrier in retro_dict.keys():
+	for redundant in retro_dict[redundant_carrier]:
+		if redundant in problem_children.keys():
+			problem_children[redundant].append(redundant_carrier)
+		else:
+			problem_children[redundant] = [redundant_carrier]
+
+print problem_children
+
+
+
+
+
+
 
 
 
