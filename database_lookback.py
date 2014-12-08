@@ -94,10 +94,12 @@ for redundant_carrier in retro_dict.keys():
 print problem_children
 print
 print len(problem_children.keys())
+lens = []
 for i in problem_children.keys():
 	print i, len(problem_children[i])
+	lens.append(len(problem_children[i]))
 
-
+print max(lens), min(lens), np.mean(lens), np.median(lens)
 
 
 
