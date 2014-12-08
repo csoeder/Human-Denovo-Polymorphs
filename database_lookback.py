@@ -92,9 +92,10 @@ for redundant_carrier in retro_dict.keys():
 			problem_children[redundant] = [redundant_carrier]
 
 print problem_children
-
-
-
+print
+print len(problem_children.keys())
+for i in problem_children.keys():
+	print i, len(problem_children[i])
 
 
 
