@@ -22,7 +22,7 @@ bedtools intersect -split -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed	#
 cat no_UCSC.bed no_refSeq.bed > no_genes.bed
 if [[ -s no_genes.bed ]]; then
 	mv no_genes.bed $2
-#	echo "GENE FOUND"
+	echo "GENE FOUND"
 	exit
 fi
 #################################################################################																					#
@@ -31,7 +31,7 @@ fi
 bedtools intersect -split -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.bed								#
 if [[ -s no_rpts.bed ]]; then
 	mv no_rpts.bed $2
-#	echo "ITS REPETITIVE"
+	echo "ITS REPETITIVE"
 	exit
 fi
 #################################################################################																					#
@@ -63,7 +63,7 @@ bedtools intersect -a $1 -b $DATA_DIR/yalepseudo.bed > no_rpts_no_est_no_mRNA_no
 cat no_rpts_no_est_no_mRNA_no_retro* > no_retros.bed
 if [[ -s no_retros.bed ]]; then
 	mv no_retros.bed $2
-#	echo "HOW RETRO"
+	echo "HOW RETRO"
 	exit
 fi
 #################################################################################																					#
