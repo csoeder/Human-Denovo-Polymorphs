@@ -62,17 +62,17 @@ os.system('while [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; do sleep 60; b
 retro_dict={}
 for d00d in all_peeps:
 	ret_list =np.array(check_output('cut -f 4 %s/%s_lookback.bed | sort | uniq'%tuple([d00d[0]]*2), shell=True).split('\n'))
-	prob_list = list(ret_list[ret_list!=''])
-	retro_dict[d00d[1]] = prob_list
+	retro_dict[d00d[1]] = list(ret_list[ret_list!=''])
 
 
 #print retro_dict
 old_dict = {}
 for i in retro_dict.keys():
-	old_dict[i] = len(retro_dict[i])
+	old_dict[i] = retro_dict[i]
 
 for fund in all_finds:
 	retro_dict[fund[1]].pop(retro_dict[fund[1]].index(str(fund[2])))
+
 
 new_dict = {}
 for i in retro_dict.keys():
@@ -81,45 +81,29 @@ for i in retro_dict.keys():
 
 for key in retro_dict.keys():
 	#print "%s had was retroactively detected in %s individuals.\n"%tuple([key, len(retro_dict[key])])
-	print key, old_dict[key], new_dict[key], retro_dict[key][:5]
-
+	#print key, old_dict[key], new_dict[key], retro_dict[key][:5]
+	print key, old_dict[key], retro_dict[key]
 
 
 problem_children = {}
-
-for person in retro_dict.keys():
-	genes = retro_dict[person]	
-	for jean in genes:
-		if jean in problem_children.keys():
-			problem_children[jean].append(person)
+for redundant_carrier in retro_dict.keys():
+	for redundant in retro_dict[redundant_carrier]:
+		if redundant in problem_children.keys():
+			problem_children[redundant].append(redundant_carrier)
 		else:
-			problem_children[jean] = [person]
+			problem_children[redundant] = [redundant_carrier]
 
-
-
-
-
-
-
-# problem_children = {}
-# for redundant_carrier in retro_dict.keys():
-# 	for redundant in retro_dict[redundant_carrier]:
-# 		if redundant in problem_children.keys():
-# 			problem_children[redundant].append(redundant_carrier)
-# 		else:
-# 			problem_children[redundant] = [redundant_carrier]
-
+lens=[]
 print problem_children
 print
 print len(problem_children.keys())
-lens = []
 for i in problem_children.keys():
-	print i, len(problem_children[i])
+	print i, len(problem_children[i]), problem_children[i]
 	lens.append(len(problem_children[i]))
 
+
+
 print max(lens), min(lens), np.mean(lens), np.median(lens)
-
-
 
 
 
