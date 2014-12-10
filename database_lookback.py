@@ -62,7 +62,8 @@ os.system('while [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; do sleep 60; b
 retro_dict={}
 for d00d in all_peeps:
 	ret_list =np.array(check_output('cut -f 4 %s/%s_lookback.bed | sort | uniq'%tuple([d00d[0]]*2), shell=True).split('\n'))
-	retro_dict[d00d[1]] = list(ret_list[ret_list!=''])
+	prob_list = list(ret_list[ret_list!=''])
+	retro_dict[d00d[1]] = prob_list
 
 
 #print retro_dict
@@ -83,21 +84,40 @@ for key in retro_dict.keys():
 	print key, old_dict[key], new_dict[key], retro_dict[key][:5]
 
 
+
 problem_children = {}
-for redundant_carrier in retro_dict.keys():
-	for redundant in retro_dict[redundant_carrier]:
-		if redundant in problem_children.keys():
-			problem_children[redundant].append(redundant_carrier)
+
+for person in retro_dict.keys():
+	genes = retro_dict[person]	
+	for jean in genes:
+		if jean in problem_children.keys():
+			problem_children[jean].append(person)
 		else:
-			problem_children[redundant] = [redundant_carrier]
+			problem_children[jean] = [person]
+
+
+
+
+
+
+
+# problem_children = {}
+# for redundant_carrier in retro_dict.keys():
+# 	for redundant in retro_dict[redundant_carrier]:
+# 		if redundant in problem_children.keys():
+# 			problem_children[redundant].append(redundant_carrier)
+# 		else:
+# 			problem_children[redundant] = [redundant_carrier]
 
 print problem_children
 print
 print len(problem_children.keys())
+lens = []
 for i in problem_children.keys():
 	print i, len(problem_children[i])
+	lens.append(len(problem_children[i]))
 
-
+print max(lens), min(lens), np.mean(lens), np.median(lens)
 
 
 
