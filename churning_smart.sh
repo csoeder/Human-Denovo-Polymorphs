@@ -8,7 +8,7 @@ DATA_DIR='/netscr/csoeder/1kGen/data'
 SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 
 mv new.bed old.bed #	bedfilter the initial .BED
-sh $SCRIPT_DIR/bedfilter_detect.sh old.bed overlap.bed
+sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh old.bed overlap.bed
 
 if [[ -s overlap.bed ]]; then
 	exit			#	If the initial .BED overlaps, you're done
