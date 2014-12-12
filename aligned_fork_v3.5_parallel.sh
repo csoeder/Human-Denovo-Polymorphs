@@ -14,6 +14,11 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 #	$3 is the indexed Trinity FASTA
 #	$4 is the individual's identifier
 
+
+samtools view -hSb $1 | samtools sort -f - $4_Assemblies_mapped.sort.bam
+bedtools intersect -split -v -abam $4_Assemblies_mapped.sort.bam -b $DATA_DIR/UCSC_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/refSeq_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/repeatmasker.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed1.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed2.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed3.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/yalepseudo.bed > $4_ILS_anomalies.bam
+samtools sort -f $4_ILS_anomalies.bam $4_ILS_anomalies.sort.bam
+
 mkdir mapt
 cd mapt
 
@@ -36,7 +41,7 @@ echo '#!/bin/sh' > bundle_$BUN_NUM.sh # 	The bundle is a script
 ###############################################################
 ###	Begin laying down data, script bundles to handle it. ######
 ###############################################################
-samtools view ../$1 -Sb | bamToBed -bed12 -i - | while read line;
+bamToBed -bed12 -i $4_ILS_anomalies.sort.bam | while read line;
 	###		for each aligned transcript
 	do 
         chrom=$(echo $line | cut -f1 -d' ')	#	Grab the genomic coords...
@@ -52,23 +57,18 @@ samtools view ../$1 -Sb | bamToBed -bed12 -i - | while read line;
 		cd $comp
 		echo $line | tr ' ' '\t' > curly.bed		
 		samtools view -b ../../$2 $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -a stdin -b curly.bed > temp.bed
-		sh $SCRIPT_DIR/bedfilter_detect.sh temp.bed overlap.bed
+#		sh $SCRIPT_DIR/bedfilter_detect.sh temp.bed overlap.bed
 		cd ..
 
-		if [[ ! -s $comp/overlap.bed ]]; then 	#	if the site doesn't overlap an annotation directly...
-			#	... queue it for accumulation
+		### Lay down the script ########################################################
+		echo "cd $comp" >> bundle_$BUN_NUM.sh 		#	push
+		echo "echo $comp" >> bundle_$BUN_NUM.sh 	#	ohai
+		echo "sh $SCRIPT_DIR/aligned_accumulator_widget_smart.sh $2 $comp" >> bundle_$BUN_NUM.sh #	go
+		echo "cd .." >> bundle_$BUN_NUM.sh 			#	pop
+		echo "rm -rf $comp" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
+		################################################################################
+		let COUNTER+=1 #					Next!
 
-			### Lay down the script ########################################################
-			echo "cd $comp" >> bundle_$BUN_NUM.sh 		#	push
-			echo "echo $comp" >> bundle_$BUN_NUM.sh 	#	ohai
-			echo "sh $SCRIPT_DIR/aligned_accumulator_widget_smart.sh $2 $comp" >> bundle_$BUN_NUM.sh #	go
-			echo "cd .." >> bundle_$BUN_NUM.sh 			#	pop
-			echo "rm -rf $comp" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
-			################################################################################
-			let COUNTER+=1 #					Next!
-		else	#								otherwise, toss it!
-			rm -rf $comp
-		fi
 		###	If the bundle is full, then start a new one! ################################
 		if [ $COUNTER -gt $BATCH_SIZE ]; then let BUN_NUM+=1 ; echo '#!/bin/sh' > bundle_$BUN_NUM.sh; COUNTER=0; fi
 	done
