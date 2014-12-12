@@ -41,7 +41,7 @@ echo '#!/bin/sh' > bundle_$BUN_NUM.sh # 	The bundle is a script
 ###############################################################
 ###	Begin laying down data, script bundles to handle it. ######
 ###############################################################
-bamToBed -bed12 -i $4_ILS_anomalies.sort.bam | while read line;
+bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 	###		for each aligned transcript
 	do 
         chrom=$(echo $line | cut -f1 -d' ')	#	Grab the genomic coords...
