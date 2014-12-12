@@ -52,15 +52,23 @@ samtools view ../$1 -Sb | bamToBed -bed12 -i - | while read line;
 		cd $comp
 		echo $line | tr ' ' '\t' > curly.bed		
 		samtools view -b ../../$2 $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -a stdin -b curly.bed > temp.bed
+		sh $SCRIPT_DIR/bedfilter_detect.sh temp.bed overlap.bed
 		cd ..
-		### Lay down the script ########################################################
-		echo "cd $comp" >> bundle_$BUN_NUM.sh 		#	push
-		echo "echo $comp" >> bundle_$BUN_NUM.sh 	#	ohai
-		echo "sh $SCRIPT_DIR/aligned_accumulator_widget_smart.sh $2 $comp" >> bundle_$BUN_NUM.sh #	go
-		echo "cd .." >> bundle_$BUN_NUM.sh 			#	pop
-		echo "rm -rf $comp" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
-		################################################################################
-		let COUNTER+=1 #					Next!
+
+		if [[ ! -s $comp/overlap.bed ]]; then 	#	if the site doesn't overlap an annotation directly...
+			#	... queue it for accumulation
+
+			### Lay down the script ########################################################
+			echo "cd $comp" >> bundle_$BUN_NUM.sh 		#	push
+			echo "echo $comp" >> bundle_$BUN_NUM.sh 	#	ohai
+			echo "sh $SCRIPT_DIR/aligned_accumulator_widget_smart.sh $2 $comp" >> bundle_$BUN_NUM.sh #	go
+			echo "cd .." >> bundle_$BUN_NUM.sh 			#	pop
+			echo "rm -rf $comp" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
+			################################################################################
+			let COUNTER+=1 #					Next!
+		else	#								otherwise, toss it!
+			rm -rf $comp
+		fi
 		###	If the bundle is full, then start a new one! ################################
 		if [ $COUNTER -gt $BATCH_SIZE ]; then let BUN_NUM+=1 ; echo '#!/bin/sh' > bundle_$BUN_NUM.sh; COUNTER=0; fi
 	done
