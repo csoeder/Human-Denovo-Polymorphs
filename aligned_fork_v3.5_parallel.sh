@@ -76,7 +76,7 @@ bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 ###	Now run the scripts ################################
 for script in `ls | grep -v lsf | grep .sh`;
 		#		submit the job, wait a while, repeat...
-		do bsub -J align_grind_$4 -o $script.lsf.out sh $script; sleep $WAIT_TIME;
+		do bsub -J align_grind_$4 -o $script.lsf.out -q week sh $script; sleep $WAIT_TIME;
 	done
 ########################################################
 ###	Chill out until the jobs are all done ##############
