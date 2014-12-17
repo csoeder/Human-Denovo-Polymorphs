@@ -29,7 +29,7 @@ echo "$4 is being align-forked"
 ###############################################################
 # bundle parameters############################################
 BUN_NUM=0 #		The first bundle is number zero
-BATCH_SIZE=500 #There are 200 datumz processed per bundle
+BATCH_SIZE=200 #There are 200 datumz processed per bundle
 WAIT_TIME=90 #	Wait 90 seconds before submitting next bundle
 COUNTER=0 #		Nothing in the present bundle
 ###############################################################
