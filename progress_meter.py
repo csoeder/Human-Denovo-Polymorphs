@@ -13,10 +13,11 @@ for name in mer_de_noms:
 	dats = check_output("for jorb in $(bjobs -w | grep RUN | grep %s | grep grind | cut -f 1 -d ' '); do c=$(bpeek $jorb | grep -c ccumulated); echo $c ; done"%tuple([name]), shell=True)
 
 	cleandats =[]
-	for d in dats.split('\n')[:-1]:
-		cleandats.append(float(d)/2)
+	if len(cleandats) > 0:
+		for d in dats.split('\n')[:-1]:
+			cleandats.append(float(d)/2)
 
-	plt.hist(cleandats, bins=25, histtype='step')
+		plt.hist(cleandats, bins=25, histtype='step')
 
 
 
