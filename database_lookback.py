@@ -101,7 +101,7 @@ lens=[]
 print problem_children
 print
 print len(problem_children.keys())
-print len(retro_dict.keys())
+print len(all_places)
 for i in problem_children.keys():
 	print i, len(problem_children[i]), problem_children[i]
 	lens.append(len(problem_children[i]))
