@@ -53,11 +53,11 @@ phial.close()
 for d00d in all_peeps:
 #	os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta | samtools view -Sbh | samtools sort - -f %s/%s_lookback.bam" &'%tuple([d00d[0]]*5))
 	os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta | samtools view -Sbh - | samtools sort - -f %s/%s_lookback.bam" &'%tuple([d00d[0]]*5))
-	sleep(100)
-sleep(500)
+	sleep(0.1)
+sleep(0.5)
 for d00d in all_peeps:
 	os.system('bsub -J retromap_%s -w "done(DBlookback_%s)" -o retromap_%s.lsf.out "samtools view -b -F4 %s/%s_lookback.bam | bedtools bamtobed -i - > %s/%s_lookback.bed " &'%tuple([d00d[0]]*7))
-	sleep(100)
+	sleep(0.1)
 os.system('while [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; do sleep 60; bar=$(); f="#"; percent=$((100*$(bjobs -w | grep retromap_ | wc -l)/%s)) ; for (( c=1; c<=$((100-$percent)); c++)); do bar=$bar$f; done; echo -ne "$percent%% remaining $bar\r" ; done; echo "\n" '%tuple([len(all_peeps)]) )
 
 
@@ -101,6 +101,7 @@ lens=[]
 print problem_children
 print
 print len(problem_children.keys())
+print len(retro_dict.keys())
 for i in problem_children.keys():
 	print i, len(problem_children[i]), problem_children[i]
 	lens.append(len(problem_children[i]))
