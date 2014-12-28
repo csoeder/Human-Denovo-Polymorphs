@@ -109,10 +109,18 @@ for i in problem_children.keys():
 	print i, len(problem_children[i]), problem_children[i]
 	lens.append(len(problem_children[i]))
 	carrier_string=''
+	curr.execute("SELECT id FROM person WHERE person.pk in (SELECT source FROM find WHERE find.loc=%s);" % i)
+	fronds = curr.fetchall()
+	for carrier in fronds:
+		carrier_string = '%s%s,' % tuple([carrier_string, int(carrier[0])])
+	carrier_string = carrier_string[:-1]	#clip final ,
+	silent_carrier_string=''
 	for carrier in problem_children[i]:
-		carrier_string = '%s%s,'%tuple([carrier_string, int(carrier)])
-	carrier_string = carrier_string[:-1]
-	reportback.write('%s\t%s\n' % tuple([i, carrier_string]))
+		curr.execute("SELECT id FROM person WHERE person.pk=%s;" % carrier)
+		dude = curr.fetchone()[0]
+		silent_carrier_string = '%s%s,' % tuple([silent_carrier_string, dude])
+	silent_carrier_string = silent_carrier_string[:-1]
+	reportback.write('%s\t%s\t%s\n' % tuple([i, carrier_string, silent_carrier_string]))
 #location_pk,	list_of_unsighted_carriers
 
 print max(lens), min(lens), np.mean(lens), np.median(lens)
