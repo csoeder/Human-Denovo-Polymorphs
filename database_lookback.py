@@ -11,6 +11,7 @@ import pysam
 import numpy as np
 from subprocess import call, check_output
 from time import sleep
+import pickle
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
@@ -97,6 +98,7 @@ for redundant_carrier in retro_dict.keys():
 		else:
 			problem_children[redundant] = [redundant_carrier]
 
+pickle.dump(problem_children, open('lookback_report.pickle','w'))
 lens=[]
 print problem_children
 print
@@ -105,15 +107,17 @@ print len(all_places)
 for i in problem_children.keys():
 	print i, len(problem_children[i]), problem_children[i]
 	lens.append(len(problem_children[i]))
-
+	reportback.write('\n')
 
 
 print max(lens), min(lens), np.mean(lens), np.median(lens)
 
 
 
-###	4	:	add a flag field to the DB?
 
+
+###	4	:	add a flag field to the DB?
+#			more likely just kick'em
 
 
 
@@ -121,4 +125,4 @@ print max(lens), min(lens), np.mean(lens), np.median(lens)
 curr.close()
 conn.close()
 
-os.remove('lookback.fasta')
+os.remove('lookback.fasta')
