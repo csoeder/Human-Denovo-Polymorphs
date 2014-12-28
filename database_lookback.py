@@ -81,7 +81,7 @@ for fund in all_finds:
 
 new_dict = {}
 for i in retro_dict.keys():
-        new_dict[i] = len(retro_dict[i])
+	new_dict[i] = len(retro_dict[i])
 
 
 for key in retro_dict.keys():
@@ -98,7 +98,8 @@ for redundant_carrier in retro_dict.keys():
 		else:
 			problem_children[redundant] = [redundant_carrier]
 
-pickle.dump(problem_children, open('lookback_report.pickle','w'))
+#pickle.dump(problem_children, open('lookback_report.pickle','w'))
+reportback = open('lookback_report.dat','w')
 lens=[]
 print problem_children
 print
@@ -107,8 +108,12 @@ print len(all_places)
 for i in problem_children.keys():
 	print i, len(problem_children[i]), problem_children[i]
 	lens.append(len(problem_children[i]))
-	reportback.write('\n')
-
+	carrier_string=''
+	for carrier in problem_children[i]:
+		carrier_string = '%s%s,'%tuple([carrier_string, int(carrier)])
+	carrier_string = carrier_string[:-1]
+	reportback.write('%s\t%s\n' % tuple([i, carrier_string]))
+#location_pk,	list_of_unsighted_carriers
 
 print max(lens), min(lens), np.mean(lens), np.median(lens)
 
@@ -125,4 +130,4 @@ print max(lens), min(lens), np.mean(lens), np.median(lens)
 curr.close()
 conn.close()
 
-os.remove('lookback.fasta')
+os.remove('lookback.fasta')
