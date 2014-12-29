@@ -22,7 +22,7 @@ for i in $(seq 1 $SAMPLE_SIZE);	do
 	tagged=$(echo $tagged_carriers | cut -f $((${RANDOM} % `echo $tagged_carriers | tr ',' '\n' | wc -l `+1 )) -d ',' );	#choose a random tagged expresser
 	silent=$(echo $silent_carriers | cut -f $((${RANDOM} % `echo $silent_carriers | tr ',' '\n' | wc -l `+1 )) -d ',' );	#choose a random silent expresser
 	
-	samtools view -hb $tagged/$tagged_mapsplice_alignment.sort.bam $new_location | bedtools bamtobed -bed12 -color 0,0,255 -i - >> unpuzzler_tagged.bed;
-	samtools view -hb $silent/$silent_mapsplice_alignment.sort.bam $new_location | bedtools bamtobed -bed12 -color 255,0,0 -i - >> unpuzzler_silent.bed;
+	samtools view -hb "$tagged/$tagged"_mapsplice_alignment.sort.bam $new_location | bedtools bamtobed -bed12 -color 0,0,255 -i - >> unpuzzler_tagged.bed;
+	samtools view -hb "$silent/$silent"_mapsplice_alignment.sort.bam $new_location | bedtools bamtobed -bed12 -color 255,0,0 -i - >> unpuzzler_silent.bed;
 	done;
 
