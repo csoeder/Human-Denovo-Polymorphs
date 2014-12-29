@@ -112,7 +112,7 @@ for i in problem_children.keys():
 	curr.execute("SELECT id FROM person WHERE person.pk in (SELECT source FROM find WHERE find.loc=%s);" % i)
 	fronds = curr.fetchone()
 	for carrier in fronds:
-		carrier_string = '%s%s,' % tuple([carrier_string, carrier[0]))
+		carrier_string = '%s%s,' % tuple([carrier_string, carrier[0]])
 	carrier_string = carrier_string[:-1]	#clip final ,
 	silent_carrier_string=''
 	for carrier in problem_children[i]:
@@ -120,7 +120,7 @@ for i in problem_children.keys():
 		dude = curr.fetchone()[0]
 		silent_carrier_string = '%s%s,' % tuple([silent_carrier_string, dude])
 	silent_carrier_string = silent_carrier_string[:-1]
-	curr.execute("SELECT chrom, start, stop FROM location WHERE location.id=%s;" % i))
+	curr.execute("SELECT chrom, start, stop FROM location WHERE location.id=%s;" % i)
 	location = curr.fetchone()
 	location_string = '%s:%s-%s' % tuple(location)
 	reportback.write('%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string]))
