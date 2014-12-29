@@ -3,7 +3,7 @@
 SAMPLE_SIZE=$1
 WINDOW_SIZE=1000
 
-for i in {1..$SAMPLE_SIZE};	do
+for i in $(seq 1 $SAMPLE_SIZE);	do
 
 	problem=$(head -$((${RANDOM} % `wc -l < lookback_report.dat`+1 )) lookback_report.dat | tail -1);
 
