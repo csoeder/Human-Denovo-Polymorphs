@@ -7,9 +7,9 @@ for i in $(seq 1 $SAMPLE_SIZE);	do
 
 	problem=$(head -$((${RANDOM} % `wc -l < lookback_report.dat`+1 )) lookback_report.dat | tail -1);
 
-	location=$(cut -f 1 lookback_report.dat);
-	tagged_carriers=$(cut -f 2 lookback_report.dat);
-	silent_carriers=$(cut -f 3 lookback_report.dat);
+	location=$(echo $problem | cut -f 1 -d ' ');
+	tagged_carriers=$(echo $problem | cut -f 2 -d ' ');
+	silent_carriers=$(echo $problem | cut -f 3 -d ' ');
 
 	echo $location;
 	chro=$(echo $location | cut -f 1 -d :);

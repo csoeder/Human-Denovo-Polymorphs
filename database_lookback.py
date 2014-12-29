@@ -116,7 +116,7 @@ for i in problem_children.keys():
 	carrier_string = carrier_string[:-1]	#clip final ,
 	silent_carrier_string=''
 	for carrier in problem_children[i]:
-		curr.execute("SELECT id FROM person WHERE person.pk=%s;" % carrier)
+		curr.eOecute("SELECT id FROM person WHERE person.pk=%s;" % carrier)
 		dude = curr.fetchone()[0]
 		silent_carrier_string = '%s%s,' % tuple([silent_carrier_string, dude])
 	silent_carrier_string = silent_carrier_string[:-1]
