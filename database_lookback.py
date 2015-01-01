@@ -66,7 +66,8 @@ os.system('while [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; do sleep 60; b
 
 retro_dict={}
 for d00d in all_peeps:
-	ret_list =np.array(check_output('cut -f 4 %s/%s_lookback.bed | sort | uniq'%tuple([d00d[0]]*2), shell=True).split('\n'))
+	#ret_list =np.array(check_output('cut -f 4 %s/%s_lookback.bed | sort | uniq'%tuple([d00d[0]]*2), shell=True).split('\n'))
+	ret_list =np.array(check_output('grep + %s/%s_lookback.bed | cut -f 4 | sort | uniq'%tuple([d00d[0]]*2), shell=True).split('\n'))
 	retro_dict[d00d[1]] = list(ret_list[ret_list!=''])
 
 
