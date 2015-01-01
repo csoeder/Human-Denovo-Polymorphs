@@ -117,7 +117,7 @@ for i in problem_children.keys():
 	carrier_string = carrier_string[:-1]	#clip final ,
 	silent_carrier_string=''
 	for carrier in problem_children[i]:
-		curr.eOecute("SELECT id FROM person WHERE person.pk=%s;" % carrier)
+		curr.execute("SELECT id FROM person WHERE person.pk=%s;" % carrier)
 		dude = curr.fetchone()[0]
 		silent_carrier_string = '%s%s,' % tuple([silent_carrier_string, dude])
 	silent_carrier_string = silent_carrier_string[:-1]
@@ -126,6 +126,7 @@ for i in problem_children.keys():
 	location_string = '%s:%s-%s' % tuple(location)
 	reportback.write('%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string]))
 #location_pk,	list_of_unsighted_carriers
+
 
 print max(lens), min(lens), np.mean(lens), np.median(lens)
 
