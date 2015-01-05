@@ -7,7 +7,7 @@ touch lookback_bins.dat
 
 head -n $(wc -l lookback_report.dat) | while read line
 do
-    pk=$( cut -f 4 line)
+    pk=$( echo $line | cut -f 4 )
 
 	touch review.bed;
 
@@ -22,11 +22,11 @@ do
 	bedtools intersect -split -a review.bed -b $DATA_DIR/refSeq_genes.bed >> no_genes.bed;
 
 	if [[ -s no_rpts.bed ]]; then
-		echo "$pk\tREPEAT\n" >> lookback_bins.dat
+		echo -e "$pk\tREPEAT\n" >> lookback_bins.dat
 	elif [[ -s no_genes.bed ]]; then
-		echo "$pk\tGENE\n" >> lookback_bins.dat
+		echo -e "$pk\tGENE\n" >> lookback_bins.dat
 	else
-		echo "$pk\tCLEAN\n" >> lookback_bins.dat
+		echo -e "$pk\tCLEAN\n" >> lookback_bins.dat
 	fi
 
 	rm review.bed;
