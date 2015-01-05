@@ -121,10 +121,10 @@ for i in problem_children.keys():
 		dude = curr.fetchone()[0]
 		silent_carrier_string = '%s%s,' % tuple([silent_carrier_string, dude])
 	silent_carrier_string = silent_carrier_string[:-1]
-	curr.execute("SELECT chrom, start, stop FROM location WHERE location.id=%s;" % i)
+	curr.execute("SELECT chrom, start, stop, id FROM location WHERE location.id=%s;" % i)
 	location = curr.fetchone()
-	location_string = '%s:%s-%s' % tuple(location)
-	reportback.write('%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string]))
+	location_string = '%s:%s-%s' % tuple(location[:-1])
+	reportback.write('%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string, location[-1]]))
 #location_pk,	list_of_unsighted_carriers
 
 

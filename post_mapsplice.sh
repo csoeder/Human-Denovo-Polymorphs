@@ -30,6 +30,9 @@ bsub -J bamsort2_$1 -w "done(bamvert2_$1)" -o bamsort2.lsf.out "samtools sort $1
 ### Partition the Transcripts into those which align and # 
 ### those which do not. ##################################
 bsub -J gather_maps_$1 -w "done(bamsort2_$1)" -o gather_maps.lsf.out "samtools view -h -F4 $1_Assembly_Alignment.sorted.bam > $1_Assemblies_mapped.sam"
+bsub -J sort_maps_$1 -w "done(bamsort2_$1)" -o gather_maps.lsf.out "samtools view -hb -F4 $1_Assembly_Alignment.sorted.bam | samtools sort - $1_Assemblies_mapped.sort "
+bsub -J bed_maps_$1 -w "done(sort_maps_$1)" -o gather_maps.lsf.out "bedtools bamtobed -bed12 -i $1_Assemblies_mapped.sort.bam > $1_Assemblies_mapped.bed"
+
 #bsub -J gather_unmaps_$1 -w "done(bamsort2_$1)" -o gather_unmaps.lsf.out "samtools view -h -f4 $1_Assembly_Alignment.sorted.bam > $1_Assemblies_unmapped.sam"
 #	ignore unaligned fork
 #############################################################################
