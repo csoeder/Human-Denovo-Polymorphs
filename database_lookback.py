@@ -124,7 +124,7 @@ for i in problem_children.keys():
 	curr.execute("SELECT chrom, start, stop, id FROM location WHERE location.id=%s;" % i)
 	location = curr.fetchone()
 	location_string = '%s:%s-%s' % tuple(location[:-1])
-	reportback.write('%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string, location[-1]]))
+	reportback.write('%s\t%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string, location[-1]]))
 #location_pk,	list_of_unsighted_carriers
 
 
