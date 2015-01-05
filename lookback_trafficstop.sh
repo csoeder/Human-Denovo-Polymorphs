@@ -21,12 +21,12 @@ do
 	bedtools intersect -split -a review.bed -b $DATA_DIR/UCSC_genes.bed > no_genes.bed;
 	bedtools intersect -split -a review.bed -b $DATA_DIR/refSeq_genes.bed >> no_genes.bed;
 
-	if [[ -s no_rpts.bed ]]; then
-		echo "$pk\tREPEAT\n" >> lookback_bins.dat
-	elif [[ -s no_genes.bed ]]; then
-		echo "$pk\tGENE\n" >> lookback_bins.dat
-	else;
-		echo "$pk\tCLEAN\n" >> lookback_bins.dat
+	if [[ -s no_rpts.bed ]] then
+		echo "$pk\tREPEAT\n" >> lookback_bins.dat;
+	elif [[ -s no_genes.bed ]] then
+		echo "$pk\tGENE\n" >> lookback_bins.dat;
+	else
+		echo "$pk\tCLEAN\n" >> lookback_bins.dat;
 	fi
 
 	rm review.bed;
