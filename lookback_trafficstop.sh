@@ -5,7 +5,7 @@ DATA_DIR='/nas02/home/c/s/csoeder/1kGen_data'
 
 touch lookback_bins.dat
 
-while read line
+head -n $(wc -l lookback_report.dat) | while read line
 do
     pk=$( cut -f 4 line)
 
@@ -33,7 +33,7 @@ do
 	rm no_rpts.bed;
 	nm no_genes.bed;
 
-done < lookback_report.dat
+done
 
 
 
