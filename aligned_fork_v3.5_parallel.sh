@@ -6,7 +6,7 @@
 module load bedops							#
 #############################################
 #	Load config								#
-source pipeline_config.sh					#
+source ../pipeline_config.sh					#
 #############################################
 #	$1 is the SAM file of mapped Trinity assemblies
 #	$2 is the file of MapSpliced RNA-Seq reads

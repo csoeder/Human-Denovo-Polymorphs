@@ -1,7 +1,7 @@
 #!/bin/sh
 ###	A script to automate the MapSplicing and post-mapsplice processing
 #############################################################
-source pipeline_config.sh	#################################
+source ../pipeline_config.sh	#################################
 FOLDER=$1
 ###Mapsplice the reads#######################################
 if [ ! -f $FOLDER_mapsplice_alignment.sam ]; then

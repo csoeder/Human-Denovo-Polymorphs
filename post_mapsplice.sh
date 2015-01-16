@@ -8,7 +8,7 @@
 FOLDER=$1
 #############################################
 #	Load config								#
-source pipeline_config.sh					#
+source ../pipeline_config.sh					#
 #############################################################################
 ### Index the Trinity fasta #################################
 bsub -J bwaInducks_$FOLDER -o bwaInducks.lsf.out bwa index Trinity_files.Trinity.fasta
