@@ -34,7 +34,7 @@ curr.execute("CREATE TABLE antifind (id serial PRIMARY KEY, source serial refere
 #An  antifind is the observed *lack* of a specific candidate in a specific individual's transcpriptome.
 # Primarily to store metadata, eg transcription levels
 
-curr.execute("CREATE TABLE variant (id serial PRIMARY KEY, chrom varchar(20), pos bigint, ref_allele text, alt_alleles text, hom_refs text, hom_alts text, hets text, heterozygosity float(10), is_snp boolean, is_indel boolean, pi_hat float(10), meta text )")
+curr.execute("CREATE TABLE variant (id serial PRIMARY KEY, chrom varchar(20), pos bigint, contained_by serial references location(id), ref_allele text, alt_alleles text, hom_refs text, hom_alts text, hets text, heterozygosity float(10), is_snp boolean, is_indel boolean, pi_hat float(10), meta text )")
 #Describe sites of variation. 
 #		primkey	chromosome	position	referenceallele	alternateallele	homozygousreferenceindividuals	homozygousalternateindividuals	heterozygousinidividuals	heterozygosity	isitaSNP?	isitanIndel?	nucleotideDiversity
 
