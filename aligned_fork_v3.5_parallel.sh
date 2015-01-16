@@ -1,14 +1,13 @@
 #!/bin/sh
 
 #############################################
-#Load relevant modules 						#
+#	Load relevant modules 					#
 . /nas02/apps/Modules/default/init/bash		#
-module load bedops
+module load bedops							#
 #############################################
-
-DATA_DIR='/netscr/csoeder/1kGen/data'
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
-
+#	Load config								#
+source pipeline_config.sh					#
+#############################################
 #	$1 is the SAM file of mapped Trinity assemblies
 #	$2 is the file of MapSpliced RNA-Seq reads
 #	$3 is the indexed Trinity FASTA
@@ -29,8 +28,6 @@ echo "$4 is being align-forked"
 ###############################################################
 # bundle parameters############################################
 BUN_NUM=0 #		The first bundle is number zero
-BATCH_SIZE=200 #There are 200 datumz processed per bundle
-WAIT_TIME=90 #	Wait 90 seconds before submitting next bundle
 COUNTER=0 #		Nothing in the present bundle
 ###############################################################
 ###	Where shall we keep our output? ###########################

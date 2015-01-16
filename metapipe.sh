@@ -1,17 +1,19 @@
 #!/bin/sh
 
+#############################################
+#	Load config								#
+source pipeline_config.sh					#
+#############################################
+filter=$1	#	to select a subset of individuals - usually HG or NA
+#############################################
+
 echo "w00tw00t we're piping" | write csoeder
 
-#######
-#For a steady submission rate of 3 per hour, which will finish in approx. 1 week
-nap_time=1200
-
-
-for folder in `cut -f 1 dwnld_list.txt | grep -v Source | grep $1 | sort | uniq`; do
+for folder in `cut -f 1 dwnld_list.txt | grep -v Source | grep $filter | sort | uniq`; do
 	echo "$folder queued" | write csoeder;
 	sh pipeline_v3.5.sh $folder > redirect_$folder.out;
 	echo "$folder submitted" | write csoeder;
-	sleep $nap_time;
+	sleep $SUBMISSION_DELAY;
 done
 
 

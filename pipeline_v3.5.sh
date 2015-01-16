@@ -3,9 +3,10 @@
 #	the paired-end reads (ERR*_1/2.fastq) and in this version, the Trinity transcripts assembled in 
 #	v1
 
+FOLDER=$1
 #############################################################
 #Enter the folder containing the files to be processed.		#
-cd $1 	#####################################################
+cd $FOLDER 	#####################################################
 ###	Cleanup any prior runs					#
 rm *.lsf.out
 rm *.sai
@@ -21,7 +22,7 @@ rm Trinity_files.Trinity.fasta.*
 #############################################################
 touch ticktock.log 		#log files 							#
 touch monitor.log											#
-echo "de novo search begin: subject $1" >> monitor.log
+echo "de novo search begin: subject $FOLDER" >> monitor.log
 date >> monitor.log
 echo "git commit #" >> monitor.log				#
 head ../.git/FETCH_HEAD | cut -f1 >> monitor.log #
@@ -39,15 +40,15 @@ module load bwa 							#
 module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
-if [[ ! -f Trinity_files.Trinity.fasta || ! -f $1_mapsplice_alignment.sam ]]; then
-	for fastq in `grep $1 ../dwnld_list.txt | cut -f 29`; do wget $fastq; gzip -d $(echo $fastq | cut -f 8 -d'/'); done
+if [[ ! -f Trinity_files.Trinity.fasta || ! -f $FOLDER_mapsplice_alignment.sam ]]; then
+	for fastq in `grep $FOLDER ../dwnld_list.txt | cut -f 29`; do wget $fastq; gzip -d $(echo $fastq | cut -f 8 -d'/'); done
 echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
 du ERR* >> monitor.log								#
 fi
 #############################################################
-sh ../the_mapsplicer.sh $1 	#	Run the MapSplice script	#
+sh ../the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log
 sleep 30					#	Chill out for a bit, then submit the post-mapsplice script
-bsub -J brief_intermission_$1 -w "done(alert_$1)" -o intermission.lsf.out sh ../post_mapsplice.sh $1 
+bsub -J brief_intermission_$FOLDER -w "done(alert_$FOLDER)" -o intermission.lsf.out sh ../post_mapsplice.sh $FOLDER
 echo "$(date)	POSTSPLUT:		post_mapsplice queued" >> monitor.log
 #############################################################
