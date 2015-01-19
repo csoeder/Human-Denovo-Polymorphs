@@ -23,5 +23,5 @@ with open('lsf.log', 'rb') as csvfile:
 
 dates = matplotlib.dates.date2num(raw_dates)
 
-plot_date(dates, full_load)
+plt.plot_date(dates, full_load)
 plt.show()
