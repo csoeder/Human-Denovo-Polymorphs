@@ -17,14 +17,17 @@ with open('lsf.log', 'rb') as csvfile:
 	run_load = []
 	pend_load = []
 	for row in spamreader:
-		date = row[0]
-		total_jobs = row[1]
-		running_jobs = row[2]
-		pending_jobs = row[3]
-		raw_dates.append(datetime.datetime( int(date.split(' ')[-1]), moon_dict[ date.split(' ')[1]], int(date.split(' ')[2]), int(date.split(' ')[3].split(':')[0]), int(date.split(' ')[3].split(':')[1]), int(date.split(' ')[3].split(':')[2])))
-		total_load.append(int(total_jobs))
-		run_load.append(int(running_jobs))
-		pend_load.append(int(pending_jobs))
+		try:
+			date = row[0]
+			total_jobs = row[1]
+			running_jobs = row[2]
+			pending_jobs = row[3]
+			raw_dates.append(datetime.datetime( int(date.split(' ')[-1]), moon_dict[ date.split(' ')[1]], int(date.split(' ')[2]), int(date.split(' ')[3].split(':')[0]), int(date.split(' ')[3].split(':')[1]), int(date.split(' ')[3].split(':')[2])))
+			total_load.append(int(total_jobs))
+			run_load.append(int(running_jobs))
+			pend_load.append(int(pending_jobs))
+		except IndexError:
+			pass
 
 
 dates = matplotlib.dates.date2num(raw_dates)
@@ -45,8 +48,10 @@ plt.fill_between(raw_dates, 0,run_load, color='green', alpha=0.25)
 plt.fill_between(raw_dates, run_load, np.array(run_load)+np.array(pend_load), color='blue', alpha=0.25)
 plt.fill_between(raw_dates, np.array(run_load)+np.array(pend_load), total_load, color='red')
 fig.autofmt_xdate(rotation=45)
-labels = ax.get_xticklabels()
+labels = ax.get_xmajorticklabels()
 plt.setp(labels, rotation=30, fontsize=10)
+labels = ax.get_xminorticklabels()
+plt.setp(labels, rotation=90, fontsize=10)
 #plt.xticks(rotation=45)
 plt.plot([],[], 'g-', label='running')
 plt.plot([],[], 'b-', label='pending')
