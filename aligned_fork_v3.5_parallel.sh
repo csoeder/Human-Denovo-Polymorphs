@@ -63,7 +63,7 @@ bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 		echo "cd $path" >> bundle_$BUN_NUM.sh 		#	push
 		echo "echo $comp" >> bundle_$BUN_NUM.sh 	#	ohai
 		echo "sh $SCRIPT_DIR/aligned_accumulator_widget_smart.sh $2 $comp" >> bundle_$BUN_NUM.sh #	go
-		echo "cd -" >> bundle_$BUN_NUM.sh 			#	pop
+		echo "cd $(pwd)" >> bundle_$BUN_NUM.sh 			#	pop
 		echo "rm -rf $path" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
 		################################################################################
 		let COUNTER+=1 #					Next!
