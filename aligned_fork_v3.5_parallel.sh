@@ -50,19 +50,21 @@ bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 			do comp=$(echo $comp | awk '{print $0"_"}')
 		done
 		### Lay down the data ########################################################
-		mkdir $comp
-		cd $comp
-		echo $line | tr ' ' '\t' > curly.bed		
+		path=''; for i in $(echo $comp | cut -f 1 -d _ | cut -f 2 -d p | grep -o .); do path="$path$i/"; done; path="$path/c$(echo $comp | cut -f 3 -d c)" #	This will create a depth-first path to the data
+
+		mkdir -p $path
+		cd $path
+		echo $line | tr ' ' '\t' > curly.bed
 		samtools view -b ../../$2 $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -a stdin -b curly.bed > temp.bed
 #		sh $SCRIPT_DIR/bedfilter_detect.sh temp.bed overlap.bed
-		cd ..
+		cd -
 
 		### Lay down the script ########################################################
-		echo "cd $comp" >> bundle_$BUN_NUM.sh 		#	push
+		echo "cd $path" >> bundle_$BUN_NUM.sh 		#	push
 		echo "echo $comp" >> bundle_$BUN_NUM.sh 	#	ohai
 		echo "sh $SCRIPT_DIR/aligned_accumulator_widget_smart.sh $2 $comp" >> bundle_$BUN_NUM.sh #	go
-		echo "cd .." >> bundle_$BUN_NUM.sh 			#	pop
-		echo "rm -rf $comp" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
+		echo "cd -" >> bundle_$BUN_NUM.sh 			#	pop
+		echo "rm -rf $path" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
 		################################################################################
 		let COUNTER+=1 #					Next!
 
