@@ -46,7 +46,13 @@ plt.fill_between(raw_dates, run_load, np.array(run_load)+np.array(pend_load), co
 plt.fill_between(raw_dates, np.array(run_load)+np.array(pend_load), total_load, color='red')
 fig.autofmt_xdate(rotation=45)
 #plt.xticks(rotation=45)
-
+plt.plot([],[], 'g-', label='running')
+plt.plot([],[], 'b-', label='pending')
+plt.plot([],[], 'r-', label='suspended')
+plt.title('LSF Load')
+plt.xlabel('Time')
+plt.ylabel('# processes')
+plt.legend(loc=0)
 plt.savefig('LSF_load.png')
 plt.show()
 
