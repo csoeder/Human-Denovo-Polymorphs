@@ -29,7 +29,7 @@ else				#	Otherwise...
 	bedtools merge -i flanks_sorted.bed > merged_flanks.bed 				#	Merge them
 	NEWTIME=$(date +"%s"); diff=$(($NEWTIME-$OLDTIME)); OLDTIME=NEWTIME
 	echo -e ""$SERIAL"\tmerge\t""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
-	bedtools intersect -split -bed -wa -abam ../../$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
+	bedtools intersect -split -bed -wa -abam $HOMEBASE$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
 	NEWTIME=$(date +"%s"); diff=$(($NEWTIME-$OLDTIME)); OLDTIME=NEWTIME
 	echo -e ""$SERIAL"\tintersect\t""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
 	cat old.bed new_reads.bed | sort -k1,1 -k2,2n -k3,3n -k4,4 -u - > new.bed #	Assimilate
