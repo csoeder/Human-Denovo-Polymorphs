@@ -35,7 +35,7 @@ COUNTER=0 #		Nothing in the present bundle
 ###	Where shall we keep our output? ###########################
 touch clean_assemblies.bed
 touch rejects.bed
-HOMEBASE=$( pwd | awk -F "mapt" '{print $1}')	#	define the uppermost folder to return to
+HOMEBASE=$( pwd | awk -F "mapt" '{print $1}')	#	define the uppermost folder to return to; ie containing individual data
 ###############################################################
 echo '#!/bin/sh' > bundle_$BUN_NUM.sh # 	The bundle is a script
 ###############################################################
@@ -60,7 +60,7 @@ bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 		echo $line | tr ' ' '\t' > curly.bed
 		samtools view -b $HOMEBASE$2 $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -a stdin -b curly.bed > temp.bed
 #		sh $SCRIPT_DIR/bedfilter_detect.sh temp.bed overlap.bed
-		cd $HOMEBASE
+		cd $HOMEBASE/mapt/
 
 		### Lay down the script ########################################################
 		echo "cd $path" >> bundle_$BUN_NUM.sh 		#	push
