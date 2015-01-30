@@ -3,6 +3,7 @@
 ###		A script which recursively accumulates RNA-Seq reads and checks 
 ###		if the accumulate overlaps an annotation.
 #	$1 is the BAM file of mapspliced reads
+mapspliced=$1
 
 DATA_DIR='/netscr/csoeder/1kGen/data'
 SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
@@ -22,24 +23,17 @@ if [[ -s overlap.bed ]]; then
 else				#	Otherwise...
 	echo "flank"
 	time bedtools flank -i old.bed -g $DATA_DIR/chromInfo.txt -b 75 > flanks.bed #	Extend existing reads
-#	NEWTIME=$(date +"%s"); diff=$(($NEWTIME-$OLDTIME)); OLDTIME=NEWTIME
-#	echo -e ""$SERIAL"\tflank\t""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
 	echo "sort"
 	time bedtools sort -i flanks.bed > flanks_sorted.bed 						# 	Sort the extensions
-#	NEWTIME=$(date +"%s"); diff=$(($NEWTIME-$OLDTIME)); OLDTIME=NEWTIME
-#	echo -e ""$SERIAL"\tsort\t""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
 	echo "merge"
 	time bedtools merge -i flanks_sorted.bed > merged_flanks.bed 				#	Merge them
-#	NEWTIME=$(date +"%s"); diff=$(($NEWTIME-$OLDTIME)); OLDTIME=NEWTIME
-#	echo -e ""$SERIAL"\tmerge\t""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
 	echo intersect
-	time bedtools intersect -split -bed -wa -abam $( pwd | awk -F "mapt" '{print $1}')$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
-#	NEWTIME=$(date +"%s"); diff=$(($NEWTIME-$OLDTIME)); OLDTIME=NEWTIME
-#	echo -e ""$SERIAL"\tintersect\t""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
+	region=''
+	while read line; do region="$region $(echo $line |cut -f 1 -d ' '):$(echo $line | cut -f 2 -d ' ')-$(echo $line | cut -f 3 -d ' ')" ; done < merged_flanks.bed
+	time samtools view -bh $( pwd | awk -F "mapt" '{print $1}')$mapspliced $region | bedtools bamtobed -bed12 -i - | bedtools intersect -split -wa -a - -b merged_flanks.bed > new_reads.bed
+	#time bedtools intersect -split -bed -wa -abam $( pwd | awk -F "mapt" '{print $1}')$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
 	echo "assimilate"
 	time cat old.bed new_reads.bed | sort -k1,1 -k2,2n -k3,3n -k4,4 -u - > new.bed #	Assimilate
-#	NEWTIME=$(date +"%s"); diff=$(($NEWTIME-$OLDTIME)); OLDTIME=NEWTIME
-#	echo -e ""$SERIAL"\tassimilate\t""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
 	cmp --silent old.bed new.bed || echo "new loop!"; time sh $SCRIPT_DIR/churning_smart.sh $1 	#	churn this new accumulation!
 fi
 
