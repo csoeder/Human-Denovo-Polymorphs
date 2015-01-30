@@ -158,6 +158,11 @@ mkdir ~/Denovo_Candidates/$4/
 cp deNovos/* ~/Denovo_Candidates/$4/
 
 
+cd $HOMEBASE
+mkdir runtime_logs
+mv *.lsf.out runtime_logs
+mv *.log runtime_logs
+
 echo DONE
 date
 echo
