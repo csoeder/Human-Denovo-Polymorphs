@@ -10,30 +10,31 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 
 HOMEBASE=$( pwd | awk -F "mapt" '{print $1}')mapt
 SERIAL=$( echo $(pwd | awk -F"mapt" '{print $2}') | tr -d '/' )
+LOOP_NUM=0
 
 mv new.bed old.bed #	bedfilter the initial .BED
 
-echo "Initial check"
-time sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh old.bed overlap.bed
+echo "Initial check	:	$SERIAL"
+sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh old.bed overlap.bed
 
-#echo -e $SERIAL "\tinitcheck\n""$(($diff / 60))"m"$(($diff % 60))"s"\n" >> $HOMEBASE/accumulator_timelord.log
-
-if [[ -s overlap.bed ]]; then
-	exit			#	If the initial .BED overlaps, you're done
-else				#	Otherwise...
-	echo "flank"
-	time bedtools flank -i old.bed -g $DATA_DIR/chromInfo.txt -b 75 > flanks.bed #	Extend existing reads
-	echo "sort"
-	time bedtools sort -i flanks.bed > flanks_sorted.bed 						# 	Sort the extensions
-	echo "merge"
-	time bedtools merge -i flanks_sorted.bed > merged_flanks.bed 				#	Merge them
-	echo intersect
-	region=''
-	while read line; do region="$region $(echo $line |cut -f 1 -d ' '):$(echo $line | cut -f 2 -d ' ')-$(echo $line | cut -f 3 -d ' ')" ; done < merged_flanks.bed
-	time samtools view -bh $( pwd | awk -F "mapt" '{print $1}')$mapspliced $region | bedtools bamtobed -bed12 -i - | bedtools intersect -split -wa -a - -b merged_flanks.bed > new_reads.bed
-	#time bedtools intersect -split -bed -wa -abam $( pwd | awk -F "mapt" '{print $1}')$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
-	echo "assimilate"
-	time cat old.bed new_reads.bed | sort -k1,1 -k2,2n -k3,3n -k4,4 -u - > new.bed #	Assimilate
-	cmp --silent old.bed new.bed || echo "new loop!"; time sh $SCRIPT_DIR/churning_smart.sh $1 	#	churn this new accumulation!
-fi
-
+churn_it () { 
+	echo "Loop number $LOOP_NUM"
+	if [[ -s overlap.bed ]]; then
+		exit			#	If the initial .BED overlaps, you're done
+	else				#	Otherwise...
+		echo "flank"
+		bedtools flank -i old.bed -g $DATA_DIR/chromInfo.txt -b 75 > flanks.bed #	Extend existing reads
+		echo "sort"
+		bedtools sort -i flanks.bed > flanks_sorted.bed 						# 	Sort the extensions
+		echo "merge"
+		bedtools merge -i flanks_sorted.bed > merged_flanks.bed 				#	Merge them
+		echo intersect
+		region=''
+		while read line; do region="$region $(echo $line |cut -f 1 -d ' '):$(echo $line | cut -f 2 -d ' ')-$(echo $line | cut -f 3 -d ' ')" ; done < merged_flanks.bed
+		samtools view -bh $( pwd | awk -F "mapt" '{print $1}')$mapspliced $region | bedtools bamtobed -bed12 -i - | bedtools intersect -split -wa -a - -b merged_flanks.bed > new_reads.bed
+		#time bedtools intersect -split -bed -wa -abam $( pwd | awk -F "mapt" '{print $1}')$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
+		echo "assimilate"
+		cat old.bed new_reads.bed | sort -k1,1 -k2,2n -k3,3n -k4,4 -u - > new.bed #	Assimilate
+		cmp --silent old.bed new.bed || let $LOOP_NUM +=1; churn_it;	#	churn this new accumulation!
+	fi
+} 
