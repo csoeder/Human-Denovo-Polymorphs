@@ -12,7 +12,6 @@ HOMEBASE=$( pwd | awk -F "mapt" '{print $1}')mapt
 SERIAL=$( echo $(pwd | awk -F"mapt" '{print $2}') | tr -d '/' )
 LOOP_NUM=0
 
-mv new.bed old.bed #	bedfilter the initial .BED
 
 echo "Initial check	:	$SERIAL"
 sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh old.bed overlap.bed
@@ -22,6 +21,7 @@ churn_it () {
 	if [[ -s overlap.bed ]]; then
 		exit			#	If the initial .BED overlaps, you're done
 	else				#	Otherwise...
+		mv new.bed old.bed #	bedfilter the initial .BED
 		echo "flank"
 		bedtools flank -i old.bed -g $DATA_DIR/chromInfo.txt -b 75 > flanks.bed #	Extend existing reads
 		echo "sort"
