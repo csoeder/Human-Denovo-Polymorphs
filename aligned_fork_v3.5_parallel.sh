@@ -41,6 +41,7 @@ echo '#!/bin/sh' > bundle_$BUN_NUM.sh # 	The bundle is a script
 ###############################################################
 ###	Begin laying down data, script bundles to handle it. ######
 ###############################################################
+total_reads=$(samtools view -c $4_ILS_anomalies.sort.bam)
 bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 	###		for each aligned transcript
 	do 
@@ -70,6 +71,7 @@ bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 		echo "rm -rf $path" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
 		################################################################################
 		let COUNTER+=1 #					Next!
+		echo "$COUNTER of $((total_reads/BATCH_SIZE)) bundles prepared"
 
 		###	If the bundle is full, then start a new one! ################################
 		if [ $COUNTER -gt $BATCH_SIZE ]; then let BUN_NUM+=1 ; echo '#!/bin/sh' > bundle_$BUN_NUM.sh; COUNTER=0; fi
