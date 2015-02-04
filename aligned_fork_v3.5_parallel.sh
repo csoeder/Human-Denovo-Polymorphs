@@ -71,10 +71,9 @@ bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 		echo "rm -rf $path" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
 		################################################################################
 		let COUNTER+=1 #					Next!
-		echo "$BUN_NUM of $((total_reads/BATCH_SIZE)) bundles prepared"
 
 		###	If the bundle is full, then start a new one! ################################
-		if [ $COUNTER -gt $BATCH_SIZE ]; then let BUN_NUM+=1 ; echo '#!/bin/sh' > bundle_$BUN_NUM.sh; COUNTER=0; fi
+		if [ $COUNTER -gt $BATCH_SIZE ]; then let BUN_NUM+=1 ; echo "$BUN_NUM of $((total_reads/BATCH_SIZE)) bundles prepared"; echo '#!/bin/sh' > bundle_$BUN_NUM.sh; COUNTER=0; fi
 	done
 ########################################################
 ###	Now run the scripts ################################
