@@ -35,8 +35,8 @@ churn_it () {
 		#time bedtools intersect -split -bed -wa -abam $( pwd | awk -F "mapt" '{print $1}')$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
 		echo "assimilate"
 		cat old.bed new_reads.bed | sort -k1,1 -k2,2n -k3,3n -k4,4 -u - > new.bed #	Assimilate
-		cmp --silent old.bed new.bed || let $LOOP_NUM +=1; churn_it;	#	churn this new accumulation!
+		cmp --silent old.bed new.bed || let $LOOP_NUM+=1; churn_it;	#	churn this new accumulation!
 	fi
 } 
 
-churn_it
+time churn_it
