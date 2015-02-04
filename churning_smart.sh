@@ -38,3 +38,5 @@ churn_it () {
 		cmp --silent old.bed new.bed || let $LOOP_NUM +=1; churn_it;	#	churn this new accumulation!
 	fi
 } 
+
+churn_it

@@ -40,7 +40,7 @@ bsub -J bed_maps_$FOLDER -w "done(sort_maps_$FOLDER)" -o gather_maps.lsf.out "be
 #	ignore unaligned fork
 #############################################################################
 ### Fork a job on each partition ############################
-bsub -J "$FOLDER"_aligned_fork -q week -w "done(faidx_$FOLDER) && done(gather_maps_$FOLDER)" -q week -o aligned_fork.lsf.out "sh $SCRIPT_DIR/aligned_fork_v3.5_parallel.sh "$FOLDER"_Assemblies_mapped.sam "$FOLDER"_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta $FOLDER"
+bsub -J "$FOLDER"_aligned_fork -q week -w "done(faidx_$FOLDER) && done(gather_maps_$FOLDER)" -o aligned_fork.lsf.out "sh $SCRIPT_DIR/aligned_fork_v3.5_parallel.sh "$FOLDER"_Assemblies_mapped.sam "$FOLDER"_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta $FOLDER"
 #bsub -J $1_unaligned_fork -q week -w "done(faidx_$1) && done(gather_unmaps_$1) && done(rnaInducks_$1)" -o unaligned_fork.lsf.out -q week "sh $SCRIPT_DIR/unaligned_fork_v3.5_parallel.sh $1_Assemblies_unmapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta RNASeq_vs_Trinity.sort.bam $1_mapsplice_alignment.bed $1"
 #	ignore the unaligned fork
 ############################################################################

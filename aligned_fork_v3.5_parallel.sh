@@ -58,7 +58,7 @@ bamToBed -bed12 -i ../$4_ILS_anomalies.sort.bam | while read line;
 		mkdir -p $path
 		cd $path
 		echo $line | tr ' ' '\t' > curly.bed
-		samtools view -b $HOMEBASE$2 $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -a stdin -b curly.bed > temp.bed
+		samtools view -b $HOMEBASE$2 $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -wa -a stdin -b curly.bed > temp.bed
 #		sh $SCRIPT_DIR/bedfilter_detect.sh temp.bed overlap.bed
 		cd $HOMEBASE/mapt/
 
