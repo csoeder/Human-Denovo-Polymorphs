@@ -14,7 +14,7 @@ LOOP_NUM=0
 
 
 echo "Initial check	:	$SERIAL"
-sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh old.bed overlap.bed
+sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh new.bed overlap.bed
 
 churn_it () { 
 	let LOOP_NUM+=1;
