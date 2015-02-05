@@ -17,11 +17,12 @@ echo "Initial check	:	$SERIAL"
 sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh old.bed overlap.bed
 
 churn_it () { 
+	let LOOP_NUM+=1;
 	echo "Loop number $LOOP_NUM"
 	if [[ -s overlap.bed ]]; then
 		exit			#	If the initial .BED overlaps, you're done
 	else				#	Otherwise...
-		mv new.bed old.bed #	bedfilter the initial .BED
+		mv new.bed old.bed #	move.it
 		echo "flank"
 		bedtools flank -i old.bed -g $DATA_DIR/chromInfo.txt -b 75 > flanks.bed #	Extend existing reads
 		echo "sort"
@@ -35,7 +36,7 @@ churn_it () {
 		#time bedtools intersect -split -bed -wa -abam $( pwd | awk -F "mapt" '{print $1}')$1 -b merged_flanks.bed > new_reads.bed #	Pull any reads that overlap the extension
 		echo "assimilate"
 		cat old.bed new_reads.bed | sort -k1,1 -k2,2n -k3,3n -k4,4 -u - > new.bed #	Assimilate
-		cmp --silent old.bed new.bed || let LOOP_NUM+=1; churn_it;	#	churn this new accumulation!
+		cmp --silent old.bed new.bed || churn_it;	#	churn this new accumulation!
 	fi
 } 
 
