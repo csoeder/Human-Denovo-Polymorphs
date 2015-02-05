@@ -13,7 +13,8 @@ cp temp.bed shemp.bed
 #Gather the Accumulation - use smart_churn!
 
 if [ -s shemp.bed ]; then	#	If there's data in the file; ie, it's nonempty
-	sh $SCRIPT_DIR/Accumulator2_smart.sh shemp.bed $1 	#	Run the accumulator on it
+	cp shemp.bed new.bed
+	sh $SCRIPT_DIR/churning_smart.sh $1
 
 	if [[ ! -s overlap.bed ]]; then 	#	if there is no overlap detected between the Accumulation and annotations
 		head curly.bed >> $HOMEBASE/clean_assemblies.bed #	then add it to the clean assemblies
