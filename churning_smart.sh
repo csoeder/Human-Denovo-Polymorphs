@@ -19,6 +19,7 @@ sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh new.bed overlap.bed
 churn_it () { 
 	let LOOP_NUM+=1;
 	echo "Loop number $LOOP_NUM"
+	sh $SCRIPT_DIR/bedfilter_detect_accumulate.sh new.bed overlap.bed
 	if [[ -s overlap.bed ]]; then
 		exit			#	If the initial .BED overlaps, you're done
 	else				#	Otherwise...
