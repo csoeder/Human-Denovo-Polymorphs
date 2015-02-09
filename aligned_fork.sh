@@ -140,8 +140,9 @@ echo "###	... duplicates removed!"
 echo "########################################################"
 echo "###	chunk any spliced ORFs into exons"
 bedtools bed12tobed6 -i no_duplicates.bed > no_duplicates.chunked.bed
-echo "###	last-minute cleanup: do any stragglers intersect with annotations? >.>"
-sh $SCRIPT_DIR/bedfilter_detect_retro.sh no_duplicates.bed 	#	Do any of the sites intersect with annotations? they shouldn't, but check *.lookback.bed for specifics.
+echo "###	last-minute cleanup: do any stragglers intersect with annotations?"
+echo "###	they shouldn't, but check escapees.lookback.bed for specifics. >.>"
+sh $SCRIPT_DIR/bedfilter_detect_retro.sh no_duplicates.bed 	#	Do any of the sites intersect with annotations? 
 echo "########################################################"
 echo "###	reCollect sequences which have passed inspection thusfar into a FASTA of nt sequences..."
 cut -f4 no_duplicates.bed | while read assembly;	
@@ -161,11 +162,11 @@ for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sor
 	numhits_pan=$(grep -c $assembly chimpCompare.blatted.psl);
 	numhits_gor=$(grep -c $assembly gorillaCompare.blatted.psl);
 
-	if [[ $numhits_pan -eq 0 ] -a [$numhits_gor -eq 0 ]]; then
+	if [ $numhits_pan -eq 0  -a $numhits_gor -eq 0 ]; then
 		grep $assembly no_duplicates.bed >> unseen_in_pan_and_gor.bed; 
 	fi;
 
-	if [[ $numhits_pan -gt 0 ] -o [$numhits_gor -gt 0 ]]; then
+	if [ $numhits_pan -gt 0  -o $numhits_gor -gt 0 ]; then
 		grep $assembly chimpCompare.blatted.psl| grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | sort -k1,1 -r | head -n1 > chimphit.psl.temp #	write the PSL lines from the chimp blat to a temp file
 		grep $assembly gorillaCompare.blatted.psl| grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | sort -k1,1 -r | head -n1 > gorillahit.psl.temp #	remove wonky chromomomes. same with gorilla. 
         python $SCRIPT_DIR/blatcheck_compprim.py chimphit.psl.temp $DATA_DIR/chimp/panTro4.fa chimp; 					#	Do a check to make try and determine if the homologous sequence
@@ -186,4 +187,4 @@ mv *.lsf.out runtime_logs
 mv *.log runtime_logs
 
 echo "$IDENTIFIER has been align-forked!	########################################################"
-echo
+echo "################################################################################################################"

@@ -2,37 +2,26 @@
 #Takes a single argument, the folder to be processed, which is expected to have a Trinity file to be processed.
 #Trinity assemblies have come from a previous version of the script - see commented out Assembly section.
 
-#############################################
-#Load relevant modules 						#
-. /nas02/apps/Modules/default/init/bash		#
-module load bedtools 						#
-#############################################
-
 DATA_DIR='/netscr/csoeder/1kGen/data'
 SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
-#	$1 = input BED file
-#	$2 = output BED file
+#	$1 = input BED file, containing the exons to be lookback'd. 
 #####################################################################################################################################################################
 ###More filtration: remove overlap with annotated genomic locations																									#
 ##################################################################################																					#
 ###		Remove annotated human genes 											#																					#
 ###			-	UCSC Genes 														#																					#
-bedtools intersect -split -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed	#
-bedtools intersect -split -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed	#
-cat no_UCSC.bed no_refSeq.bed > no_genes.bed
-if [[ -s no_genes.bed ]]; then
-	mv no_genes.bed $2
-#	echo "GENE FOUND"
-	exit
+bedtools intersect -split -wa -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed.temp	#
+bedtools intersect -split -wa -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed.temp	#
+cat no_UCSC.bed no_refSeq.bed > no_genes.lookback.bed
+if [[ -s no_genes.lookback.bed ]]; then
+	echo "GENES FOUND ON LOOKBACK"
 fi
 #################################################################################																					#
 ###		Remove repetitive elements												#																					#
 ###			-	UCSC Repeat Masker												#																					#
-bedtools intersect -split -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.bed								#
-if [[ -s no_rpts.bed ]]; then
-	mv no_rpts.bed $2
-#	echo "ITS REPETITIVE"
-	exit
+bedtools intersect -split -wa -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.lookback.bed					#
+if [[ -s no_rpts.lookback.bed ]]; then
+	echo "repetitives FOUND ON LOOKBACK"
 fi
 #################################################################################																					#
 ###		Current version admits known ESTs.	##########							#																					#
@@ -52,21 +41,20 @@ fi
 #################################################################################																					#
 ###		Remove retroelements													#																					#
 ###			-	UCSC retroAli5													#																					#
-bedtools intersect -a $1 -b $DATA_DIR/retroposed1.bed > no_rpts_no_est_no_mRNA_no_retro1.bed
+bedtools intersect-wa  -a $1 -b $DATA_DIR/retroposed1.bed > no_rpts_no_est_no_mRNA_no_retro1.bed.temp
 ###			-	UCSC retroExpressed5											#																					#
-bedtools intersect -a $1 -b $DATA_DIR/retroposed2.bed > no_rpts_no_est_no_mRNA_no_retro2.bed
+bedtools intersect -wa -a $1 -b $DATA_DIR/retroposed2.bed > no_rpts_no_est_no_mRNA_no_retro2.bed.temp
 ###			-	UCSC retroInfo5													#																					#
-bedtools intersect -a $1 -b $DATA_DIR/retroposed3.bed > no_rpts_no_est_no_mRNA_no_retro3.bed
+bedtools intersect -wa -a $1 -b $DATA_DIR/retroposed3.bed > no_rpts_no_est_no_mRNA_no_retro3.bed.temp
 ###		Remove pseudogenes too													#																					#
 ###			-	UCSC YalePseudo60												#																					#
-bedtools intersect -a $1 -b $DATA_DIR/yalepseudo.bed > no_rpts_no_est_no_mRNA_no_retro_no_pseudo.bed
-cat no_rpts_no_est_no_mRNA_no_retro* > no_retros.bed
-if [[ -s no_retros.bed ]]; then
-	mv no_retros.bed $2
-#	echo "HOW RETRO"
-	exit
+bedtools intersect -wa -a $1 -b $DATA_DIR/yalepseudo.bed > no_rpts_no_est_no_mRNA_no_retro_no_pseudo.bed.temp
+cat no_rpts_no_est_no_mRNA_no_retro* > no_retro_no_psuedo.lookback.bed
+if [[ -s no_retro_no_psuedo.lookback.bed ]]; then
+	echo "RETRO/PSEUDO FOUND ON LOOKBACK"
 fi
+cat *.lookback.bed >> escapees.lookback.bed 
+rm *.temp
 #################################################################################																					#
-touch $2	#																									
 #################################################################																									#
 ####################################################################################################################################################################
