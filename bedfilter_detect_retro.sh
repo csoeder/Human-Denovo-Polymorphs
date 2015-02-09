@@ -12,7 +12,7 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 ###			-	UCSC Genes 														#																					#
 bedtools intersect -split -wa -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed.temp	#
 bedtools intersect -split -wa -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed.temp	#
-cat no_UCSC.bed no_refSeq.bed > no_genes.lookback.bed
+cat no_UCSC.bed.temp no_refSeq.bed.temp > no_genes.lookback.bed
 if [[ -s no_genes.lookback.bed ]]; then
 	echo "GENES FOUND ON LOOKBACK"
 fi
@@ -41,7 +41,7 @@ fi
 #################################################################################																					#
 ###		Remove retroelements													#																					#
 ###			-	UCSC retroAli5													#																					#
-bedtools intersect-wa  -a $1 -b $DATA_DIR/retroposed1.bed > no_rpts_no_est_no_mRNA_no_retro1.bed.temp
+bedtools intersect -wa  -a $1 -b $DATA_DIR/retroposed1.bed > no_rpts_no_est_no_mRNA_no_retro1.bed.temp
 ###			-	UCSC retroExpressed5											#																					#
 bedtools intersect -wa -a $1 -b $DATA_DIR/retroposed2.bed > no_rpts_no_est_no_mRNA_no_retro2.bed.temp
 ###			-	UCSC retroInfo5													#																					#
