@@ -12,32 +12,30 @@ import re
 import sys
 from Bio import SeqIO
 ########################################################
-index = re.compile('blat(\d*).psl')	#	what does a BLAT result look like?
-listing = os.listdir('BLATs')		#	Gather the BLAT results
-for item in listing:	#		For each one...
-	number = index.match(item).groups()[0]	#	scrape the ID number
-	call(['touch', 'BLATs/%s.snipt'%item])	#	Slice and dice...
-	os.system('sed 1,5d BLATs/%s | grep chr[1-9,X,Y][0-9]*"\s" > BLATs/%s.snipt'%tuple([item, item]))	#remove header; remove chrXXrandomY_blahblahblah hits
-	os.system('sort -k1,1 -r BLATs/%s.snipt > BLATs/%s.snipt.sortd'%tuple([item, item]))
-	os.system('head -n3 BLATs/%s.snipt.sortd > BLATs/%s.snipt.sortd.clipt'%tuple([item, item]))
+#index = re.compile('blat(\d*).psl')	#	what does a BLAT result look like?
+#listing = os.listdir('BLATs')		#	Gather the BLAT results
 
-	r1, r2 = 0, 0	#	The ratios between successive lines of the BLAT results
-	try:			#
-		scores = []
-		with open('BLATs/%s.snipt.sortd.clipt'%item, 'rb') as csvfile:
-			spamreader = csv.reader(csvfile, delimiter='\t')
-			for row in spamreader:
-				scores.append(float(row[0]))
-		r1, r2 = scores[1]/scores[0], scores[2]/scores[1]
-	except IndexError:
-		pass
-	########################################################
-	if r1 < 0.75 or r2 < 0.75:#if there is a "step-down" in score values
-		pass	#	Fuggedaboddit
-	else:		#	Get rid of that nonsense
-		call(['rm', "BLATs/%s"%item])
-		call(['rm', "BLATs/%s.snipt"%item])
-		call(['rm', "BLATs/%s.snipt.sortd"%item])
-		call(['rm', "BLATs/%s.snipt.sortd.clipt"%item])
-	########################################################
-########################################################
+PSL_IN = sys.argv[1]
+
+with open(PSL_IN,'rb') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter='\t')
+	row1 = spamreader.next()
+	numhits1 = float(row1[0])	#how many matches did the alignment get?
+	numtargets = float(row[10])	#how many matches were there to get?
+	row2 = spamreader.next()
+	numhits2 = float(row2[0])
+
+	if numhits1/numtargets > 0.9:	# if the top score is a legit hit, not a partial one
+		if numhits2/numhits1 < 0.75: #	If there is a big step-down, 
+			phial = open('cleared_sequence.psl.temp', 'w')
+			phial.write('%s\t'*len(row1)%tuple(row1))	#then it's actually ok; write it!
+			phial.close()
+		else:	#		If there's no step down, take note
+			phial = open('genome_duplicates.list', 'a')
+			phial.write('%s\n'%tuple([row1[9]]))
+			phial.close()
+	else: #			If it doesn't show up in BLAT (wtf) take note
+		phial = open('fragmentary_blathits.list', 'a')
+		phial.write('%s\n'%tuple([row1[9]]))
+		phial.close()
+

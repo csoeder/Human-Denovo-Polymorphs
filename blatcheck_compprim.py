@@ -21,24 +21,20 @@ from is_it_an_ORF import orf_check
 ########################################################
 codSeq = True							#	flag to track the status of this potential coding sequence
 totalPoints = 0 						#	The score for this potential coding sequnce
-phial  = sys.argv[1]
-genome  = sys.argv[2]
-index = re.compile('\w*blat(\d*).psl')	#	what does a BLAT result look like?
-number = index.match(phial).groups()[0]	#	scrape the ID number
+FILE_IN  = sys.argv[1]	#	PSL file, unheadered, sorted, containing best hit to comparative primate genome. 
+COMP_GENOME  = sys.argv[2] 	#	Genome file to be compared to
+PRIMATE = sys.argv[3]	#	Primate name
+#index = re.compile('\w*blat(\d*).psl')	#	what does a BLAT result look like?
+#number = index.match(phial).groups()[0]	#	scrape the ID number
 ##########################################	Slice and dice...
-os.system('sed 1,5d compprimBLATs/%s | grep chr[1-9,X,Y,M][0-9,A,B]*"\s" > compprimBLATs/%s.snipt'%tuple([phial, phial]))	#remove header; remove chrXXrandomY_blahblahblah hits
-os.system('sort -k1,1 -r compprimBLATs/%s.snipt > compprimBLATs/%s.snipt.sortd'%tuple([phial, phial]))				#sort the hits
-os.system('head -n1 compprimBLATs/%s.snipt.sortd > compprimBLATs/%s.snipt.sortd.clipt'%tuple([phial, phial]))		#select the top score - is this correct? what if the top hit
-########################################################																doesn't code, but a marginally weaker hit does?
-
 
 def sequence_sniffer(seq, begin):
 	if seq[:3] != 'ATG':
 		back = 0 	#	Pull out the codon before and check that one.
-		prevCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*back, begin-3*back+2])]).split('\n')[1:]).upper()
+		prevCodon = ''.join(check_output(['samtools', 'faidx', COMP_GENOME, '%s:%s-%s'%tuple([chrom, begin-3*back, begin-3*back+2])]).split('\n')[1:]).upper()
 		while prevCodon != 'ATG' and prevCodon not in ['TAG', 'TAA', 'TGA']:	#	While the codon is neither start nor stop
 			back +=1
-			prevCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*back, begin-3*back+2])]).split('\n')[1:]).upper()
+			prevCodon = ''.join(check_output(['samtools', 'faidx', COMP_GENOME, '%s:%s-%s'%tuple([chrom, begin-3*back, begin-3*back+2])]).split('\n')[1:]).upper()
 			if prevCodon == 'ATG':	#	If there is a start codon upstream of the missing start 
 				codSeq = True		#	Then the coding sequence is 'rescued'
 				#print "START CODON WIPEOUT WITH REPLACEMENT"
@@ -47,19 +43,19 @@ def sequence_sniffer(seq, begin):
 				#print "START CODON WIPEOUT W/O REPLACEMENT"
 	#	better check for restart!	(ie, a new start codon upstream which brings 1/2 or more of the ORF back)
 		forward = 0
-		nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+		nextCodon = ''.join(check_output(['samtools', 'faidx', COMP_GENOME, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
 		while forward*3 < 0.5 * qsize:	#	While there is still half a peptide left....
 			forward += 1
-			nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+			nextCodon = ''.join(check_output(['samtools', 'faidx', COMP_GENOME, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
 			if nextCodon == 'ATG':
 				codSeq = False
 				#print "START CODON WIPEOUT WITH RESTART"
 	else:	#If the start codon is intact...
 		forward = 0 #	begin at the beginning...
-		nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+		nextCodon = ''.join(check_output(['samtools', 'faidx', COMP_GENOME, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
 		while forward*3 < 0.5 * qsize:#	and see if there's an early termination
 			forward += 1
-			nextCodon = ''.join(check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
+			nextCodon = ''.join(check_output(['samtools', 'faidx', COMP_GENOME, '%s:%s-%s'%tuple([chrom, begin-3*forward, begin+3*forward+2])]).split('\n')[1:]).upper()
 			if nextCodon in ['TAG', 'TAA', 'TGA']:
 				codSeq = False
 				#print "EARLY TERMINATION!"
@@ -67,7 +63,7 @@ def sequence_sniffer(seq, begin):
 
 
 
-with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
+with open(FILE_IN, 'rb') as csvfile:
 
 	try:
 		row = csv.reader(csvfile, delimiter='\t').next()
@@ -76,12 +72,13 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		start = int(row[15])	#
 		stop = int(row[16])		#	
 		matches = int(row[0])	#	number of matching bases
+		name = row(9)			#	query name
 		qsize = int(row[10])	#	query size
 		qinsert = int(row[5])	#	number of bases inserted in query
 		tinsert = int(row[7])	#	number of bases inserted in target
 		strand = row[8]			#	the strand
 
-		seq_query = check_output(['samtools', 'faidx', genome, '%s:%s-%s'%tuple([chrom, start, stop])])
+		seq_query = check_output(['samtools', 'faidx', COMP_GENOME, '%s:%s-%s'%tuple([chrom, start, stop])])
 		seq = ''.join(seq_query.split('\n')[1:]).upper()
 		if strand == '-':	#	if the hit is to the opposite strand...
 			seq = Seq.Seq(seq).reverse_complement().tostring()
@@ -123,15 +120,22 @@ with open('compprimBLATs/%s.snipt.sortd.clipt'%phial, 'rb') as csvfile:
 		#print "Indel fraction:	%s" 	%	tuple([float(qinsert + tinsert)/float(qsize)])
 
 	except StopIteration:
+		name = '[blank]'
 #		DNE:	If there is no alignment, there is no coding sequence
 		codSeq = False
 		#print "NO HOMOLOG"
 
-print phial
-print "Coding sequence status:	%s"	%	codSeq
+print 
+print "%s 	Coding sequence status:	%s"	%	tuple([name, codSeq])
 
 if codSeq:
-	os.system('cp exons_%s.bed primate_homologs/'%number)	
+	FILE_OUT=open('coding_in_%s.list'%tuple([PRIMATE]),'a')	
+	FILE_OUT.write('%s\n'%tuple([name]))
+	FILE_OUT.close()
+else:
+	FILE_OUT=open('broken_in_%s.list'%tuple([PRIMATE]),'a')	
+	FILE_OUT.write('%s\n'%tuple([name]))
+	FILE_OUT.close()
 
 
 
