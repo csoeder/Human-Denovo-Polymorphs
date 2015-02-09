@@ -12,15 +12,15 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
 ###			-	UCSC Genes 														#																					#
 bedtools intersect -split -wa -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed.temp	#
 bedtools intersect -split -wa -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed.temp	#
-cat no_UCSC.bed.temp no_refSeq.bed.temp > no_genes.lookback.bed
-if [[ -s no_genes.lookback.bed ]]; then
+cat no_UCSC.bed.temp no_refSeq.bed.temp > no_genes.lookback.bed.temp
+if [[ -s no_genes.lookback.bed.temp ]]; then
 	echo "GENES FOUND ON LOOKBACK"
 fi
 #################################################################################																					#
 ###		Remove repetitive elements												#																					#
 ###			-	UCSC Repeat Masker												#																					#
-bedtools intersect -split -wa -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.lookback.bed					#
-if [[ -s no_rpts.lookback.bed ]]; then
+bedtools intersect -split -wa -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.lookback.bed.temp					#
+if [[ -s no_rpts.lookback.bed.temp ]]; then
 	echo "repetitives FOUND ON LOOKBACK"
 fi
 #################################################################################																					#
@@ -49,8 +49,8 @@ bedtools intersect -wa -a $1 -b $DATA_DIR/retroposed3.bed > no_rpts_no_est_no_mR
 ###		Remove pseudogenes too													#																					#
 ###			-	UCSC YalePseudo60												#																					#
 bedtools intersect -wa -a $1 -b $DATA_DIR/yalepseudo.bed > no_rpts_no_est_no_mRNA_no_retro_no_pseudo.bed.temp
-cat no_rpts_no_est_no_mRNA_no_retro* > no_retro_no_psuedo.lookback.bed
-if [[ -s no_retro_no_psuedo.lookback.bed ]]; then
+cat no_rpts_no_est_no_mRNA_no_retro* > no_retro_no_psuedo.lookback.bed.temp
+if [[ -s no_retro_no_psuedo.lookback.bed.temp ]]; then
 	echo "RETRO/PSEUDO FOUND ON LOOKBACK"
 fi
 cat *.lookback.bed >> escapees.lookback.bed 

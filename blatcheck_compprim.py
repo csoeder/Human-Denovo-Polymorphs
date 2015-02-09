@@ -24,8 +24,6 @@ totalPoints = 0 						#	The score for this potential coding sequnce
 FILE_IN  = sys.argv[1]	#	PSL file, unheadered, sorted, containing best hit to comparative primate genome. 
 COMP_GENOME  = sys.argv[2] 	#	Genome file to be compared to
 PRIMATE = sys.argv[3]	#	Primate name
-#index = re.compile('\w*blat(\d*).psl')	#	what does a BLAT result look like?
-#number = index.match(phial).groups()[0]	#	scrape the ID number
 ##########################################	Slice and dice...
 
 def sequence_sniffer(seq, begin):
@@ -72,7 +70,7 @@ with open(FILE_IN, 'rb') as csvfile:
 		start = int(row[15])	#
 		stop = int(row[16])		#	
 		matches = int(row[0])	#	number of matching bases
-		name = row(9)			#	query name
+		name = row[9]			#	query name
 		qsize = int(row[10])	#	query size
 		qinsert = int(row[5])	#	number of bases inserted in query
 		tinsert = int(row[7])	#	number of bases inserted in target
