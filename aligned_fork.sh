@@ -113,30 +113,28 @@ python $SCRIPT_DIR/garbageman.py rough_ORFs.fa precleaned_ORFs.fa
 blastx -outfmt 6 -db $DATA_DIR/blast/pdbaa -query precleaned_ORFs.fa -out PDB_BLASTX_results.out #	make like nitroglycerine and blastx
 cut -f 1 PDB_BLASTX_results.out | sort | uniq > found_in_PDB.list #						collect the names of all the sequences which stuck to PDB
 grep ">" precleaned_ORFs.fa| cut -f 2 -d '>' | grep -v -wFf found_in_PDB.list > absent_from_PDB.list
-grep -wFf absent_from_PDB.list clean_assemblies.bed > absent_from_PDB.bed #			exclude them from clean_assemblies to a new BED file
-touch absent_from_PDB.fasta
-cut -f4 absent_from_PDB.bed | while read assembly;	#	For each clean assembly...
+while read assembly;	#	For each clean assembly...
 	do 
 	samtools faidx ../$TRINITY_FASTA $assembly >> absent_from_PDB.fasta #	put it in a new file!
-	done
+	done < absent_from_PDB.list
 ###	Collect the results.... Done!
 
 ########################################################
 ###	Realign the ORFs with BLAT
 blat $DATA_DIR/hg19.fa absent_from_PDB.fasta absent_from_PDB.blatted.psl
 #	Use the output for quality control re: duplicates in the genome
-for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" absent_from_PDB.bed | cut -f 4 | sort | uniq ); do #	pull each assembly mapping. 
-	numhits=$(grep -c $assembly absent_from_PDB.blatted.psl);
+for ORF in $(grep ">" absent_from_PDB.fasta | cut -f 2 -d ">" ); do #	pull each ORF mapping. 
+	numhits=$(grep -c $ORF absent_from_PDB.blatted.psl);
 
 
 	if [[ $numhits -eq 1 ]] ; then	#	If there's only one example 
-		grep $assembly absent_from_PDB.bed >> no_duplicates.bed	#	then it's clean - write it!
+		grep $ORF absent_from_PDB.blatted.psl | psl2bed >> no_duplicates.bed	#	then it's clean - write it!
 	else						#	If there are more than one ...
-		grep $assembly absent_from_PDB.blatted.psl > duplicates.psl.temp;	# collect those records one at a time
+		grep $ORF absent_from_PDB.blatted.psl > duplicates.psl.temp;	# collect those records one at a time
 		sort -k1,1 -r duplicates.psl.temp > duplicates.sorted.psl.temp
 		python $SCRIPT_DIR/blatcheck.py duplicates.sorted.psl.temp; #	double check: is one alignment half the size of the other? etc.
 		if [[ -e cleared_sequence.psl.temp ]] ; then	# if blatcheck decided it was ok...
-			grep $assembly absent_from_PDB.bed >> no_duplicates.bed; #	write it to the no-dupes file
+			grep $ORF absent_from_PDB.blatted.psl | psl2bed >> no_duplicates.bed;	#	write it to the no-dupes file
 		fi
 		#	Otherwise, blatcheck has written to the .list files about it, so move on
 	fi
@@ -146,7 +144,7 @@ done
 
 ########################################################
 ###	chunk any spliced ORFs into exons
-bedtools bed12ToBed6 -i no_duplicates.bed > no_duplicates.chunked.bed
+bedtools bed12tobed6 -i no_duplicates.bed > no_duplicates.chunked.bed
 ###	last-minute cleanup >.>
 sh $SCRIPT_DIR/bedfilter_detect_retro.sh no_duplicates.bed 	#	Do any of the sites intersect with annotations? they shouldn't, but check *.lookback.bed for specifics.
 ########################################################
