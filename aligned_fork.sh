@@ -1,5 +1,5 @@
 #!/bin/sh
-echo "#	$IDENTIFIER is being align-forked"
+echo "#	$4 is being align-forked"
 echo "###############################################"
 echo "#	Loading config file...						#"
 source ../pipeline_config.sh					#
@@ -119,8 +119,8 @@ for ORF in $(grep ">" absent_from_PDB.fasta | cut -f 2 -d ">" ); do #	pull each 
 
 	if [[ $numhits -eq 1 ]] ; then	#	If there's only one example 
 		line=$(grep $ORF absent_from_PDB.blatted.psl);
-		first=$( echo $line | psl2bed | cut -f 1,2,3,4,5,6 )
-		last=$( echo $line | psl2bed | cut -f 18,19,21 )
+		first=$( echo $line | tr ' ' '\t' | psl2bed | cut -f 1,2,3,4,5,6 )
+		last=$( echo $line | tr ' ' '\t' | psl2bed | cut -f 18,19,21 )
 		echo -e "$first\t0\t0\t0,0,0\t$last" >> no_duplicates.bed	#	then it's clean - write it!
 	else						#	If there are more than one ...
 		grep $ORF absent_from_PDB.blatted.psl > duplicates.psl.temp;	# collect those records one at a time
@@ -128,8 +128,8 @@ for ORF in $(grep ">" absent_from_PDB.fasta | cut -f 2 -d ">" ); do #	pull each 
 		python $SCRIPT_DIR/blatcheck.py duplicates.sorted.psl.temp; #	double check: is one alignment half the size of the other? etc.
 		if [[ -e cleared_sequence.psl.temp ]] ; then	# if blatcheck decided it was ok...
 			line=$(head -n 1 duplicates.sorted.psl.temp) 
-			first=$( echo $line | psl2bed | cut -f 1,2,3,4,5,6 )
-			last=$( echo $line | psl2bed | cut -f 18,19,21 )			
+			first=$( echo $line | tr ' ' '\t' | psl2bed | cut -f 1,2,3,4,5,6 )
+			last=$( echo $line | tr ' ' '\t' | psl2bed | cut -f 18,19,21 )			
 			echo -e "$first\t0\t0\t0,0,0\t$last" >> no_duplicates.bed;	#	write it to the no-dupes file
 		fi
 		#	Otherwise, blatcheck has written to the .list files about it, so move on
