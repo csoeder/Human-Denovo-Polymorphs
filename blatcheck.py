@@ -21,7 +21,7 @@ with open(PSL_IN,'rb') as csvfile:
 	spamreader = csv.reader(csvfile, delimiter='\t')
 	row1 = spamreader.next()
 	numhits1 = float(row1[0])	#how many matches did the alignment get?
-	numtargets = float(row[10])	#how many matches were there to get?
+	numtargets = float(row1[10])	#how many matches were there to get?
 	row2 = spamreader.next()
 	numhits2 = float(row2[0])
 
