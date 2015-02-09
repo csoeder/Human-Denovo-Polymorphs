@@ -1,15 +1,10 @@
 #!/bin/sh
-
-#############################################
-#	Load relevant modules 					#
-. /nas02/apps/Modules/default/init/bash		#
-module load bedops							#
-module load samtools
-module load bedtools
-#############################################
-#	Load config								#
+echo "#	$IDENTIFIER is being align-forked"
+echo "###############################################"
+echo "#	Loading config file...						#"
 source ../pipeline_config.sh					#
-#############################################
+echo "#	... done."
+echo "#############################################"
 #	$1 is the SAM file of mapped Trinity assemblies
 MAPPED_TRINITY=$1
 #	$2 is the file of MapSpliced RNA-Seq reads
@@ -19,17 +14,15 @@ TRINITY_FASTA=$3
 #	$4 is the individual's identifier
 IDENTIFIER=$4
 
-samtools view -hSb $MAPPED_TRINITY | samtools sort -f - "$IDENTIFIER"_Assemblies_mapped.sort.bam #	Gather the mapped Trinity assemblies, remove any overlapping known annotations...
+samtools view -hSb $MAPPED_TRINITY | samtools sort -f - "$IDENTIFIER"_Assemblies_mapped.sort.bam; echo "#	Gathering the mapped Trinity assemblies, remove any overlapping known annotations..."
 bedtools intersect -split -v -abam "$IDENTIFIER"_Assemblies_mapped.sort.bam -b $DATA_DIR/UCSC_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/refSeq_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/repeatmasker.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed1.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed2.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed3.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/yalepseudo.bed > "$IDENTIFIER"_ILS_anomalies.bam
-samtools sort -f "$IDENTIFIER"_ILS_anomalies.bam "$IDENTIFIER"_ILS_anomalies.sort.bam #	Collect the resulting information and library science anomalies.
-
+samtools sort -f "$IDENTIFIER"_ILS_anomalies.bam "$IDENTIFIER"_ILS_anomalies.sort.bam; echo "#	Collecting the resulting information and library science anomalies."
+echo "#	ILS anomalies collected!"
+echo "#############################################"
+echo "#	entering working subdirectory...	"
 mkdir mapt
 cd mapt
-
-date
-echo "$IDENTIFIER is being align-forked"
-
-
+echo "#############################################"
 ###############################################################
 # bundle parameters############################################
 BUN_NUM=0 #		The first bundle is number zero
@@ -41,9 +34,9 @@ touch rejects.bed
 HOMEBASE=$( pwd | awk -F "mapt" '{print $1}')	#	define the uppermost folder to return to; ie containing individual data
 ###############################################################
 echo '#!/bin/sh' > bundle_$BUN_NUM.sh # 	The bundle is a script
-###############################################################
-###	Begin laying down data, script bundles to handle it. ######
-###############################################################
+echo "###############################################################"
+echo "###	Begin laying down data, script bundles to handle it. ######"
+echo "###############################################################"
 total_reads=$(samtools view -c ../"$IDENTIFIER"_ILS_anomalies.sort.bam)
 bamToBed -bed12 -i ../"$IDENTIFIER"_ILS_anomalies.sort.bam | while read line;
 	###		for each aligned transcript
@@ -58,14 +51,11 @@ bamToBed -bed12 -i ../"$IDENTIFIER"_ILS_anomalies.sort.bam | while read line;
 		done
 		### Lay down the data ########################################################
 		path=''; for i in $(echo $comp | cut -f 1 -d _ | cut -f 2 -d p | grep -o .); do path="$path$i/"; done; path="$path/c$(echo $comp | cut -f 3 -d c)" #	This will create a depth-first path to the data
-
-		mkdir -p $path
+		mkdir -p $path #	Create that directory structure
 		cd $path
-		echo $line | tr ' ' '\t' > curly.bed
-		samtools view -b $HOMEBASE$MAPSPLICED $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -wa -a stdin -b curly.bed > temp.bed
-#		sh $SCRIPT_DIR/bedfilter_detect.sh temp.bed overlap.bed
-		cd $HOMEBASE/mapt/
-
+		echo $line | tr ' ' '\t' > curly.bed #	Write the interval being investigated
+		samtools view -b $HOMEBASE$MAPSPLICED $chrom:$start-$stop | bamToBed  -bed12 -i - | bedtools intersect -split -wa -a stdin -b curly.bed > temp.bed #	Collect the mapspliced RNA-Seq reads overlapping (but not splice-spanning) the interval
+		cd $HOMEBASE/mapt/ #	Return to the mapt directory to write to the script bundle
 		### Lay down the script ########################################################
 		echo "cd $path" >> bundle_$BUN_NUM.sh 		#	push
 		echo "echo $comp" >> bundle_$BUN_NUM.sh 	#	ohai
@@ -74,91 +64,99 @@ bamToBed -bed12 -i ../"$IDENTIFIER"_ILS_anomalies.sort.bam | while read line;
 		echo "rm -rf $path" >> bundle_$BUN_NUM.sh 	#	EXTERMINATE
 		################################################################################
 		let COUNTER+=1 #					Next!
-
 		###	If the bundle is full, then start a new one! ################################
-		if [ $COUNTER -gt $BATCH_SIZE ]; then let BUN_NUM+=1 ; echo "$BUN_NUM of $((total_reads/BATCH_SIZE)) bundles prepared"; echo '#!/bin/sh' > bundle_$BUN_NUM.sh; COUNTER=0; fi
+		if [ $COUNTER -gt $BATCH_SIZE ]; then let BUN_NUM+=1 ; echo "######	$BUN_NUM of $((total_reads/BATCH_SIZE)) bundles prepared"; echo '#!/bin/sh' > bundle_$BUN_NUM.sh; COUNTER=0; fi
 	done
-########################################################
-###	Now run the scripts ################################
+echo "###	Done recording data and writing bundle scripts. ###########"
+echo "#################################################################"
+echo "###	Now run the bundle scripts ################################"
 for script in `ls | grep -v lsf | grep .sh`;
 		#		submit the job, wait a while, repeat...
 		do bsub -J align_grind_$IDENTIFIER -o $script.lsf.out -q week sh $script; sleep $WAIT_TIME;
 	done
-########################################################
-###	Chill out until the jobs are all done ##############
+echo "########################################################"
+echo "###	Chill out until the bundle scripts are all done ##############"
 while [ `bjobs -w | grep align_grind_$IDENTIFIER | wc -l` -gt 0 ]
-		do echo "chillin...";
 		sleep 60;
 	done
-########################################################
-###	Clean up the mess###################################
+echo "###	Accumulation-checking is DONE! ##############"
+echo "########################################################"
+echo "###	Clean up the mess###################################"
 mkdir detritus
 mv bundle_* detritus/
-#########################################################
-###	Unpack the cleared assemblies into a FASTA 			#
-###	of nt sequences	####################################~
+echo "###########################################################"
+echo "###	Unpack the cleared assemblies into a FASTA 			#"
+echo "###	of nucleotide sequences...	#########################"
 touch clean_assemblies.fa
 cut -f4 clean_assemblies.bed | while read assembly;	#	For each clean assembly...
 	do 
 	samtools faidx ../$TRINITY_FASTA $assembly >> clean_assemblies.fa #	put it in a new file!
 	done
-########################################################
-###	Pull all ORFs out of these OK'd assemblies
+echo "... done!"
+echo "########################################################"
+echo "###	Pull all ORFs out of these OK'd assemblies"
 python $SCRIPT_DIR/ORF_extract.py clean_assemblies.fa rough_ORFs.fa
-###	And then process them; in particular for length
+echo "###	And then filter them for length"
 python $SCRIPT_DIR/garbageman.py rough_ORFs.fa precleaned_ORFs.fa
-########################################################
-###	BLAST!
-###	Blast the ORFs to make sure they're not known proteins
+echo "########################################################"
+echo "###	BLAST!"
+echo "###	Blast the ORFs to make sure they're not known proteins..."
 blastx -outfmt 6 -db $DATA_DIR/blast/pdbaa -query precleaned_ORFs.fa -out PDB_BLASTX_results.out #	make like nitroglycerine and blastx
 cut -f 1 PDB_BLASTX_results.out | sort | uniq > found_in_PDB.list #						collect the names of all the sequences which stuck to PDB
 grep ">" precleaned_ORFs.fa| cut -f 2 -d '>' | grep -v -wFf found_in_PDB.list > absent_from_PDB.list
+echo "###	... done! Collect the nucleotide sequences in a FASTA..."
 while read assembly;	#	For each clean assembly...
 	do 
 	samtools faidx ../$TRINITY_FASTA $assembly >> absent_from_PDB.fasta #	put it in a new file!
 	done < absent_from_PDB.list
-###	Collect the results.... Done!
-
-########################################################
-###	Realign the ORFs with BLAT
+echo "###	...done!"
+echo "########################################################"
+echo "###	Realign the ORFs with BLAT"
 blat $DATA_DIR/hg19.fa absent_from_PDB.fasta absent_from_PDB.blatted.psl
-#	Use the output for quality control re: duplicates in the genome
+echo "###	Use the output for quality control re: duplicates in the genome"
 for ORF in $(grep ">" absent_from_PDB.fasta | cut -f 2 -d ">" ); do #	pull each ORF mapping. 
 	numhits=$(grep -c $ORF absent_from_PDB.blatted.psl);
 
-
 	if [[ $numhits -eq 1 ]] ; then	#	If there's only one example 
-		grep $ORF absent_from_PDB.blatted.psl | psl2bed >> no_duplicates.bed	#	then it's clean - write it!
+		line=$(grep $ORF absent_from_PDB.blatted.psl);
+		first=$( echo $line | psl2bed | cut -f 1,2,3,4,5,6 )
+		last=$( echo $line | psl2bed | cut -f 18,19,21 )
+		echo -e "$first\t0\t0\t0,0,0\t$last" >> no_duplicates.bed	#	then it's clean - write it!
 	else						#	If there are more than one ...
 		grep $ORF absent_from_PDB.blatted.psl > duplicates.psl.temp;	# collect those records one at a time
 		sort -k1,1 -r duplicates.psl.temp > duplicates.sorted.psl.temp
 		python $SCRIPT_DIR/blatcheck.py duplicates.sorted.psl.temp; #	double check: is one alignment half the size of the other? etc.
 		if [[ -e cleared_sequence.psl.temp ]] ; then	# if blatcheck decided it was ok...
-			grep $ORF absent_from_PDB.blatted.psl | psl2bed >> no_duplicates.bed;	#	write it to the no-dupes file
+			line=$(head -n 1 duplicates.sorted.psl.temp) 
+			first=$( echo $line | psl2bed | cut -f 1,2,3,4,5,6 )
+			last=$( echo $line | psl2bed | cut -f 18,19,21 )			
+			echo -e "$first\t0\t0\t0,0,0\t$last" >> no_duplicates.bed;	#	write it to the no-dupes file
 		fi
 		#	Otherwise, blatcheck has written to the .list files about it, so move on
+		rm *.temp # clean up the detritus
 	fi
-	rm *.temp # clean up the detritus
 done
-########################################################
-
-########################################################
-###	chunk any spliced ORFs into exons
+echo "###	... duplicates removed!"
+echo "########################################################"
+echo "###	chunk any spliced ORFs into exons"
 bedtools bed12tobed6 -i no_duplicates.bed > no_duplicates.chunked.bed
-###	last-minute cleanup >.>
+echo "###	last-minute cleanup: do any stragglers intersect with annotations? >.>"
 sh $SCRIPT_DIR/bedfilter_detect_retro.sh no_duplicates.bed 	#	Do any of the sites intersect with annotations? they shouldn't, but check *.lookback.bed for specifics.
-########################################################
+echo "########################################################"
+echo "###	reCollect sequences which have passed inspection thusfar into a FASTA of nt sequences..."
 cut -f4 no_duplicates.bed | while read assembly;	
 	do 
 	samtools faidx $HOMEBASE/$TRINITY_FASTA $assembly >> human_candidates.fasta
 	done
-#	reCollect sequences which have passed inspection thusfar.
-########################################################
-#	Time to check comparative primatology
-########################################################
+echo "###	... done!"
+echo "########################################################"
+echo "###	Time to check comparative primatology"
+echo "########################################################"
 blat $DATA_DIR/chimp/panTro4.fa human_candidates.fasta chimpCompare.blatted.psl 	#	BLAT vs. chimp
+echo "###	*	BLAT vs. chimp"
 blat $DATA_DIR/gorilla/gorGor3.fa human_candidates.fasta gorillaCompare.blatted.psl #	BLAT vs. gorilla
-
+echo "###	*	BLAT vs. gorilla"
+echo "###	scanning comparative primatology results, excluding hits with clear homology to a coding sequence..."
 for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sort | uniq ); do #	going to take all the candidates thusfar, see who's in chimp/gorilla
 	numhits_pan=$(grep -c $assembly chimpCompare.blatted.psl);
 	numhits_gor=$(grep -c $assembly gorillaCompare.blatted.psl);
@@ -175,18 +173,17 @@ for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sor
 	fi;
 	rm *.temp
 done;
-
 grep  -wFf broken_in_chimp.list no_duplicates.bed | grep -wFf broken_in_gorilla.list > broken_in_pan_and_gor.bed
 cat unseen_in_pan_and_gor.bed broken_in_pan_and_gor.bed > no_compprim_homology.bed
-########################################################
-#	Data ready for database upload!
-########################################################
+echo "###	... done!"
+echo "########################################################"
+echo "#	Data ready for database upload!"
+echo "########################################################"
 
 cd $HOMEBASE
 mkdir runtime_logs
 mv *.lsf.out runtime_logs
 mv *.log runtime_logs
 
-echo DONE
-date
+echo "$IDENTIFIER has been align-forked!	########################################################"
 echo
