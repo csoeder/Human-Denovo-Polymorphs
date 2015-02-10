@@ -124,7 +124,7 @@ for ORF in $(grep ">" absent_from_PDB.fasta | cut -f 2 -d ">" ); do #	pull each 
 		echo -e "$first\t0\t0\t0,0,0\t$last" >> no_duplicates.bed	#	then it's clean - write it!
 	else						#	If there are more than one ...
 		grep $ORF absent_from_PDB.blatted.psl | grep chr[1-9,X,Y,M][0-9,A,B]*"\s" > duplicates.psl.temp;	# collect those records one at a time
-		sort -k1,1 duplicates.psl.temp > duplicates.sorted.psl.temp
+		sort -k1,1 -r -g duplicates.psl.temp > duplicates.sorted.psl.temp
 		python $SCRIPT_DIR/blatcheck.py duplicates.sorted.psl.temp; #	double check: is one alignment half the size of the other? etc.
 		if [[ -e cleared_sequence.psl.temp ]] ; then	# if blatcheck decided it was ok...
 			line=$(head -n 1 duplicates.sorted.psl.temp) 
@@ -167,8 +167,8 @@ for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sor
 	fi;
 
 	if [ $numhits_pan -gt 0  -o $numhits_gor -gt 0 ]; then
-		grep $assembly chimpCompare.blatted.psl| grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | sort -k1,1 | head -n1 > chimphit.psl.temp #	write the PSL lines from the chimp blat to a temp file
-		grep $assembly gorillaCompare.blatted.psl| grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | sort -k1,1 | head -n1 > gorillahit.psl.temp #	remove wonky chromomomes. same with gorilla. 
+		grep $assembly chimpCompare.blatted.psl| grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | sort -k1,1 -r -g | head -n1 > chimphit.psl.temp #	write the PSL lines from the chimp blat to a temp file
+		grep $assembly gorillaCompare.blatted.psl| grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | sort -k1,1 -r -g | head -n1 > gorillahit.psl.temp #	remove wonky chromomomes. same with gorilla. 
         python $SCRIPT_DIR/blatcheck_compprim.py chimphit.psl.temp $DATA_DIR/chimp/panTro4.fa chimp; 					#	Do a check to make try and determine if the homologous sequence
         python $SCRIPT_DIR/blatcheck_compprim.py gorillahit.psl.temp $DATA_DIR/gorilla/gorGor3.fa gorilla; 				#	is an ORF
 	fi;

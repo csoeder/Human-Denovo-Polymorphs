@@ -53,7 +53,7 @@ cat no_rpts_no_est_no_mRNA_no_retro* > no_retro_no_psuedo.lookback.bed.temp
 if [[ -s no_retro_no_psuedo.lookback.bed.temp ]]; then
 	echo "RETRO/PSEUDO FOUND ON LOOKBACK"
 fi
-cat *.lookback.bed >> escapees.lookback.bed 
+cat *.lookback.bed.temo >> escapees.lookback.bed 
 rm *.temp
 #################################################################################																					#
 #################################################################																									#
