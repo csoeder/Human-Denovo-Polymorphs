@@ -6,7 +6,7 @@
 mapspliced=$1
 
 DATA_DIR='/netscr/csoeder/1kGen/data'
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 
 HOMEBASE=$( pwd | awk -F "mapt" '{print $1}')mapt
 SERIAL=$( echo $(pwd | awk -F"mapt" '{print $2}') | tr -d '/' )

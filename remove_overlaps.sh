@@ -1,7 +1,7 @@
 #!/bin/sh
 ###		A file to remove any chunked genes which overlap an annotation
 #############################################################
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 #############################################################
 for gene in `ls | grep exon`;	#		for all exons
 	do sh $SCRIPT_DIR/bedfilter_detect_retro.sh $gene overlap.bed ;	

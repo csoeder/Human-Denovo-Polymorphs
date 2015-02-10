@@ -1,6 +1,6 @@
 #!/bin/sh
 DATA_DIR='/netscr/csoeder/1kGen/data'
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 
 #	$1 is the mapsplice BAM file
 #	$2 is the name of the assembly being accumulated

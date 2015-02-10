@@ -10,7 +10,7 @@ module load bedtools 						#
 
 
 DATA_DIR='/netscr/csoeder/1kGen/data'
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 #	$1 = input BED file
 #	$2 = output BED file
 #####################################################################################################################################################################

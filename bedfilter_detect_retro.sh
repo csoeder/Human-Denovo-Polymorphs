@@ -3,7 +3,7 @@
 #Trinity assemblies have come from a previous version of the script - see commented out Assembly section.
 
 DATA_DIR='/netscr/csoeder/1kGen/data'
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 #	$1 = input BED file, containing the exons to be lookback'd. 
 #####################################################################################################################################################################
 ###More filtration: remove overlap with annotated genomic locations																									#

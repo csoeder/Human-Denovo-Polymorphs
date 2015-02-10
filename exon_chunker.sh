@@ -1,8 +1,8 @@
 #!/bin/sh
 ###		A script to break spliced ORFs into exons
 
-SCRIPT_DIR=/netscr/csoeder/1kGen/v3.5
-###		Create the place to do it
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
+
 mkdir chunked_genes
 count=0
 for gene in `ls BLATs | grep snipt.sortd.clipt`;
