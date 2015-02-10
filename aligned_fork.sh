@@ -115,15 +115,15 @@ echo "###	Realign the ORFs with BLAT"
 blat $DATA_DIR/hg19.fa absent_from_PDB.fasta absent_from_PDB.blatted.psl
 echo "###	Use the output for quality control re: duplicates in the genome"
 for ORF in $(grep ">" absent_from_PDB.fasta | cut -f 2 -d ">" ); do #	pull each ORF mapping. 
-	numhits=$(grep -c $ORF absent_from_PDB.blatted.psl);
+	numhits=$(grep $ORF absent_from_PDB.blatted.psl | grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | grep -c $ORF );
 
 	if [[ $numhits -eq 1 ]] ; then	#	If there's only one example 
-		line=$(grep $ORF absent_from_PDB.blatted.psl);
+		line=$(grep $ORF absent_from_PDB.blatted.psl | grep chr[1-9,X,Y,M][0-9,A,B]*"\s" | head -n 1);
 		first=$( echo $line | tr ' ' '\t' | psl2bed | cut -f 1,2,3,4,5,6 )
 		last=$( echo $line | tr ' ' '\t' | psl2bed | cut -f 18,19,21 )
 		echo -e "$first\t0\t0\t0,0,0\t$last" >> no_duplicates.bed	#	then it's clean - write it!
 	else						#	If there are more than one ...
-		grep $ORF absent_from_PDB.blatted.psl > duplicates.psl.temp;	# collect those records one at a time
+		grep $ORF absent_from_PDB.blatted.psl | grep chr[1-9,X,Y,M][0-9,A,B]*"\s" > duplicates.psl.temp;	# collect those records one at a time
 		sort -k1,1 duplicates.psl.temp > duplicates.sorted.psl.temp
 		python $SCRIPT_DIR/blatcheck.py duplicates.sorted.psl.temp; #	double check: is one alignment half the size of the other? etc.
 		if [[ -e cleared_sequence.psl.temp ]] ; then	# if blatcheck decided it was ok...
