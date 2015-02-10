@@ -158,7 +158,7 @@ echo "###	*	BLAT vs. chimp"
 blat $DATA_DIR/gorilla/gorGor3.fa human_candidates.fasta gorillaCompare.blatted.psl #	BLAT vs. gorilla
 echo "###	*	BLAT vs. gorilla"
 echo "###	scanning comparative primatology results, excluding hits with clear homology to a coding sequence..."
-total_regions=$(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sort | uniq | grep -c chr);
+total_regions=$(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sort | uniq | grep -c comp);
 loop_num=0;
 for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sort | uniq ); do #	going to take all the candidates thusfar, see who's in chimp/gorilla
 	numhits_pan=$(grep -c $assembly chimpCompare.blatted.psl);
