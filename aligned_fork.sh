@@ -82,7 +82,7 @@ while [ `bjobs -w | grep align_grind_$IDENTIFIER | wc -l` -gt 0 ]
 echo "###	Accumulation-checking is DONE! ##############"
 echo "########################################################"
 echo "###	Clean up the mess###################################"
-rm -rf 1; rm -rf 2; rm -rf 3; rm -rf 4; rm -rf 5; rm -rf 6; rm -rf 7; rm -rf 8; rm -rf 9;
+bsub -J detrivore "rm -rf 1; rm -rf 2; rm -rf 3; rm -rf 4; rm -rf 5; rm -rf 6; rm -rf 7; rm -rf 8; rm -rf 9;"	#	Cleanup the depth-first file structure
 mkdir detritus
 mv bundle_* detritus/
 echo "###########################################################"
