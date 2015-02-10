@@ -135,7 +135,7 @@ elif name !='[blank]':
 	FILE_OUT.write('%s\n'%tuple([name]))
 	FILE_OUT.close()
 else:
-	break
+	pass
 
 
 
