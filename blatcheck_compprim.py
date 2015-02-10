@@ -130,11 +130,12 @@ if codSeq:
 	FILE_OUT=open('coding_in_%s.list'%tuple([PRIMATE]),'a')	
 	FILE_OUT.write('%s\n'%tuple([name]))
 	FILE_OUT.close()
-else:
+elif name !='[blank]':
 	FILE_OUT=open('broken_in_%s.list'%tuple([PRIMATE]),'a')	
 	FILE_OUT.write('%s\n'%tuple([name]))
 	FILE_OUT.close()
-
+else:
+	break
 
 
 
