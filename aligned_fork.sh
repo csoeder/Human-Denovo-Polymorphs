@@ -158,6 +158,8 @@ echo "###	*	BLAT vs. chimp"
 blat $DATA_DIR/gorilla/gorGor3.fa human_candidates.fasta gorillaCompare.blatted.psl #	BLAT vs. gorilla
 echo "###	*	BLAT vs. gorilla"
 echo "###	scanning comparative primatology results, excluding hits with clear homology to a coding sequence..."
+total_regions=$(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sort | uniq | grep -c chr);
+loop_num=0;
 for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sort | uniq ); do #	going to take all the candidates thusfar, see who's in chimp/gorilla
 	numhits_pan=$(grep -c $assembly chimpCompare.blatted.psl);
 	numhits_gor=$(grep -c $assembly gorillaCompare.blatted.psl);
@@ -172,6 +174,8 @@ for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sor
         python $SCRIPT_DIR/blatcheck_compprim.py chimphit.psl.temp $DATA_DIR/chimp/panTro4.fa chimp; 					#	Do a check to make try and determine if the homologous sequence
         python $SCRIPT_DIR/blatcheck_compprim.py gorillahit.psl.temp $DATA_DIR/gorilla/gorGor3.fa gorilla; 				#	is an ORF
 	fi;
+	let loopnum+=1;
+	if [[ $((loopnum%10)) -eq 0 ]]; then echo "Site $loopnum of $total_regions checked!"; fi
 	rm *.temp
 done;
 grep  -wFf broken_in_chimp.list no_duplicates.bed | grep -wFf broken_in_gorilla.list > broken_in_pan_and_gor.bed
