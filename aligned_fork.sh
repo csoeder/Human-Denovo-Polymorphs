@@ -124,7 +124,7 @@ for ORF in $(grep ">" absent_from_PDB.fasta | cut -f 2 -d ">" ); do #	pull each 
 		echo -e "$first\t0\t0\t0,0,0\t$last" >> no_duplicates.bed	#	then it's clean - write it!
 	else						#	If there are more than one ...
 		grep $ORF absent_from_PDB.blatted.psl > duplicates.psl.temp;	# collect those records one at a time
-		sort -k1,1 -r duplicates.psl.temp > duplicates.sorted.psl.temp
+		sort -k1,1 duplicates.psl.temp > duplicates.sorted.psl.temp
 		python $SCRIPT_DIR/blatcheck.py duplicates.sorted.psl.temp; #	double check: is one alignment half the size of the other? etc.
 		if [[ -e cleared_sequence.psl.temp ]] ; then	# if blatcheck decided it was ok...
 			line=$(head -n 1 duplicates.sorted.psl.temp) 
