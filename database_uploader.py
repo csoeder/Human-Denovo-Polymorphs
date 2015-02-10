@@ -24,22 +24,19 @@ for rho in dats:
 
 	#add each person to the database
 
-
 	try:	#	Try adding the finds from each person.
-		#deNovos = os.listdir('%s/mapt/chunked_genes/deNovos'%ide)
-		deNovos = os.listdir('/nas02/home/c/s/csoeder/Denovo_Candidates/%s'%tuple([ide]))
+		deNovos = open('/netscr/csoeder/1kGen/individuals/%s/mapt/no_compprim_homology.bed'%tuple([ide]), 'r')
 
 		curr.execute('INSERT INTO person (id, access, sex, pop, mother, father) VALUES (%s, %s, %s, %s, 1, 1);', tuple([rho[2], rho[1], string.capitalize(rho[4][0]), rho[0]]))
 		curr.execute('SELECT pk FROM person WHERE id = %s;', tuple([ide]))
 		person_pk = curr.fetchone()[0]
-		#print deNovos
-		for exon in deNovos:
-			try:
-	#			dats = csv.reader( open('%s/mapt/chunked_genes/deNovos/%s'%tuple([ide, exon]),'r'), delimiter='\t').next()
-				print exon
 
-				dats = csv.reader( open('/nas02/home/c/s/csoeder/Denovo_Candidates/%s/%s'%tuple([ide, exon]),'r'), delimiter='\t').next()
-				chro, begin, end, script_tag = dats[:4]
+		spamreader = csv.reader(deNovos, delimiter='\t')
+
+		for line in spamreader:
+			try:
+				#	print line
+				chro, begin, end, script_tag = line[:4]
 				seq_query = check_output(['samtools', 'faidx', '%s/Trinity_files.Trinity.fasta'%ide, script_tag])
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
 				seq_query = check_output(['samtools', 'faidx', '../data/hg19.fa', '%s:%s-%s'%tuple([chro, begin, end])])
@@ -76,11 +73,11 @@ for rho in dats:
 				except TypeError:#mostly its going to just add data to th DB
 					curr.execute("INSERT INTO find (source, seq, loc) VALUES (%s, %s, %s);", tuple([person_pk, trans_seq_pk, loc_pk]) )
 			except StopIteration:
-				print "%s is empty"%tuple([exon]) 
+				break
 
 		#de_novs = os.listdir('%s/mapt/chunked_genes/deNovos/'%ide)
 		print "%s dumped to database" % tuple([ide])
-	except OSError:	#	in case the person's hits haven't been found yet. 
+	except IOError:	#	in case the person's hits haven't been found yet. 
 		print "No file %s" % ide
 
 conn.commit()
