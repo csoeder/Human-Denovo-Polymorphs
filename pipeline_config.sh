@@ -3,7 +3,7 @@
 ###############################################################
 # paths to various folders	###################################
 DATA_DIR='/netscr/csoeder/1kGen/data'
-SCRIPT_DIR='/netscr/csoeder/1kGen/v3.5'
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 ###############################################################
 # define the delay for the top-level submission step ##########
 #	see metapipe.sh ###########################################

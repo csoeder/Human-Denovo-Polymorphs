@@ -1,8 +1,9 @@
 #!/bin/sh
 echo "#	$4 is being align-forked"
 echo "###############################################"
-echo "#	Loading config file...						#"
-source ../pipeline_config.sh					#
+echo "#	Loading config file...	"
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'					#"
+source $SCRIPT_DIR/pipeline_config.sh					#
 echo "#	... done."
 echo "#############################################"
 #	$1 is the SAM file of mapped Trinity assemblies

@@ -1,13 +1,13 @@
 #!/bin/sh
 ###	A script to automate the MapSplicing and post-mapsplice processing
 #############################################################
-source ../pipeline_config.sh	#################################
+SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
+source $SCRIPT_DIR/pipeline_config.sh	#################################
 FOLDER=$1
 ###Mapsplice the reads#######################################
 if [[ ! -f "$FOLDER"_mapsplice_alignment.sam ]]; then
 #	bsub -J mapsplut_$FOLDER -o mapsplut.lsf.out -M 75 -q week python /nas02/apps/mapsplice-2.1.4/src/MapSplice-v2.1.4/mapsplice.py -c /netscr/csoeder/1kGen/data/hg19_split/ -x /netscr/csoeder/1kGen/data/hg19_bowtieindex/hg19 -1 ERR*_1.fastq -2 ERR*_2.fastq
-$	bsub -J mapsplut_$FOLDER -o mapsplut.lsf.out -q week python /nas02/apps/mapsplice-2.1.4/src/MapSplice-v2.1.4/mapsplice.py -c /netscr/csoeder/1kGen/data/hg19_split/ -x /netscr/csoeder/1kGen/data/hg19_bowtieindex/hg19 -1 ERR*_1.fastq -2 ERR*_2.fastq
-	bsub -J mapsplut_$FOLDER -o mapsplut.lsf.out -q week sleep 10
+	bsub -J mapsplut_$FOLDER -o mapsplut.lsf.out -q week python /nas02/apps/mapsplice-2.1.4/src/MapSplice-v2.1.4/mapsplice.py -c /netscr/csoeder/1kGen/data/hg19_split/ -x /netscr/csoeder/1kGen/data/hg19_bowtieindex/hg19 -1 ERR*_1.fastq -2 ERR*_2.fastq
 	bsub -J mvsplut_$FOLDER -w "done(mapsplut_$FOLDER)" -o mvsplut.lsf.out  cp mapsplice_out/alignments.sam "$FOLDER"_mapsplice_alignment.sam
 	bsub -J splutvert_$FOLDER -w "done(mvsplut_$FOLDER)" -o splutvert.lsf.out "samtools view -Sbh "$FOLDER"_mapsplice_alignment.sam > "$FOLDER"_mapsplice_alignment.bam"
 	bsub -J bamsort_$FOLDER -w "done(splutvert_$FOLDER)" -o bamsort.lsf.out samtools sort "$FOLDER"_mapsplice_alignment.bam "$FOLDER"_mapsplice_alignment.sort
