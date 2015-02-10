@@ -2,7 +2,7 @@
 echo "#	$4 is being align-forked"
 echo "###############################################"
 echo "#	Loading config file...						#"
-source ../pipeline_config.sh					#
+source pipeline_config.sh					#
 echo "#	... done."
 echo "#############################################"
 #	$1 is the SAM file of mapped Trinity assemblies
