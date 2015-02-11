@@ -22,7 +22,7 @@ with open('lsf.log', 'rb') as csvfile:
 			total_jobs = row[1]
 			running_jobs = row[2]
 			pending_jobs = row[3]
-			raw_dates.append(datetime.datetime( int(date.split(' ')[-1]), moon_dict[ date.split(' ')[1]], int(date.split(' ')[3]), int(date.split(' ')[4].split(':')[0]), int(date.split(' ')[4].split(':')[1]), int(date.split(' ')[4].split(':')[2])))
+			raw_dates.append(datetime.datetime( int(date.split(' ')[-1]), moon_dict[ date.split(' ')[1]], int(date.split(' ')[2]), int(date.split(' ')[3].split(':')[0]), int(date.split(' ')[3].split(':')[1]), int(date.split(' ')[3].split(':')[2])))
 			total_load.append(int(total_jobs))
 			run_load.append(int(running_jobs))
 			pend_load.append(int(pending_jobs))
