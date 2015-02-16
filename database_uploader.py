@@ -15,6 +15,8 @@ curr= conn.cursor()
 
 ####Read the 1000Genomes roster, use it to populate the database with people
 
+
+
 with open('%s1kGenRoster.dat'%script_dir) as f:
 	reader = csv.reader(f, delimiter="\t")
 	dats= list(reader)
