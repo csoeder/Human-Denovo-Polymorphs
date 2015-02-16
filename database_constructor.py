@@ -7,13 +7,13 @@ curr = conn.cursor()
 
 ###	tables, calling little johnny tables....
 print "Jettison old data..."
-curr.execute("DROP TABLE find;")
-curr.execute("DROP TABLE antifind;")
-curr.execute("DROP TABLE person;")
-curr.execute("DROP TABLE location;")
-curr.execute("DROP TABLE sequence;")
-curr.execute("DROP TABLE variant;")
-curr.execute("DROP TYPE sex;")
+curr.execute("DROP TABLE find CASCADE;")
+curr.execute("DROP TABLE antifind CASCADE;")
+curr.execute("DROP TABLE person CASCADE;")
+curr.execute("DROP TABLE location CASCADE;")
+curr.execute("DROP TABLE sequence CASCADE;")
+curr.execute("DROP TABLE variant CASCADE;")
+curr.execute("DROP TYPE sex CASCADE;")
 conn.commit()
 
 
