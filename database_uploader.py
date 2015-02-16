@@ -6,6 +6,8 @@ import sys
 import os
 from subprocess import call, check_output
 
+script_dir='/netscr/csoeder/1kGen/query-process/'
+
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 
@@ -13,7 +15,7 @@ curr= conn.cursor()
 
 ####Read the 1000Genomes roster, use it to populate the database with people
 
-with open('1kGenRoster.dat') as f:
+with open('%s1kGenRoster.dat'%script_dir) as f:
 	reader = csv.reader(f, delimiter="\t")
 	dats= list(reader)
 
