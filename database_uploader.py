@@ -43,7 +43,7 @@ for rho in dats:
 			try:
 				#	print line
 				chro, begin, end, script_tag = line[:4]
-				seq_query = check_output(['samtools', 'faidx', '%s/Trinity_files.Trinity.fasta'%tuple([working_path, ide]), script_tag])
+				seq_query = check_output(['samtools', 'faidx', '%s%s/Trinity_files.Trinity.fasta'%tuple([working_path, ide]), script_tag])
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
 				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin, end])])
 				reference_seq = ''.join(seq_query.split('\n')[1:]).upper()#				the sequence which appears in the reference genome
