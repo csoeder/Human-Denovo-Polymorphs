@@ -6,7 +6,9 @@ import sys
 import os
 from subprocess import call, check_output
 
-script_dir='/netscr/csoeder/1kGen/query-process/'
+script_path='/netscr/csoeder/1kGen/query-process/'
+working_path='/netscr/csoeder/1kGen/individuals/'
+data_path='/netscr/csoeder/1kGen/data/'
 
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
@@ -17,7 +19,7 @@ curr= conn.cursor()
 
 
 
-with open('%s1kGenRoster.dat'%script_dir) as f:
+with open('%s1kGenRoster.dat'%script_path) as f:
 	reader = csv.reader(f, delimiter="\t")
 	dats= list(reader)
 
@@ -29,7 +31,7 @@ for rho in dats:
 	#add each person to the database
 
 	try:	#	Try adding the finds from each person.
-		deNovos = open('/netscr/csoeder/1kGen/individuals/%s/mapt/no_compprim_homology.bed'%tuple([ide]), 'r')
+		deNovos = open('%s%s/mapt/no_compprim_homology.bed'%tuple([working_path, ide]), 'r')
 
 		curr.execute('INSERT INTO person (id, access, sex, pop) VALUES (%s, %s, %s, %s);', tuple([rho[2], rho[1], string.capitalize(rho[4][0]), rho[0]]))
 		curr.execute('SELECT pk FROM person WHERE id = %s;', tuple([ide]))
@@ -41,9 +43,9 @@ for rho in dats:
 			try:
 				#	print line
 				chro, begin, end, script_tag = line[:4]
-				seq_query = check_output(['samtools', 'faidx', '%s/Trinity_files.Trinity.fasta'%ide, script_tag])
+				seq_query = check_output(['samtools', 'faidx', '%s/Trinity_files.Trinity.fasta'%tuple([working_path, ide]), script_tag])
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
-				seq_query = check_output(['samtools', 'faidx', '../data/hg19.fa', '%s:%s-%s'%tuple([chro, begin, end])])
+				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin, end])])
 				reference_seq = ''.join(seq_query.split('\n')[1:]).upper()#				the sequence which appears in the reference genome
 
 				try:#is the location already entered in the database, ie, this site has been detected as expressed?
