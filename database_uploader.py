@@ -27,7 +27,7 @@ for rho in dats:
 	try:	#	Try adding the finds from each person.
 		deNovos = open('/netscr/csoeder/1kGen/individuals/%s/mapt/no_compprim_homology.bed'%tuple([ide]), 'r')
 
-		curr.execute('INSERT INTO person (id, access, sex, pop, mother, father) VALUES (%s, %s, %s, %s, 1, 1);', tuple([rho[2], rho[1], string.capitalize(rho[4][0]), rho[0]]))
+		curr.execute('INSERT INTO person (id, access, sex, pop) VALUES (%s, %s, %s, %s);', tuple([rho[2], rho[1], string.capitalize(rho[4][0]), rho[0]]))
 		curr.execute('SELECT pk FROM person WHERE id = %s;', tuple([ide]))
 		person_pk = curr.fetchone()[0]
 
