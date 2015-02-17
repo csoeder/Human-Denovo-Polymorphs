@@ -1,7 +1,7 @@
 #!/bin/sh
 
 
-DATA_DIR='/nas02/home/c/s/csoeder/1kGen_data'
+DATA_DIR='/netscr/csoeder/1kGen/data'
 
 touch lookback_bins.dat
 
