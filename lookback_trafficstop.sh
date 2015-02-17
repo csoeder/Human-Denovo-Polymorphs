@@ -5,15 +5,14 @@ DATA_DIR='/netscr/csoeder/1kGen/data'
 
 touch lookback_bins.dat
 
-head -n $(wc -l lookback_report.dat) | while read line
-do
-    pk=$( echo $line | cut -f 4 )
+while read line; do
+    pk=$( echo $line | cut -f 4 -d ' ')
 
 	touch review.bed;
-
-	for person in $(tail -n +2 $DATA_DIR/dwnld_list.txt| cut -f 1 | sort | uniq );
-		do echo $person;
-		transcript=$(grep -P "^[a-zA-Z0-9_]*\t[0-9]*\t[0-9]*\t$a\t" individuals/"$person"/"$person"_lookback.bed | cut -f 1);
+	echo $line, $pk
+	for person in $( ls individuals );
+		do #	echo $person;
+		transcript=$(grep -P "^[a-zA-Z0-9_]*\t[0-9]*\t[0-9]*\t$pk\t" individuals/"$person"/"$person"_lookback.bed | cut -f 1);
 		grep $transcript individuals/"$person"/"$person"_Assemblies_mapped.bed >> review.bed;
 	done;
 
@@ -29,11 +28,11 @@ do
 		echo -e "$pk\tCLEAN\n" >> lookback_bins.dat
 	fi
 
-	rm review.bed;
-	rm no_rpts.bed;
-	nm no_genes.bed;
+	#rm review.bed;
+	#rm no_rpts.bed;
+	#rm no_genes.bed;
 
-done
+done < lookback_report.dat 
 
 
 
