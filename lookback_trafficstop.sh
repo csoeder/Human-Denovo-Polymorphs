@@ -11,7 +11,7 @@ do
 
 	touch review.bed;
 
-	for person in $(tail -n +2 dwnld_list.txt| cut -f 1 | sort | uniq );
+	for person in $(tail -n +2 $DATA_DIR/dwnld_list.txt| cut -f 1 | sort | uniq );
 		do echo $person;
 		transcript=$(grep -P "^[a-zA-Z0-9_]*\t[0-9]*\t[0-9]*\t$a\t" "$person"/"$person"_lookback.bed | cut -f 1);
 		grep $transcript "person"/"$person"_Assemblies_mapped.bed >> review.bed;
