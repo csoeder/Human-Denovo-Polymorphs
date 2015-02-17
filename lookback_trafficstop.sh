@@ -6,14 +6,16 @@ DATA_DIR='/netscr/csoeder/1kGen/data'
 touch lookback_bins.dat
 
 while read line; do
-    pk=$( echo $line | cut -f 4 -d ' ')
+
+	pk=$( echo $line | cut -f 4 -d ' ')
 
 	touch review.bed;
 	echo $line, $pk
 	for person in $( ls individuals );
-		do #	echo $person;
+		do	echo $person;
 		transcript=$(grep -P "^[a-zA-Z0-9_]*\t[0-9]*\t[0-9]*\t$pk\t" individuals/"$person"/"$person"_lookback.bed | cut -f 1);
-		grep $transcript individuals/"$person"/"$person"_Assemblies_mapped.bed >> review.bed;
+		#echo $transcript test.test
+		grep "$transcript" individuals/"$person"/"$person"_Assemblies_mapped.bed >> review.bed
 	done;
 
 	bedtools intersect -split -a review.bed -b $DATA_DIR/repeatmasker.bed > no_rpts.bed;				#
@@ -28,9 +30,9 @@ while read line; do
 		echo -e "$pk\tCLEAN\n" >> lookback_bins.dat
 	fi
 
-	#rm review.bed;
-	#rm no_rpts.bed;
-	#rm no_genes.bed;
+	rm review.bed;
+	rm no_rpts.bed;
+	rm no_genes.bed;
 
 done < lookback_report.dat 
 
