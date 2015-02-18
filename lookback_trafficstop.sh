@@ -12,27 +12,26 @@ while read line; do
 	touch review.bed;
 	echo $line, $pk
 	for person in $( ls individuals );
-		do	echo $person;
-		transcript=$(grep -P "^[a-zA-Z0-9_]*\t[0-9]*\t[0-9]*\t$pk\t" individuals/"$person"/"$person"_lookback.bed | cut -f 1);
-		#echo $transcript test.test
-		grep "$transcript" individuals/"$person"/"$person"_Assemblies_mapped.bed >> review.bed
+		do	echo $person;	#	This following regex command looks for $pk specifically in the QNAME column of a BEDfile
+		transcript=$(grep -P "^[a-zA-Z0-9_]*\t[0-9]*\t[0-9]*\t$pk\t" individuals/"$person"/"$person"_lookback.bed | cut -f 1);	#	find the transcript which the sequence stuck to
+		grep "$transcript" individuals/"$person"/mapt/rejects.bed | cut -f 2 >> review.dat #	Look for it in the rejects.bed file; move the flag to review
 	done;
 
-	bedtools intersect -split -a review.bed -b $DATA_DIR/repeatmasker.bed > no_rpts.bed;				#
-	bedtools intersect -split -a review.bed -b $DATA_DIR/UCSC_genes.bed > no_genes.bed;
-	bedtools intersect -split -a review.bed -b $DATA_DIR/refSeq_genes.bed >> no_genes.bed;
+	sort review.dat | uniq > flags.dat 	#	collect any flags found across all individuals
 
-	if [[ -s no_rpts.bed ]]; then
-		echo -e "$pk\tREPEAT\n" >> lookback_bins.dat
-	elif [[ -s no_genes.bed ]]; then
-		echo -e "$pk\tGENE\n" >> lookback_bins.dat
+	flags=''
+	while read flag; do
+		flags='"$flags","$flag"';
+	done < flags.dat 	#	concatenate flags into a single string
+
+
+	if [[ -s review.dat ]]; then
+		echo -e "$pk\tCLEAN\n" >> lookback_bins.dat #	Unflagged hits are "clean"
 	else
-		echo -e "$pk\tCLEAN\n" >> lookback_bins.dat
+		echo -e "$pk\t$flags\n" >> lookback_bins.dat #	Otherwise, make note
 	fi
 
 	rm review.bed;
-	rm no_rpts.bed;
-	rm no_genes.bed;
 
 done < lookback_report.dat 
 
