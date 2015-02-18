@@ -20,7 +20,7 @@ if [ -s shemp.bed ]; then	#	If there's data in the file; ie, it's nonempty
 		head curly.bed >> $HOMEBASE/clean_assemblies.bed #	then add it to the clean assemblies
 		flag="PASS"
 	else	#								otherwise,
-		head curly.bed >> $HOMEBASE/rejects.bed #	"Rejected", by Don Hertzfeldt
+		cut -f 4 curly.bed | paste - overlap.bed >> $HOMEBASE/rejects.bed #	"Rejected", by Don Hertzfeldt
 		flag="FAIL"
 	fi
 

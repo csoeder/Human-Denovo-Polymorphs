@@ -22,7 +22,7 @@ bedtools intersect -split -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed	#
 bedtools intersect -split -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed	#
 cat no_UCSC.bed no_refSeq.bed > no_genes.bed
 if [[ -s no_genes.bed ]]; then
-	mv no_genes.bed $2
+	echo "GENE" > $2;
 #	echo "GENE FOUND"
 	exit
 fi
@@ -63,7 +63,7 @@ bedtools intersect -a $1 -b $DATA_DIR/retroposed3.bed > no_rpts_no_est_no_mRNA_n
 bedtools intersect -a $1 -b $DATA_DIR/yalepseudo.bed > no_rpts_no_est_no_mRNA_no_retro_no_pseudo.bed
 cat no_rpts_no_est_no_mRNA_no_retro* > no_retros.bed
 if [[ -s no_retros.bed ]]; then
-	mv no_retros.bed $2
+	echo "RETRO" > $2;
 #	echo "HOW RETRO"
 	exit
 fi
