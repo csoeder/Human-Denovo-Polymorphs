@@ -21,7 +21,7 @@ while read line; do
 
 	flags=''
 	while read flag; do
-		flags='"$flags","$flag"';
+		flags="$flags","$flag";
 	done < flags.dat 	#	concatenate flags into a single string
 
 
