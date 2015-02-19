@@ -26,9 +26,9 @@ while read line; do
 
 
 	if [[ -s review.dat ]]; then
-		echo -e "$pk\tCLEAN\n" >> lookback_bins.dat #	Unflagged hits are "clean"
+		echo -e "$pk\t$flags\n" >> lookback_bins.dat #	Unflagged hits are "clean"
 	else
-		echo -e "$pk\t$flags\n" >> lookback_bins.dat #	Otherwise, make note
+		echo -e "$pk\tCLEAN\n" >> lookback_bins.dat #	Otherwise, make note
 	fi
 
 	rm review.dat;
