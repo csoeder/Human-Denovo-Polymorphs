@@ -9,7 +9,7 @@ while read line; do
 
 	pk=$( echo $line | cut -f 4 -d ' ')
 
-	touch review.bed;
+	touch review.dat;
 	echo $line, $pk
 	for person in $( ls individuals );
 		do	echo $person;	#	This following regex command looks for $pk specifically in the QNAME column of a BEDfile
@@ -31,7 +31,7 @@ while read line; do
 		echo -e "$pk\t$flags\n" >> lookback_bins.dat #	Otherwise, make note
 	fi
 
-	rm review.bed;
+	rm review.dat;
 
 done < lookback_report.dat 
 
