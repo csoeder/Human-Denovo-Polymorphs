@@ -1,5 +1,5 @@
 ###
-#	A script to pull database locations into BED files, sequences into FASTA files, etc
+#	A script to pull consolidated database infor into BED files, sequences into FASTA files, etc
 #	So that they may be analyzed with misc. tools
 
 import psycopg2
@@ -36,7 +36,7 @@ all_peeps = curr.fetchall()
 
 bedfile = open('genome_locations.bed','w')
 for location in all_places:
-	bedfile.write('%s\t%s\t%s\t%s\n'%tuple([all_places[1], all_places[2], all_places[3], all_places[0]]))
+	bedfile.write('%s\t%s\t%s\t%s\n'%tuple([location[1], location[2], location[3], location[0]]))
 bedfile.close()
 
 
