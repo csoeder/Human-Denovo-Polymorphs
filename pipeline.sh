@@ -29,8 +29,8 @@ touch monitor.log											#
 echo "de novo search begin: subject $FOLDER" >> monitor.log
 date >> monitor.log
 echo "git commit #" >> monitor.log				#
-head ../.git/FETCH_HEAD | cut -f1 >> monitor.log #
-head ../.git/FETCH_HEAD | cut -f3 >> monitor.log 
+head $SCRIPT_DIR/.git/FETCH_HEAD | cut -f1 >> monitor.log #
+head $SCRIPT_DIR/.git/FETCH_HEAD | cut -f3 >> monitor.log 
 #############################################
 #Load relevant modules 						#
 . /nas02/apps/Modules/default/init/bash		#
@@ -45,7 +45,8 @@ module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
 if [[ ! -f Trinity_files.Trinity.fasta || ! -f "$FOLDER"_mapsplice_alignment.sam ]]; then
-	for fastq in `grep $FOLDER $SCRIPT_DIR/dwnld_list.txt | cut -f 29`; do wget $fastq; gzip -d $(echo $fastq | cut -f 8 -d'/'); done
+	cp /proj/cdjones_lab/1kGen_Trinity/"$FOLDER"/* . 
+	gzip -d *.gz
 echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
 du ERR* >> monitor.log								#
 fi
