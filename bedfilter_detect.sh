@@ -29,7 +29,7 @@ fi
 #################################################################################																					#
 ###		Remove repetitive elements												#																					#
 ###			-	UCSC Repeat Masker												#																					#
-bedtools intersect -split -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.bed								#
+bedtools intersect -split -a $1 -b $DATA_DIR/complicated_repeats.bed > no_rpts.bed								#
 if [[ -s no_rpts.bed ]]; then
 	mv no_rpts.bed $2
 	echo "ITS REPETITIVE"

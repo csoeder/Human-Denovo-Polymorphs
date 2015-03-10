@@ -16,7 +16,7 @@ TRINITY_FASTA=$3
 IDENTIFIER=$4
 echo "###	Start colleting ILS anomalies. ########"	
 samtools view -hSb $MAPPED_TRINITY | samtools sort -f - "$IDENTIFIER"_Assemblies_mapped.sort.bam; echo "#	Gathering the mapped Trinity assemblies, remove any overlapping known annotations..."
-bedtools intersect -split -v -abam "$IDENTIFIER"_Assemblies_mapped.sort.bam -b $DATA_DIR/UCSC_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/refSeq_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/repeatmasker.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed1.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed2.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed3.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/yalepseudo.bed > "$IDENTIFIER"_ILS_anomalies.bam
+bedtools intersect -split -v -abam "$IDENTIFIER"_Assemblies_mapped.sort.bam -b $DATA_DIR/UCSC_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/refSeq_genes.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/complicated_repeats.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed1.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed2.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/retroposed3.bed | bedtools intersect -split -v -abam stdin -b $DATA_DIR/yalepseudo.bed > "$IDENTIFIER"_ILS_anomalies.bam
 samtools sort -f "$IDENTIFIER"_ILS_anomalies.bam "$IDENTIFIER"_ILS_anomalies.sort.bam; echo "#	Collecting the resulting information and library science anomalies."
 echo "#	ILS anomalies collected!"
 echo "#############################################"

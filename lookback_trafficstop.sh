@@ -17,7 +17,7 @@ do
 		grep $transcript "person"/"$person"_Assemblies_mapped.bed >> review.bed;
 	done;
 
-	bedtools intersect -split -a review.bed -b $DATA_DIR/repeatmasker.bed > no_rpts.bed;				#
+	bedtools intersect -split -a review.bed -b $DATA_DIR/complicated_repeats.bed > no_rpts.bed;				#
 	bedtools intersect -split -a review.bed -b $DATA_DIR/UCSC_genes.bed > no_genes.bed;
 	bedtools intersect -split -a review.bed -b $DATA_DIR/refSeq_genes.bed >> no_genes.bed;
 

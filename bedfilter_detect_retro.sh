@@ -19,7 +19,7 @@ fi
 #################################################################################																					#
 ###		Remove repetitive elements												#																					#
 ###			-	UCSC Repeat Masker												#																					#
-bedtools intersect -split -wa -a $1 -b $DATA_DIR/repeatmasker.bed > no_rpts.lookback.bed.temp					#
+bedtools intersect -split -wa -a $1 -b $DATA_DIR/complicated_repeats.bed > no_rpts.lookback.bed.temp					#
 if [[ -s no_rpts.lookback.bed.temp ]]; then
 	echo "repetitives FOUND ON LOOKBACK"
 fi
