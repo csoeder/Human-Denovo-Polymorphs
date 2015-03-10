@@ -45,7 +45,7 @@ bsub -J "$FOLDER"_aligned_fork -q week -w "done(faidx_$FOLDER) && done(gather_ma
 #	ignore the unaligned fork
 ############################################################################
 ### Is it done? Email me. ###################################
-bsub -J "$FOLDER"_alert -w "done("$FOLDER"_aligned_fork)" echo $FOLDER has successfully completed
+bsub -J "$FOLDER"_alert -w "done("$FOLDER"_aligned_fork)" 'rm *.fastq; echo "$FOLDER" has successfully completed'
 #############################################################################
 
 
