@@ -8,8 +8,10 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 source $SCRIPT_DIR/pipeline_config.sh		#
 #############################################
 FOLDER=$1
+
 #############################################################
 #Enter the folder containing the files to be processed.		#
+mkdir -p $FOLDER ################################################
 cd $FOLDER 	#####################################################
 ###	Cleanup any prior runs					#
 rm *.lsf.out
@@ -45,7 +47,7 @@ module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
 if [[ ! -f Trinity_files.Trinity.fasta || ! -f "$FOLDER"_mapsplice_alignment.sam ]]; then
-	cp /proj/cdjones_lab/1kGen_Trinity/"$FOLDER"/* . 
+	cp /proj/cdjones_lab/csoeder/1kGen_Trinity/"$FOLDER"/* . 
 	gzip -d *.gz
 echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
 du ERR* >> monitor.log								#
