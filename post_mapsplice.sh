@@ -16,7 +16,7 @@ bsub -J bwaInducks_$FOLDER -o bwaInducks.lsf.out bwa index Trinity_files.Trinity
 bsub -J faidx_$FOLDER -w "done(bwaInducks_$FOLDER)" -o faidx.lsf.out samtools faidx Trinity_files.Trinity.fasta
 #############################################################################
 ### Align the Trinity #######################################
-bsub -J TrinAlign_$FOLDER -w "done(faidx_$FOLDER)" -o TrinAlign.lsf.out bowtie2 -f -x $DATA_DIR/hg19_bowtieindex/hg19 -U Trinity_files.Trinity.fasta -S "$FOLDER"_aligned.sam
+bsub -J TrinAlign_$FOLDER -w "done(faidx_$FOLDER)" -o TrinAlign.lsf.out bowtie2 -f -x $DATA_DIR/hg19_bowtie2index/hg19 -U Trinity_files.Trinity.fasta -S "$FOLDER"_aligned.sam
 bsub -J bamvert2_$FOLDER -w "done(TrinAlign_$FOLDER)" -o bamvert2.lsf.out "samtools view -bS "$FOLDER"_aligned.sam > "$FOLDER"_Assembly_Alignment.bam"
 bsub -J bamsort2_$FOLDER -w "done(bamvert2_$FOLDER)" -o bamsort2.lsf.out "samtools sort "$FOLDER"_Assembly_Alignment.bam "$FOLDER"_Assembly_Alignment.sorted"
 #############################################################################
