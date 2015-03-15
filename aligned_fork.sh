@@ -180,6 +180,8 @@ for assembly in $(grep chr[1-9,X,Y][0-9]*"\s" no_duplicates.bed | cut -f 4 | sor
 	if [[ $((loopnum%10)) -eq 0 ]]; then echo "Site $loopnum of $total_regions checked!"; fi
 	rm *.temp
 done;
+cut -f 1 broken_in_chimp.log > broken_in_chimp.list
+cut -f 1 broken_in_gorilla.log > broken_in_gorilla.list
 grep  -wFf broken_in_chimp.list no_duplicates.bed | grep -wFf broken_in_gorilla.list > broken_in_pan_and_gor.bed
 cat unseen_in_pan_and_gor.bed broken_in_pan_and_gor.bed > no_compprim_homology.bed
 echo "###	... done!"

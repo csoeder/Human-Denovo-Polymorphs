@@ -127,12 +127,12 @@ print
 print "%s 	Coding sequence status:	%s"	%	tuple([name, codSeq])
 
 if codSeq:
-	FILE_OUT=open('coding_in_%s.list'%tuple([PRIMATE]),'a')	
-	FILE_OUT.write('%s\n'%tuple([name]))
+	FILE_OUT=open('coding_in_%s.log'%tuple([PRIMATE]),'a')	
+	FILE_OUT.write('%s\t%s:%s-%s\n'%tuple([name, chrom, start, stop]))
 	FILE_OUT.close()
 elif name !='[blank]':
-	FILE_OUT=open('broken_in_%s.list'%tuple([PRIMATE]),'a')	
-	FILE_OUT.write('%s\n'%tuple([name]))
+	FILE_OUT=open('broken_in_%s.log'%tuple([PRIMATE]),'a')	
+	FILE_OUT.write('%s\t%s:%s-%s\n'%tuple([name, chrom, start, stop]))
 	FILE_OUT.close()
 else:
 	pass
