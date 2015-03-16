@@ -73,7 +73,7 @@ echo "#################################################################"
 echo "###	Now run the bundle scripts ################################"
 for script in `ls | grep -v lsf | grep .sh`;
 		#		submit the job, wait a while, repeat...
-		do bsub -J align_grind_$IDENTIFIER -o $script.lsf.out -q week sh $script; sleep $WAIT_TIME;
+		do bsub -J align_grind_$IDENTIFIER -o $script.lsf.out -q week -n 3 -R "span[hosts=1]" sh $script; sleep $WAIT_TIME; 	#	Special settings so Jenny doesn't yell at me
 	done
 echo "########################################################"
 echo "###	Chill out until the bundle scripts are all done ##############"
