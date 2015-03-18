@@ -18,7 +18,7 @@ conn.commit()
 
 
 curr.execute("CREATE TYPE sex AS ENUM ('M', 'F')")	#	Define sex as a datatype
-curr.execute("CREATE TABLE person ( person_pk serial PRIMARY KEY, person_name varchar(20), person_access varchar(20), sex sex, mother serial references person(pk), father serial references person(pk), pop varchar(20), superpop varchar(20),  rna_seq boolean, meta text);")	#	a human is described as a sample ID and an accession number.
+curr.execute("CREATE TABLE person ( person_pk serial PRIMARY KEY, person_name varchar(20), person_access varchar(20), sex sex, mother serial references person(person_pk), father serial references person(person_pk), pop varchar(20), superpop varchar(20),  rna_seq boolean, meta text);")	#	a human is described as a sample ID and an accession number.
 #	pk, personal identifier ("HG00000"; "NA00000"), accession number (?), sex, mother, father, population, if they are in the RNA-Seq subset 
 #parents are listed; a search will return the siblings. 
 
@@ -41,11 +41,11 @@ curr.execute("CREATE TABLE find (find_pk serial PRIMARY KEY, source serial refer
 #A find is an observation of a specific candidate in a specific individual's transcpriptome.
 #	pk, person, sequence, location, assembly of observation, 
 
-curr.execute("CREATE TABLE antifind (antifind_pk serial PRIMARY KEY, source serial references person(pk), seq serial references sequence(id), loc serial references location(id), meta text )")
+curr.execute("CREATE TABLE antifind (antifind_pk serial PRIMARY KEY, source serial references person(person_pk), seq serial references sequence(sequence_pk), loc serial references location(location_pk), meta text )")
 #An  antifind is the observed *lack* of a specific candidate in a specific individual's transcpriptome.
 # Primarily to store metadata, eg transcription levels
 
-curr.execute("CREATE TABLE variant ( variant_pk serial PRIMARY KEY, chrom varchar(20), pos bigint, contained_by serial references location(id), ref_allele text, alt_alleles text, hom_refs text, hom_alts text, hets text, heterozygosity float(10), pi_hat float(10), snpDBid text, varType text, varSubtype text, meta text )")
+curr.execute("CREATE TABLE variant ( variant_pk serial PRIMARY KEY, chrom varchar(20), pos bigint, contained_by serial references location(location_pk), ref_allele text, alt_alleles text, hom_refs text, hom_alts text, hets text, heterozygosity float(10), pi_hat float(10), snpDBid text, varType text, varSubtype text, meta text )")
 #Describe sites of variation. 
 #		primkey	chromosome	position	referenceallele	alternateallele	homozygousreferenceindividuals	homozygousalternateindividuals	heterozygousinidividuals	heterozygosity	isitaSNP?	isitanIndel?	nucleotideDiversity, 	dbSNP id number, 
 
