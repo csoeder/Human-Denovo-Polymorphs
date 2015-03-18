@@ -34,14 +34,29 @@ with open('%svariation/integrated_call_samples.20130502.ALL.ped'%data_path, 'r')
 for datum in familial:
 	if datum[2:4] != ['0', '0']:	#	If there is a parental relation registered:
 		curr.execute('SELECT person_pk FROM person WHERE person_name = %s;', tuple([datum[1]]))
-		child_pk = curr.fetchone()[0]
+		try:
+			child_pk = curr.fetchone()[0]
+
 		if datum[2] != '0':
-			curr.execute('SELECT person_pk FROM person WHERE person_name = %s;', tuple([datum[2]]))			
-		paternal_pk = curr.fetchone()[0]
+			curr.execute('SELECT person_pk FROM person WHERE person_name = %s;', tuple([datum[2]]))	
+			try:
+				paternal_pk = curr.fetchone()[0]
+				curr.execute("UPDATE person SET father = %s WHERE person.person_pk = %s;"%tuple([paternal_pk, child_pk]))
+			except TypeError:
+				pass
 		if datum[3] != '0':
-			curr.execute('SELECT person_pk FROM person WHERE person_name = %s;', tuple([datum[3]]))			
-		maternal_pk = curr.fetchone()[0]
-		curr.execute("UPDATE person SET mother = %s WHERE person.person_pk = %s;"%tuple([maternal_pk, child_pk]))
+			curr.execute('SELECT person_pk FROM person WHERE person_name = %s;', tuple([datum[3]]))	
+			try:
+				maternal_pk = curr.fetchone()[0]
+				curr.execute("UPDATE person SET mother = %s WHERE person.person_pk = %s;"%tuple([maternal_pk, child_pk]))
+			except TypeError:
+				pass
+
+
+		except TypeError:
+			pass
+
+
 conn.commit()
 
 
