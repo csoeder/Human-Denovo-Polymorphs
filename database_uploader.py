@@ -88,10 +88,10 @@ with open('%s1kGenRoster.dat'%script_path) as f:	#	open and parse the roster of 
 	reader = csv.reader(f, delimiter="\t")
 	dats= list(reader)
 
-for rho in dats:
+for d00d in dats:
 
-	print rho	
-	hombre_nombre = rho[2]
+	print d00d	
+	hombre_nombre = d00d[0]
 
 	#add each person to the database
 
