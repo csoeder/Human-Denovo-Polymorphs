@@ -16,9 +16,9 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr = conn.cursor()
 
 ###		First, populate the database with demographic data
-with open('%s1kGenRoster.dat'%data_path, 'r') as phial:
+with open('%svariation/integrated_call_samples.20130502.ALL.ped'%data_path, 'r') as phial:
 	reader = csv.reader(phial, delimiter='\t')	
-#	reader.next()	#	burn off the one-line header
+	reader.next()	#	burn off the one-line header
 	demographics = list(reader)
 
 #	
@@ -36,11 +36,12 @@ superpops.extend(['AFR']*7)
 superpops.extend(['AMR']*4)
 superpops.extend(['SAS']*5)
 pop_dict = dict(zip(pops, superpops))
-
 #	Source: http://www.1000genomes.org/category/frequently-asked-questions/population
 
+sex_dict = {'1':'M', '2':'F'}
+
 for datum in demographics:
-	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[2], string.capitalize(datum[4][0]), datum[0], pop_dict[datum[0]]]))
+	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[1], sex_dict[datum[4]], datum[6], pop_dict[datum[6]]]))
 conn.commit()
 
 ###		also include familial relations
