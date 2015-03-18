@@ -22,7 +22,7 @@ with open('%svariation/integrated_call_samples_v3.20130502.ALL.panel'%data_path,
 	demographics = list(reader)
 
 for datum in demographics:
-	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[0], string.capitalize(datum[3][0]), datum[1], , datum[2]]))
+	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[0], string.capitalize(datum[3][0]), datum[1], datum[2]]))
 conn.commit()
 
 ###		also include familial relations
