@@ -13,6 +13,8 @@ curr.execute("DROP TABLE person CASCADE;")
 curr.execute("DROP TABLE location CASCADE;")
 curr.execute("DROP TABLE sequence CASCADE;")
 curr.execute("DROP TABLE variant CASCADE;")
+curr.execute("DROP TABLE chimp_location CASCADE;")
+curr.execute("DROP TABLE gorilla_location CASCADE;")
 curr.execute("DROP TYPE sex CASCADE;")
 conn.commit()
 
