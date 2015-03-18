@@ -31,7 +31,7 @@ start_dict = {}	#		All finds from the DB
 
 # curr.execute("SELECT id, chrom, start, stop FROM location;")
 # all_places = curr.fetchall()
-curr.execute("SELECT id, source, loc, seq FROM find;")
+curr.execute("SELECT find_pk, source, loc, seq FROM find;")
 all_finds = curr.fetchall()
 curr.execute("SELECT person_name, person_pk FROM person WHERE person.rna_seq =True;")	#	collect the subset of people with RNA-Seq data
 all_peeps = curr.fetchall()
