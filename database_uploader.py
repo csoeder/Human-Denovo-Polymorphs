@@ -30,7 +30,7 @@ with open('%svariation/integrated_call_samples.20130502.ALL.ped'%data_path, 'r')
 # SAS, South Asian
 pops = ['CHB', 'CHD','JPT','CHS','CDX', 'KHV', 'CEU', 'TSI', 'FIN', 'GBR', 'IBS', 'YRI', 'LWK', 'GWD', 'MSL', 'ESN', 'ASW', 'ACB', 'MXL', 'PUR', 'CLM', 'PEL', 'GIH', 'PJL', 'BEB', 'STU', 'ITU']
 superpops = []
-superpops.extend(['EAS']*5)
+superpops.extend(['EAS']*6)
 superpops.extend(['EUR']*5)
 superpops.extend(['AFR']*7)
 superpops.extend(['AMR']*4)
