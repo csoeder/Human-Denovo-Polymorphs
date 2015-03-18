@@ -18,7 +18,7 @@ curr = conn.cursor()
 ###		First, populate the database with demographic data
 with open('%s1kGenRoster.dat'%data_path, 'r') as phial:
 	reader = csv.reader(phial, delimiter='\t')	
-	reader.next()	#	burn off the one-line header
+#	reader.next()	#	burn off the one-line header
 	demographics = list(reader)
 
 #	
@@ -40,7 +40,7 @@ pop_dict = dict(zip(pops, superpops))
 #	Source: http://www.1000genomes.org/category/frequently-asked-questions/population
 
 for datum in demographics:
-	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[3], string.capitalize(datum[3][0]), datum[0], pop_dict[datum[0]]]))
+	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[2], string.capitalize(datum[4][0]), datum[0], pop_dict[datum[0]]]))
 conn.commit()
 
 ###		also include familial relations
