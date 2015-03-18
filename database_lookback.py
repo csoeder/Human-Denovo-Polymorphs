@@ -26,29 +26,32 @@ missing_dict = {}	#	Were any sequences missing when the transcriptomes were reex
 unexpected_dict = {}#	Did any sequences appear in new individuals when the transcriptomes were reexamined?
 start_dict = {}	#		All finds from the DB
 
-###	0	:	DBpull
+###########	This all is now handled by database_pullBioinfo.py 	###############################################
+# ###	0	:	DBpull
 
-curr.execute("SELECT id, chrom, start, stop FROM location;")
-all_places = curr.fetchall()
-curr.execute("SELECT id, source, loc, seq FROM find;")
-all_finds = curr.fetchall()
-curr.execute("SELECT id, pk FROM person;")
+# curr.execute("SELECT id, chrom, start, stop FROM location;")
+# all_places = curr.fetchall()
+# curr.execute("SELECT id, source, loc, seq FROM find;")
+# all_finds = curr.fetchall()
+curr.execute("SELECT person_name, person_pk FROM person WHERE person.rna_seq =True;")	#	collect the subset of people with RNA-Seq data
 all_peeps = curr.fetchall()
 
 
-###	1	:	Grep the sequence
+# ###	1	:	Grep the sequence
 
-phial = open('lookback.fasta', 'w')
-for find in all_finds:	#	For each sighting, record who expresses each location
-	if find[2] in start_dict.keys():
-		start_dict[find[2]].append(find[1])
-	else:
-		start_dict[find[2]] = [find[1]]
-		curr.execute("SELECT seq FROM sequence WHERE sequence.id=%s"%find[3])	
-		seq = curr.fetchone()[0]
-		phial.write('>%s\n'%str(find[2]))
-		phial.write('%s\n'%seq)
-phial.close()
+# phial = open('lookback.fasta', 'w')
+# for find in all_finds:	#	For each sighting, record who expresses each location
+# 	if find[2] in start_dict.keys():
+# 		start_dict[find[2]].append(find[1])
+# 	else:
+# 		start_dict[find[2]] = [find[1]]
+# 		curr.execute("SELECT seq FROM sequence WHERE sequence.id=%s"%find[3])	
+# 		seq = curr.fetchone()[0]
+# 		phial.write('>%s\n'%str(find[2]))
+# 		phial.write('%s\n'%seq)
+# phial.close()
+################################################################################################################
+
 
 ###	2	:	align it to ALL the transcriptomes
 
@@ -141,4 +144,4 @@ print max(lens), min(lens), np.mean(lens), np.median(lens)
 curr.close()
 conn.close()
 
-os.remove('lookback.fasta')
+#os.remove('lookback.fasta')

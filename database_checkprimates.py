@@ -32,21 +32,23 @@ all_finds = curr.fetchall()
 curr.execute("SELECT id, pk FROM person;")
 all_peeps = curr.fetchall()
 
-###	1	:	Grep the sequence
 
-tot_count=0
-phial = open('lookback.fasta', 'w')
-for find in all_finds:
-	if find[2] in start_dict.keys():
-		start_dict[find[2]].append(find[1])
-		tot_count+=1
-	else:
-		start_dict[find[2]] = [find[1]]
-		curr.execute("SELECT seq FROM sequence WHERE sequence.id=%s"%find[3])	
-		seq = curr.fetchone()[0]
-		phial.write('>%s\n'%str(find[2]))
-		phial.write('%s\n'%seq)
-phial.close()
+###	This is now handed by database_pullBioinfo.py ########################################################
+# ###	1	:	Grep the sequence
+# tot_count=0
+# phial = open('lookback.fasta', 'w')
+# for find in all_finds:
+# 	if find[2] in start_dict.keys():
+# 		start_dict[find[2]].append(find[1])
+# 		tot_count+=1
+# 	else:
+# 		start_dict[find[2]] = [find[1]]
+# 		curr.execute("SELECT seq FROM sequence WHERE sequence.id=%s"%find[3])	
+# 		seq = curr.fetchone()[0]
+# 		phial.write('>%s\n'%str(find[2]))
+# 		phial.write('%s\n'%seq)
+# phial.close()
+###########################################################################################################
 
 ###	2	:	align it to ALL the transcriptomes
 
@@ -89,11 +91,9 @@ print "%s candidates were observed in gorilla only: %s\n"%tuple([len(gorillaz.di
 print "%s candidates appeared clean, ie were not observed in either chimps or gorillas.\n"%tuple([tot_count-len(chumps.intersection(gorillaz))-len(chumps.difference(gorillaz))-len(gorillaz.difference(chumps))])
 
 ###	4	:	add a flag field to the DB?
-
+###				even better, add a location field to track where the chimp/gor homologs are
 
 curr.close()
 conn.close()
-
-os.remove('lookback.fasta')
 
 

@@ -17,13 +17,13 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr= conn.cursor()
 
-curr.execute('SELECT id FROM location WHERE location.poly IS TRUE;')
+curr.execute('SELECT location_pk FROM location WHERE location.poly IS TRUE;')
 all_genes = curr.fetchall()
 
 assoc_list = []
 num_expressers = []
 for jean in all_genes:
-	curr.execute('SELECT pk FROM person WHERE person.pk IN (SELECT source FROM find WHERE find.loc=%s);'%jean[0])
+	curr.execute('SELECT person_pk FROM person WHERE person.person_pk IN (SELECT source FROM find WHERE find.loc=%s);'%jean[0])
 	peeps = curr.fetchall()
 	num_expressers.append(len(peeps))
 	associates = []

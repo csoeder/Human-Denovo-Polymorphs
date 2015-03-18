@@ -17,9 +17,9 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr= conn.cursor()
 
 
-curr.execute("SELECT id FROM location WHERE location.poly IS TRUE;")
+curr.execute("SELECT location_pk FROM location WHERE location.poly IS TRUE;")
 all_places = curr.fetchall()
-curr.execute("SELECT pk FROM person;")
+curr.execute("SELECT person_pk FROM person;")
 all_peeps = curr.fetchall()
 
 
@@ -82,7 +82,7 @@ phial.close()
 plt.xticks([1,2]], ['Non-transcribers', 'Transcribers'], rotation=30)
 plt.ylabel('Average Absolute Expression (Reads/Base)')
 plt.title('Expression (in RNA coverage) at Sites of Transcribers and Non-transcribers')
-plt.savefig('Cumulativenovelty.png')
+plt.savefig('comparative_expression.png')
 
 
 

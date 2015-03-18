@@ -12,11 +12,11 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 
 curr= conn.cursor()
 
-curr.execute("SELECT id, source, seq, loc FROM find;")
+curr.execute("SELECT find_pk, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
-curr.execute("SELECT id, chrom, start, stop FROM location WHERE location.poly IS TRUE;")
+curr.execute("SELECT location_pk, chrom, start, stop FROM location WHERE location.poly IS TRUE;") #	add handchecked = True clause?
 all_places = curr.fetchall()
-curr.execute("SELECT pk, id, sex, pop FROM person;")
+curr.execute("SELECT person_pk, person_name, sex, pop FROM person;")
 all_peeps = curr.fetchall()
 transcriber_ids = []
 for find in all_finds:
@@ -24,7 +24,7 @@ for find in all_finds:
 transcriber_ids = list(set(transcriber_ids))
 transcribers=[]
 for thing in transcriber_ids:
-	curr.execute("SELECT pk, id, sex, pop FROM person where pk=%s;"%thing)
+	curr.execute("SELECT person_pk, person_name, sex, pop FROM person where person_pk=%s;"%thing)
 	transcribers.extend(curr.fetchall())
 
 
