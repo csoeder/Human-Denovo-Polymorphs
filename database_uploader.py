@@ -16,13 +16,31 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr = conn.cursor()
 
 ###		First, populate the database with demographic data
-with open('%svariation/integrated_call_samples_v3.20130502.ALL.panel'%data_path, 'r') as phial:
+with open('%s1kGenRoster.dat'%data_path, 'r') as phial:
 	reader = csv.reader(phial, delimiter='\t')	
 	reader.next()	#	burn off the one-line header
 	demographics = list(reader)
 
+#	
+#	Super Population Codes
+# AFR, African
+# AMR, Ad Mixed American
+# EAS, East Asian
+# EUR, European
+# SAS, South Asian
+pops = ['CHB', 'JPT','CHS','CDX', 'KHV', 'CEU', 'TSI', 'FIN', 'GBR', 'IBS', 'YRI', 'LWK', 'GWD', 'MSL', 'ESN', 'ASW', 'ACB', 'MXL', 'PUR', 'CLM', 'PEL', 'GIH', 'PJL', 'BEB', 'STU', 'ITU']
+superpops = []
+superpops.extend(['EAS']*5)
+superpops.extend(['EUR']*5)
+superpops.extend(['AFR']*7)
+superpops.extend(['AMR']*4)
+superpops.extend(['SAS']*5)
+pop_dict = dict(zip(pops, superpops))
+
+#	Source: http://www.1000genomes.org/category/frequently-asked-questions/population
+
 for datum in demographics:
-	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[0], string.capitalize(datum[3][0]), datum[1], datum[2]]))
+	curr.execute('INSERT INTO person (person_name, sex, pop, superpop) VALUES (%s, %s, %s, %s);', tuple([datum[3], string.capitalize(datum[3][0]), datum[0], pop_dict[datum[0]]]))
 conn.commit()
 
 ###		also include familial relations
