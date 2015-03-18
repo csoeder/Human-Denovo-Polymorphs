@@ -103,6 +103,8 @@ for d00d in dats:
 		deNovos = open('%s%s/mapt/no_compprim_homology.bed'%tuple([working_path, hombre_nombre]), 'r')	#	open the output of the aligned_fork script for parsing and upload
 		spamreader = csv.reader(deNovos, delimiter='\t')
 
+		curr.execute("UPDATE person SET rna_seq = TRUE WHERE person.person_pk = %s;"%tuple([person_pk]))		
+
 		for line in spamreader:
 			try:
 				#	print line
