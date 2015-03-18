@@ -28,7 +28,7 @@ with open('%svariation/integrated_call_samples.20130502.ALL.ped'%data_path, 'r')
 # EAS, East Asian
 # EUR, European
 # SAS, South Asian
-pops = ['CHB', 'JPT','CHS','CDX', 'KHV', 'CEU', 'TSI', 'FIN', 'GBR', 'IBS', 'YRI', 'LWK', 'GWD', 'MSL', 'ESN', 'ASW', 'ACB', 'MXL', 'PUR', 'CLM', 'PEL', 'GIH', 'PJL', 'BEB', 'STU', 'ITU']
+pops = ['CHB', 'CHD','JPT','CHS','CDX', 'KHV', 'CEU', 'TSI', 'FIN', 'GBR', 'IBS', 'YRI', 'LWK', 'GWD', 'MSL', 'ESN', 'ASW', 'ACB', 'MXL', 'PUR', 'CLM', 'PEL', 'GIH', 'PJL', 'BEB', 'STU', 'ITU']
 superpops = []
 superpops.extend(['EAS']*5)
 superpops.extend(['EUR']*5)
@@ -37,6 +37,7 @@ superpops.extend(['AMR']*4)
 superpops.extend(['SAS']*5)
 pop_dict = dict(zip(pops, superpops))
 #	Source: http://www.1000genomes.org/category/frequently-asked-questions/population
+#	NOTE: the asian population CHD is not listed in the above source!
 
 sex_dict = {'1':'M', '2':'F'}
 
