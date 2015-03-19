@@ -112,7 +112,7 @@ for i in problem_children.keys():
 	print i, len(problem_children[i]), problem_children[i]
 	lens.append(len(problem_children[i]))
 	carrier_string=''
-	curr.execute("SELECT id FROM person WHERE person.pk in (SELECT source FROM find WHERE find.loc=%s);" % i)
+	curr.execute("SELECT person_name FROM person WHERE person.person_pk in (SELECT source FROM find WHERE find.loc=%s);" % i)
 	fronds = curr.fetchone()
 	for carrier in fronds:
 		carrier_string = '%s%s,' % tuple([carrier_string, carrier])
