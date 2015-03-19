@@ -119,11 +119,11 @@ for i in problem_children.keys():
 	carrier_string = carrier_string[:-1]	#clip final ,
 	silent_carrier_string=''
 	for carrier in problem_children[i]:
-		curr.execute("SELECT person_name FROM person WHERE person.pk=%s;" % carrier)
+		curr.execute("SELECT person_name FROM person WHERE person.person_pk=%s;" % carrier)
 		dude = curr.fetchone()[0]
 		silent_carrier_string = '%s%s,' % tuple([silent_carrier_string, dude])
 	silent_carrier_string = silent_carrier_string[:-1]
-	curr.execute("SELECT chrom, start, stop, location_pk FROM location WHERE location.id=%s;" % i)
+	curr.execute("SELECT chrom, start, stop, location_pk FROM location WHERE location.location_pk=%s;" % i)
 	location = curr.fetchone()
 	location_string = '%s:%s-%s' % tuple(location[:-1])
 	reportback.write('%s\t%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string, location[-1]]))
