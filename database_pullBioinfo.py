@@ -42,7 +42,7 @@ fastafile = open('cannonical_sequences.fasta', 'w')
 for location in all_places:
 	curr.execute("SELECT seq FROM sequence WHERE sequence.sequence_pk = %s;"%tuple([location[4]]))
 	cannon_seq = curr.fetchone()[0]
-	fastafile.write('>location#%s\n'%tuple([location[0]]))
+	fastafile.write('>%s\n'%tuple([location[0]]))
 	fastafile.write('%s\n'%tuple([cannon_seq]))
 fastafile.close()
 
