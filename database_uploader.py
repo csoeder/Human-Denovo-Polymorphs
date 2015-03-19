@@ -108,7 +108,7 @@ for d00d in dats:
 		for line in spamreader:
 			try:
 				#	print line
-				chro, begin, end, script_tag = line[:4]
+				chro, begin, end, script_tag, dummy_variable, strand = line[:6]
 				seq_query = check_output(['samtools', 'faidx', '%s%s/Trinity_files.Trinity.fasta'%tuple([working_path, hombre_nombre]), script_tag])
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
 				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin, end])])
@@ -133,10 +133,10 @@ for d00d in dats:
 
 
 				try:#is the location already entered in the database, ie, this site has been detected as expressed?
-					curr.execute("SELECT location_pk FROM location WHERE chrom = %s AND start = %s AND stop = %s AND ref = 'hg19';", tuple([chro, begin, end]))
+					curr.execute("SELECT location_pk FROM location WHERE chrom = %s AND start = %s AND stop = %s AND strand = %s AND ref = 'hg19';", tuple([chro, begin, end, strand]))
 					loc_pk = curr.fetchone()[0]
 				except TypeError:#if not, put it into the appropriate table
-					curr.execute('INSERT INTO location (chrom, start, stop, ref, poly, canon_seq) VALUES (%s, %s, %s, %s, %s, %s);', tuple([chro, begin, end, 'hg19', True, ref_seq_pk]))
+					curr.execute('INSERT INTO location (chrom, start, stop, strand, ref, poly, canon_seq) VALUES (%s, %s, %s, %s, %s, %s);', tuple([chro, begin, end, strand, 'hg19', True, ref_seq_pk]))
 					curr.execute("SELECT location_pk FROM location WHERE chrom = %s AND start = %s AND stop = %s AND ref = 'hg19';", tuple([chro, begin, end]))
 					loc_pk = curr.fetchone()[0]
 
