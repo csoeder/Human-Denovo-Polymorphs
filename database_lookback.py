@@ -127,7 +127,7 @@ for i in problem_children.keys():
 	location = curr.fetchone()
 	location_string = '%s:%s-%s' % tuple(location[:-1])
 	reportback.write('%s\t%s\t%s\t%s\n' % tuple([location_string, carrier_string, silent_carrier_string, location[-1]]))
-
+reportback.close()
 
 print max(lens), min(lens), np.mean(lens), np.median(lens)
 
@@ -137,6 +137,15 @@ print max(lens), min(lens), np.mean(lens), np.median(lens)
 
 ###	4	:	add a flag field to the DB?
 #			more likely just kick'em
+
+
+with open('lookback_report.dat', 'rb') as csvfile:
+    spamreader = csv.reader(csvfile, delimiter='\t')
+    lookie = list(spamreader)
+
+for failure in lookie:
+	curr.execute("UPDATE location SET lookback_clean = False WHERE location.location_pk = %s;"%tuple([failure[-1]]))
+
 
 
 

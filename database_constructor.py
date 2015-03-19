@@ -27,7 +27,7 @@ curr.execute("CREATE TABLE person ( person_pk serial PRIMARY KEY, person_name va
 curr.execute("CREATE TABLE sequence ( sequence_pk serial PRIMARY KEY, seq text, ref varchar(20), meta text);")
 #Define a sequence as basically a string of ATCGs ("text") which is derived from some reference genome "ref"
 
-curr.execute("CREATE TABLE location ( location_pk serial PRIMARY KEY, chrom varchar(20), start bigint, stop bigint, strand varchar(2), ref varchar(20), var text, poly boolean, canon_seq serial references sequence(sequence_pk), handchecked boolean, meta text ) ;")
+curr.execute("CREATE TABLE location ( location_pk serial PRIMARY KEY, chrom varchar(20), start bigint, stop bigint, strand varchar(2), ref varchar(20), var text, poly boolean, canon_seq serial references sequence(sequence_pk), lookback_clean boolean, handchecked boolean, meta text ) ;")
 #Define a chromosomal location as an entity which has a chromosome, a start site, and an end site
 #	pk, chromosome, start, stop, reference genome, list of variant sites (?), is the locus polymorphic?, what is the canonical sequence?, has this site been inspected manually?
 
