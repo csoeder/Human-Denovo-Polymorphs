@@ -136,7 +136,7 @@ for d00d in dats:
 					curr.execute("SELECT location_pk FROM location WHERE chrom = %s AND start = %s AND stop = %s AND strand = %s AND ref = 'hg19';", tuple([chro, begin, end, strand]))
 					loc_pk = curr.fetchone()[0]
 				except TypeError:#if not, put it into the appropriate table
-					curr.execute('INSERT INTO location (chrom, start, stop, strand, ref, poly, canon_seq) VALUES (%s, %s, %s, %s, %s, %s);', tuple([chro, begin, end, strand, 'hg19', True, ref_seq_pk]))
+					curr.execute('INSERT INTO location (chrom, start, stop, strand, ref, poly, canon_seq) VALUES (%s, %s, %s, %s, %s, %s, %s);', tuple([chro, begin, end, strand, 'hg19', True, ref_seq_pk]))
 					curr.execute("SELECT location_pk FROM location WHERE chrom = %s AND start = %s AND stop = %s AND ref = 'hg19';", tuple([chro, begin, end]))
 					loc_pk = curr.fetchone()[0]
 
