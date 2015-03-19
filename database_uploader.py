@@ -1,5 +1,5 @@
 import psycopg2
-from Bio import SeqIO
+from Bio import SeqIO, Seq
 import string
 import csv
 import sys
@@ -113,6 +113,9 @@ for d00d in dats:
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
 				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin, end])])
 				reference_seq = ''.join(seq_query.split('\n')[1:]).upper()#				the sequence which appears in the reference genome
+
+				if strand == '-':	#	if it's on the reverse strand...
+					reference_seq = Seq.Seq(reference_seq).reverse_complement().tostring()	#	flip it!
 
 				try:#is the reference sequence one which has already been identified? 
 					curr.execute("SELECT sequence_pk FROM sequence WHERE seq = %s AND ref = 'hg19';", tuple(reference_seq))
