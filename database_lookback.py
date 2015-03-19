@@ -29,7 +29,7 @@ start_dict = {}	#		All finds from the DB
 ###########	This all is now handled by database_pullBioinfo.py 	###############################################
 # ###	0	:	DBpull
 
-curr.execute("SELECT id, chrom, start, stop FROM location;")
+curr.execute("SELECT location_pk, chrom, start, stop FROM location;")
 all_places = curr.fetchall()
 curr.execute("SELECT find_pk, source, loc, seq FROM find;")
 all_finds = curr.fetchall()
