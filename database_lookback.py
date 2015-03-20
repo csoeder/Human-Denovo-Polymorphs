@@ -145,6 +145,7 @@ with open('lookback_report.dat', 'rb') as csvfile:
 
 for failure in lookie:
 	curr.execute("UPDATE location SET lookback_clean = False WHERE location.location_pk = %s;"%tuple([failure[-1]]))
+conn.commit()
 
 
 
