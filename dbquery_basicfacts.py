@@ -14,7 +14,7 @@ curr= conn.cursor()
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
-curr.execute("SELECT location_pk, chrom, start, stop FROM location WHERE location.poly IS TRUE;") #	add handchecked = True clause?
+curr.execute("SELECT location_pk, chrom, start, stop FROM location WHERE location.poly IS TRUE and handchecked IS TRUE;") #	add handchecked = True clause?
 all_places = curr.fetchall()
 curr.execute("SELECT person_pk, person_name, sex, pop FROM person;")
 all_peeps = curr.fetchall()
