@@ -83,7 +83,7 @@ plt.hist(person_dict.values(), bins=stats[0], label='hand-curated')
 
 plt.xlabel('Genes per Individual')
 plt.ylabel('# Individuals')
-plt.xticks(list(arange(0.5, endtick)), list(arange(endtick), 5), rotation=30)
+plt.xticks(list(arange(0.5, endtick, 5)), list(arange(0, endtick, 5)), rotation=30)
 plt.title('Polymorphic De Novo Genes per Individual')
 plt.legend()
 plt.savefig('Genes_per_person_comparison.png')
