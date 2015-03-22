@@ -16,7 +16,7 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr= conn.cursor()
 
  
-curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN ( select location_pk FROM location WHERE location.poly IS TRUE AN location.handchecked IS TRUE ));")
+curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN ( select location_pk FROM location WHERE location.poly IS TRUE AND location.handchecked IS TRUE ));")
 all_peeps = curr.fetchall()
 peeplist = []
 for d00d in all_peeps:
