@@ -57,7 +57,7 @@ plt.hold(False)
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find where find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE );")
 all_finds = curr.fetchall()
-curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE) ;")
+curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE)) ;")
 peeps = curr.fetchall()
 
 stats, person_dict, mackses = puzzler(all_finds, peeps)
