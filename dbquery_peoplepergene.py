@@ -16,11 +16,11 @@ curr= conn.cursor()
 
 
 
-curr.execute("SELECT id, source, seq, loc FROM find;")
+curr.execute("SELECT find_pk, source, seq, loc FROM find where find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.handchecked IS TRUE);")
 all_finds = curr.fetchall()
-curr.execute("SELECT id FROM location WHERE location.poly IS TRUE;")
+curr.execute("SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.handchecked IS TRUE;")
 genes = curr.fetchall()
-curr.execute("SELECT count(*) FROM person;")
+curr.execute("SELECT count(*) FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.handchecked IS TRUE));;")
 numpeeps = curr.fetchone()[0]
 
 gene_dict = {}
@@ -44,9 +44,6 @@ for jean in gene_dict:
 		mackses = '%s %s,'%tuple([mackses, jean])
 	if gene_dict[jean] == 1:
 		singletons += 1
-
-
-
 
 
 
