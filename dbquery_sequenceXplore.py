@@ -63,7 +63,7 @@ curr.execute("SELECT location_pk, start, stop FROM location WHERE location.poly 
 all_genes = curr.fetchall()
 for site in all_genes:
 	curated_sites.append(int(site[2])-int(site[1]))
-print len(curated_sites)
+print len(curated_sites), mean(curated_sites), median(curated_sites)
 
 plt.hold(True)
 plt.hist( curated_sites, bins=5, label='curated candidates' )
