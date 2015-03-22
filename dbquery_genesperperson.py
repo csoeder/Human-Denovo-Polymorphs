@@ -27,7 +27,7 @@ def puzzler(all_finds, peeps):
 	for d00d in person_dict:
 		if person_dict[d00d] == stats[0]:
 			mackses = '%s %s,'%tuple([mackses, d00d])
-	return person_dict, mackses
+	return stats, person_dict, mackses
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find where find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.handchecked IS TRUE);")
 all_finds = curr.fetchall()
@@ -36,7 +36,7 @@ peeps = curr.fetchall()
 curr.execute("SELECT count(*) FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.handchecked IS TRUE;")
 numjeanz = curr.fetchone()[0]
 
-person_dict, mackses = puzzler(all_finds, peeps)
+stats, person_dict, mackses = puzzler(all_finds, peeps)
 
 phial = open('Genes_per_person.txt','w')
 phial.write('The %s genes found were distributed across %s individuals.\n'%tuple([numjeanz, len(person_dict.keys())]))
@@ -60,8 +60,7 @@ all_finds = curr.fetchall()
 curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE ;")
 peeps = curr.fetchall()
 
-person_dict, mackses = puzzler(all_finds, peeps)
-
+stats, person_dict, mackses = puzzler(all_finds, peeps)
 plt.hist(person_dict.values(), bins=stats[0], label='all candidates')
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find where find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean);")
@@ -69,7 +68,7 @@ all_finds = curr.fetchall()
 curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean)) ;")
 peeps = curr.fetchall()
 
-person_dict, mackses = puzzler(all_finds, peeps)
+stats, person_dict, mackses = puzzler(all_finds, peeps)
 plt.hist(person_dict.values(), bins=stats[0], label='never observed to \ninteract with annotations')
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find where find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean AND location.handchecked IS TRUE);")
@@ -77,7 +76,7 @@ all_finds = curr.fetchall()
 curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean AND location.handchecked IS TRUE)) ;")
 peeps = curr.fetchall()
 
-person_dict, mackses = puzzler(all_finds, peeps)
+stats, person_dict, mackses = puzzler(all_finds, peeps)
 plt.hist(person_dict.values(), bins=stats[0], label='hand-curated')
 
 plt.xlabel('Genes per Individual')
