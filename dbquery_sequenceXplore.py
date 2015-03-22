@@ -41,10 +41,36 @@ for jean in all_genes:
 	seq_lens[jean[0]].append(mean(lens))
 
 
-phial = open('Sequence_Basicfacts.txt','w')
-phial.write('The %s genomic sites were expressed in the form of %s unique RNA sequences. The maximum number of sequences per location was %s.\n'%tuple([len(all_genes), sum(num_seqs), max(num_seqs)]))
-phial.write('\nThe sequence length varied from %s bp to %s bp, with a mean and median of %s and %s bp, respectively. (ORFs shorter than 75 bp were rejected.)\n'%tuple([min(seq_lens), max(seq_lens), mean(seq_lens), median(seq_lens)]))
-phial.close()
+#phial = open('Sequence_Basicfacts.txt','w')
+#phial.write('The %s genomic sites were expressed in the form of %s unique RNA sequences. The maximum number of sequences per location was %s.\n'%tuple([len(all_genes), sum(num_seqs), max(num_seqs)]))
+#phial.write('\nThe sequence length varied from %s bp to %s bp, with a mean and median of %s and %s bp, respectively. (ORFs shorter than 75 bp were rejected.)\n'%tuple([min(seq_lens), max(seq_lens), mean(seq_lens), median(seq_lens)]))
+#phial.close()
 
+all_sites = []
+curr.execute("SELECT location_pk, start, stop FROM location WHERE location.poly IS TRUE;")
+all_genes = curr.fetchall()
+for site in all_genes:
+	all_sites.append(int(site[2])-int(site[1]))
 
+lookback_sites = []
+curr.execute("SELECT location_pk, start, stop FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE ;")
+all_genes = curr.fetchall()
+for site in all_genes:
+	lookback_sites.append(int(site[2])-int(site[1]))
+
+curated_sites = []
+curr.execute("SELECT location_pk, start, stop FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.handchecked IS TRUE;")
+all_genes = curr.fetchall()
+for site in all_genes:
+	lookback_sites.append(int(site[2])-int(site[1]))
+
+plt.hold(True)
+plt.hist( all_sites, bins=5, label="all candidates" )
+plt.hist( lookback_sites, bins=5, label='lookback candidates' )
+plt.hist( lookback_sites, bins=5, label='curated candidates' )
+plt.xlabel('ORF Length (nt)')
+plt.ylabel('# Genomic Sites')
+plt.xticks(list(arange(0.5, stats[0])), list(arange(stats[0])), rotation=30)
+plt.title('Distribution of ORF Lengths')
+plt.savefig('ORF_Lengths.png')
 
