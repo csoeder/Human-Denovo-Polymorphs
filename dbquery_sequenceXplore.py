@@ -65,8 +65,6 @@ for site in all_genes:
 	lookback_sites.append(int(site[2])-int(site[1]))
 
 plt.hold(True)
-plt.hist( all_sites, bins=5, label="all candidates" )
-plt.hist( lookback_sites, bins=5, label='lookback candidates' )
 plt.hist( lookback_sites, bins=5, label='curated candidates' )
 plt.legend()
 plt.xlabel('ORF Length (nt)')
