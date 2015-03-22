@@ -71,7 +71,6 @@ plt.hist( lookback_sites, bins=5, label='curated candidates' )
 plt.legend()
 plt.xlabel('ORF Length (nt)')
 plt.ylabel('# Genomic Sites')
-plt.xticks(list(arange(0.5, stats[0])), list(arange(stats[0])), rotation=30)
 plt.title('Distribution of ORF Lengths')
 plt.savefig('ORF_Lengths.png')
 
