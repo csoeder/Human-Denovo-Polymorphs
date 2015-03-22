@@ -53,6 +53,7 @@ plt.xticks(list(arange(0.5, stats[0])), list(arange(stats[0])), rotation=30)
 plt.title('Polymorphic De Novo Genes per Individual')
 plt.savefig('Genes_per_person.png')
 plt.hold(False)
+plt.hold(True)
 
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find where find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE );")
