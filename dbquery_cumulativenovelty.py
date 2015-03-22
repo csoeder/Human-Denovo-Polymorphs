@@ -15,8 +15,8 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr= conn.cursor()
 
-
-curr.execute("SELECT pk FROM person;")
+ 
+curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN ( select location_pk FROM location WHERE location.poly IS TRUE AN location.handchecked IS TRUE ));")
 all_peeps = curr.fetchall()
 peeplist = []
 for d00d in all_peeps:
@@ -41,7 +41,7 @@ def stochastic_sampler(lust):
 	nov=0
 	for members in truffle_shuffle:
 		for goonie in members:
-			curr.execute("SELECT id FROM location WHERE id IN (SELECT loc FROM find WHERE source=%s) AND WHERE location.poly IS TRUE;"%goonie)
+			curr.execute("SELECT location_pk FROM location WHERE location_pk IN (SELECT loc FROM find WHERE find.source=%s) AND WHERE location.poly IS TRUE AND location.handchecked;"%goonie)
 			all_genes = curr.fetchall()
 			for jean in all_genes:
 				if jean[0] in old_news:
