@@ -63,6 +63,7 @@ peeps = curr.fetchall()
 
 stats, person_dict, mackses = puzzler(all_finds, peeps)
 plt.hist(person_dict.values(), bins=stats[0], label='all candidates')
+endtick = stats[0]
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find where find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean);")
 all_finds = curr.fetchall()
@@ -82,7 +83,7 @@ plt.hist(person_dict.values(), bins=stats[0], label='hand-curated')
 
 plt.xlabel('Genes per Individual')
 plt.ylabel('# Individuals')
-plt.xticks(list(arange(0.5, stats[0])), list(arange(stats[0])), rotation=30)
+plt.xticks(list(arange(0.5, endtick)), list(arange(endtick)), rotation=30)
 plt.title('Polymorphic De Novo Genes per Individual')
 plt.legend()
 plt.savefig('Genes_per_person_comparison.png')
