@@ -62,10 +62,11 @@ curated_sites = []
 curr.execute("SELECT location_pk, start, stop FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.handchecked IS TRUE;")
 all_genes = curr.fetchall()
 for site in all_genes:
-	lookback_sites.append(int(site[2])-int(site[1]))
+	curated_sites.append(int(site[2])-int(site[1]))
+print len(curated_sites)
 
 plt.hold(True)
-plt.hist( lookback_sites, bins=5, label='curated candidates' )
+plt.hist( curated_sites, bins=5, label='curated candidates' )
 plt.legend()
 plt.xlabel('ORF Length (nt)')
 plt.ylabel('# Genomic Sites')
