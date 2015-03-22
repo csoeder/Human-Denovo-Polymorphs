@@ -22,7 +22,7 @@ curr= conn.cursor()
 num_seqs = {}
 seq_lens = {}
 span = 0
-curr.execute("SELECT id, start, stop FROM location WHERE location.poly IS TRUE;")
+curr.execute("SELECT location_pk, start, stop FROM location WHERE location.poly IS TRUE;")
 all_genes = curr.fetchall()
 for jean in all_genes:
 	span += jean[2]-jean[1]
@@ -68,6 +68,7 @@ plt.hold(True)
 plt.hist( all_sites, bins=5, label="all candidates" )
 plt.hist( lookback_sites, bins=5, label='lookback candidates' )
 plt.hist( lookback_sites, bins=5, label='curated candidates' )
+plt.legend()
 plt.xlabel('ORF Length (nt)')
 plt.ylabel('# Genomic Sites')
 plt.xticks(list(arange(0.5, stats[0])), list(arange(stats[0])), rotation=30)
