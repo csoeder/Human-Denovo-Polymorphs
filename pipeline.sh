@@ -47,14 +47,14 @@ module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
 {	#	Try to pull the already-processed reads, if they exist...
-	cp /proj/cdjones_lab/csoeder/1kGen_Processed/"$FOLDER"_archived.gz . ;
-	tar xf "$FOLDER"_archived.gz ;
+	cp -r /proj/cdjones_lab/csoeder/1kGen_Processed/"$FOLDER"_archived . ;
 	mv "$FOLDER"_archived/* . ;
+	gzip -d *.gz ;
 } || { cp /proj/cdjones_lab/csoeder/1kGen_RNASeq/"$FOLDER"/* . ;
 	gzip -d *.gz
 	echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
 	du ERR* >> monitor.log								#
-} #	If the processed files don't exist, pull the raw reads to create them! 
+} #	If the processed files don't exist, pull the raw reads to create 
 #############################################################
 sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log
