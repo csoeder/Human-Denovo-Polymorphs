@@ -46,12 +46,15 @@ module load bwa 							#
 module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
-if [[ ! -f Trinity_files.Trinity.fasta || ! -f "$FOLDER"_mapsplice_alignment.sam ]]; then
-	cp /proj/cdjones_lab/csoeder/1kGen_Trinity/"$FOLDER"/* . 
+{	#	Try to pull the already-processed reads, if they exist...
+	cp /proj/cdjones_lab/csoeder/1kGen_Processed/"$FOLDER"_archived.gz . ;
+	tar xf "$FOLDER"_archived.gz ;
+	mv "$FOLDER"_archived/* . ;
+} || { cp /proj/cdjones_lab/csoeder/1kGen_RNASeq/"$FOLDER"/* . ;
 	gzip -d *.gz
-echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
-du ERR* >> monitor.log								#
-fi
+	echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
+	du ERR* >> monitor.log								#
+} #	If the processed files don't exist, pull the raw reads to create them! 
 #############################################################
 sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log

@@ -44,8 +44,8 @@ bsub -J "$FOLDER"_aligned_fork -q week -w "done(faidx_$FOLDER) && done(gather_ma
 #bsub -J $1_unaligned_fork -q week -w "done(faidx_$1) && done(gather_unmaps_$1) && done(rnaInducks_$1)" -o unaligned_fork.lsf.out -q week "sh $SCRIPT_DIR/unaligned_fork_v3.5_parallel.sh $1_Assemblies_unmapped.sam $1_mapsplice_alignment.sort.bam Trinity_files.Trinity.fasta RNASeq_vs_Trinity.sort.bam $1_mapsplice_alignment.bed $1"
 #	ignore the unaligned fork
 ############################################################################
-### Is it done? Email me. ###################################
-bsub -J "$FOLDER"_alert -w "done("$FOLDER"_aligned_fork)" 'rm *.fastq; echo "$FOLDER" has successfully completed'
+### Is it done? Email me. ###################################	#	and archive it
+bsub -J "$FOLDER"_alert -w "done("$FOLDER"_aligned_fork)" 'rm *.fastq; echo "$FOLDER" has successfully completed; mkdir "$FOLDER"_archived; cp "$FOLDER"_mapsplice_alignment.sort.bam "$FOLDER"_archived/ ; cp Trinity_files.Trinity.fasta "$FOLDER"_archived/ ; gzip -r "$FOLDER"_archived; mv "$FOLDER"_archived /proj/cdjones_lab/csoeder/1kGen_Processed/; ' 
 #############################################################################
 
 
