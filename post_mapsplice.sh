@@ -45,7 +45,7 @@ bsub -J "$FOLDER"_aligned_fork -q week -w "done(faidx_$FOLDER) && done(gather_ma
 #	ignore the unaligned fork
 ############################################################################
 ### Is it done? Email me. ###################################	#	and archive it
-bsub -J "$FOLDER"_alert -w "done("$FOLDER"_aligned_fork)" 'rm *.fastq; echo "$FOLDER" has successfully completed; mkdir "$FOLDER"_archived; cp "$FOLDER"_mapsplice_alignment.sort.bam "$FOLDER"_archived/ ; cp Trinity_files.Trinity.fasta "$FOLDER"_archived/ ; gzip -r "$FOLDER"_archived; mv "$FOLDER"_archived /proj/cdjones_lab/csoeder/1kGen_Processed/; ' 
+bsub -J "$FOLDER"_alert -w "done("$FOLDER"_aligned_fork)" 'rm *.fastq; echo "$FOLDER" has successfully completed' #	 changing this back; archive by hand.
 #############################################################################
 
 
