@@ -26,7 +26,7 @@ fi
 if [ ! -f Trinity_files.Trinity.fasta ]; then
 	mkdir Trinity_files					#
 	# bsub -J Trinity_$FOLDER -x -q week -o Trinity_$FOLDER.lsf.out -M 75 '/nas02/home/k/e/keklund/bin/perl /nas02/home/k/e/keklund/bin/trinityrnaseq_r2013-02-25/Trinity.pl --CPU 6 --JM 50G --seqType fq --inchworm_cpu 6 --bflyCPU 6 --left ERR*_1.fastq --right ERR*_2.fastq --output Trinity_files --full_cleanup'
-	bsub -J Trinity_$FOLDER -x -q week -o Trinity_$FOLDER.lsf.out '/nas02/home/k/e/keklund/bin/perl /nas02/home/k/e/keklund/bin/trinityrnaseq_r2013-02-25/Trinity.pl --CPU 6 --JM 50G --seqType fq --inchworm_cpu 6 --bflyCPU 6 --left ERR*_1.fastq --right ERR*_2.fastq --output Trinity_files --full_cleanup'
+	bsub -J Trinity_$FOLDER -x -M 25 -q week -o Trinity_$FOLDER.lsf.out '/nas02/home/k/e/keklund/bin/perl /nas02/home/k/e/keklund/bin/trinityrnaseq_r2013-02-25/Trinity.pl --CPU 6 --JM 50G --seqType fq --inchworm_cpu 6 --bflyCPU 6 --left ERR*_1.fastq --right ERR*_2.fastq --output Trinity_files --full_cleanup'
 else									#
 	bsub -J Trinity_$FOLDER -q week -o Trinity_$FOLDER.lsf.out echo "trivial"
 fi 										#
