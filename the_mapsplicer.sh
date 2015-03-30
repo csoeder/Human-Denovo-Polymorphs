@@ -15,7 +15,7 @@ if [[ ! -f "$FOLDER"_mapsplice_alignment.sam ]]; then
 	bsub -J bam2bed_$FOLDER -w "done(bamsort_$FOLDER)" -o bam2bed.lsf.out "bedtools bamtobed -bed12 -i "$FOLDER"_mapsplice_alignment.sort.bam > "$FOLDER"_mapsplice_alignment.bed"
 	echo "$(date)	MAPSPLICER:		MapSplice jobs submitted"	>> monitor.log
 else
-	bsub -J splutvert_$FOLDER -w "done(mvsplut_$FOLDER)" -o splutvert.lsf.out "samtools view -Sbh "$FOLDER"_mapsplice_alignment.sam > "$FOLDER"_mapsplice_alignment.bam"
+	bsub -J splutvert_$FOLDER -o splutvert.lsf.out "samtools view -Sbh "$FOLDER"_mapsplice_alignment.sam > "$FOLDER"_mapsplice_alignment.bam"
 	bsub -J bamsort_$FOLDER -w "done(splutvert_$FOLDER)" -o bamsort.lsf.out samtools sort "$FOLDER"_mapsplice_alignment.bam "$FOLDER"_mapsplice_alignment.sort
 	bsub -J splutDex_$FOLDER -w "done(bamsort_$FOLDER)" -o splutDex.lsf.out samtools index "$FOLDER"_mapsplice_alignment.sort.bam
 	bsub -J bam2bed_$FOLDER -w "done(bamsort_$FOLDER)" -o bam2bed.lsf.out "bedtools bamtobed -bed12 -i "$FOLDER"_mapsplice_alignment.sort.bam > "$FOLDER"_mapsplice_alignment.bed"
