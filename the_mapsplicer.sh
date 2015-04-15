@@ -40,5 +40,5 @@ fi 										#
 #echo >> ticktock.txt					#
 #########################################
 touch a.fastq
-bsub -J alert_$FOLDER -w "done(bam2bed_$FOLDER) && done(splutDex_$FOLDER) && done(Trinity_$FOLDER)" -o heavylifting.lsf.out rm *.fastq
+bsub -J alert_"$FOLDER" -w "done(bam2bed_$FOLDER) && done(splutDex_$FOLDER) && done(Trinity_$FOLDER)" -o heavylifting.lsf.out rm *.fastq
 #############################################################
