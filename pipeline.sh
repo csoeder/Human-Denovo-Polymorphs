@@ -60,7 +60,7 @@ if [ ! -e Trinity_files.Trinity.fasta ] || [ ! -e "$FOLDER"_mapsplice_alignment.
 	} " #	...if the processed files don't exist, pull the raw reads to create 
 fi
 #############################################################
-bsub sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
+bsub -o /dev/null sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log
 sleep 30					#	Chill out for a bit, then submit the post-mapsplice script
 bsub -J brief_intermission_$FOLDER -w "done(alert_$FOLDER)" -o intermission.lsf.out sh $SCRIPT_DIR/post_mapsplice.sh $FOLDER
