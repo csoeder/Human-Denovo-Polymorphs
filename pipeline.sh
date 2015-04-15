@@ -46,17 +46,18 @@ module load bwa 							#
 module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
-{	#	Try to pull the already-processed reads, if they exist...
-	cp -r /proj/cdjones_lab/csoeder/1kGen_Processed/"$FOLDER"_archived . ;
+#	Try to pull the already-processed reads, if they exist...
+bsub -J grabdata_"$FOLDER" -q ms -K "{	
+	cp -r /ms/home/c/s/csoeder/1kGen_Processed/1kGen_Processed/"$FOLDER"_archived . ;
 	mv "$FOLDER"_archived/* . ;
 	gzip -d *.gz ;
-} || { cp /proj/cdjones_lab/csoeder/1kGen_RNASeq/"$FOLDER"/* . ;
+} || { cp /ms/home/c/s/csoeder/1kGen_RNASeq/"$FOLDER"/* . ;
 	gzip -d *.gz
-	echo "RNA-Seq reads:	" >> monitor.log	#	Note the lack of Trinity assembly frontload
+	echo 'RNA-Seq reads:	' >> monitor.log	
 	du ERR* >> monitor.log								#
-} #	If the processed files don't exist, pull the raw reads to create 
+} " #	...if the processed files don't exist, pull the raw reads to create 
 #############################################################
-sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
+bsub sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log
 sleep 30					#	Chill out for a bit, then submit the post-mapsplice script
 bsub -J brief_intermission_$FOLDER -w "done(alert_$FOLDER)" -o intermission.lsf.out sh $SCRIPT_DIR/post_mapsplice.sh $FOLDER
