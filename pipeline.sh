@@ -46,16 +46,19 @@ module load bwa 							#
 module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
-#	Try to pull the already-processed reads, if they exist...
-bsub -J grabdata_"$FOLDER" -q ms -K "{	
-	cp -r /ms/home/c/s/csoeder/1kGen_Processed/1kGen_Processed/"$FOLDER"_archived . ;
-	mv "$FOLDER"_archived/* . ;
-	gzip -d *.gz ;
-} || { cp /ms/home/c/s/csoeder/1kGen_RNASeq/"$FOLDER"/* . ;
-	gzip -d *.gz
-	echo 'RNA-Seq reads:	' >> monitor.log	
-	du ERR* >> monitor.log								#
-} " #	...if the processed files don't exist, pull the raw reads to create 
+#	Are the processed data files in the folder?
+if [ ! -e Trinity_files.Trinity.fasta ] || [ ! -e "$FOLDER"_mapsplice_alignment.sam ] ; then 
+#	If not, try to pull the already-processed reads, if they exist...
+	bsub -J grabdata_"$FOLDER" -q ms -K "{	
+		cp -r /ms/home/c/s/csoeder/1kGen_Processed/1kGen_Processed/"$FOLDER"_archived . ;
+		mv "$FOLDER"_archived/* . ;
+		gzip -d *.gz ;
+	} || { cp /ms/home/c/s/csoeder/1kGen_RNASeq/"$FOLDER"/* . ;
+		gzip -d *.gz
+		echo 'RNA-Seq reads:	' >> monitor.log	
+		du ERR* >> monitor.log								#
+	} " #	...if the processed files don't exist, pull the raw reads to create 
+fi
 #############################################################
 bsub sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log
