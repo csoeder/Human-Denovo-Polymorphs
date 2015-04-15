@@ -5,7 +5,7 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 source $SCRIPT_DIR/pipeline_config.sh	#################################
 FOLDER=$1
 ###Mapsplice the reads#######################################
-if [[ ! -f "$FOLDER"_mapsplice_alignment.sam ]]; then
+if [[ ! -f "$FOLDER"_mapsplice_alignment.sort.bam ]]; then
 #	bsub -J mapsplut_$FOLDER -o mapsplut.lsf.out -M 75 -q week python /nas02/apps/mapsplice-2.1.4/src/MapSplice-v2.1.4/mapsplice.py -c /netscr/csoeder/1kGen/data/hg19_split/ -x /netscr/csoeder/1kGen/data/hg19_bowtieindex/hg19 -1 ERR*_1.fastq -2 ERR*_2.fastq
 	bsub -J mapsplut_$FOLDER -o mapsplut.lsf.out -q week python /nas02/apps/mapsplice-2.1.4/src/MapSplice-v2.1.4/mapsplice.py -c /netscr/csoeder/1kGen/data/hg19_split/ -x /netscr/csoeder/1kGen/data/hg19_bowtieindex/hg19 -1 ERR*_1.fastq -2 ERR*_2.fastq
 	bsub -J mvsplut_$FOLDER -w "done(mapsplut_$FOLDER)" -o mvsplut.lsf.out  cp mapsplice_out/alignments.sam "$FOLDER"_mapsplice_alignment.sam
