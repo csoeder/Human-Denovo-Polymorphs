@@ -47,7 +47,7 @@ module load bowtie
 echo "$(date)	META:		modules loaded"	>> monitor.log
 #############################################
 #	Are the processed data files in the folder?
-if [ ! -e Trinity_files.Trinity.fasta ] || [ ! -e "$FOLDER"_mapsplice_alignment.sam ] ; then 
+if [ ! -e Trinity_files.Trinity.fasta ] || [ ! -e "$FOLDER"_mapsplice_alignment.sort.bam ] ; then 
 #	If not, try to pull the already-processed reads, if they exist...
 	bsub -J grabdata_"$FOLDER" -q ms -K "{	
 		cp -r /ms/home/c/s/csoeder/1kGen_Processed/1kGen_Processed/"$FOLDER"_archived . ;
