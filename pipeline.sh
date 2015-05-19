@@ -63,6 +63,7 @@ fi
 bsub -o mapsplutter.lsf.out -J mapsplutter_"$FOLDER" sh $SCRIPT_DIR/the_mapsplicer.sh $FOLDER 	#	Run the MapSplice script	#
 echo "$(date)	MAPSPLICE:		the_mapsplicer submitted to run" >> monitor.log
 sleep 30					#	Chill out for a bit, then submit the post-mapsplice script
-bsub -J brief_intermission_$FOLDER -w "done(alert_$FOLDER) && done(mapsplutter_$FOLDER)" -o intermission.lsf.out sh $SCRIPT_DIR/post_mapsplice.sh $FOLDER
+#bsub -J brief_intermission_$FOLDER -w "done(alert_$FOLDER) && done(mapsplutter_$FOLDER)" -o intermission.lsf.out sh $SCRIPT_DIR/post_mapsplice.sh $FOLDER
+bsub -J brief_intermission_$FOLDER -w "done(mapsplutter_$FOLDER)" -o intermission.lsf.out sh $SCRIPT_DIR/post_mapsplice.sh $FOLDER
 echo "$(date)	POSTSPLUT:		post_mapsplice queued" >> monitor.log
 #############################################################
