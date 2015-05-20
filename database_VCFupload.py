@@ -11,8 +11,8 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 
 
-data_path='/netscr/csoeder/1kGen/data/'
-
+#data_path='/netscr/csoeder/1kGen/data/'
+data_path='/proj/cdjones_lab/csoeder/1kGen_variation/'
 
 
 
