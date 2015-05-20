@@ -63,7 +63,7 @@ for site in loc_sites:
 			curr.execute("UPDATE location SET poly = %s WHERE location.id = %s;"%tuple([False, site[0]]))
 
 	else:
-		if not Parsley('%sALL.%s.phase1_release_v3.20101123.snps_indels_svs.genotypes.vcf.gz'%tuple([data_path, site[1]])):
+		if not Parsley('%sALL.%s.phase3_shapeit2_mvncall_integrated_v5a.20130502.genotypes.vcf.gz'%tuple([data_path, site[1]])):
 			curr.execute("UPDATE location SET poly = %s WHERE location.id = %s;"%tuple([False, site[0]]))
 
 
