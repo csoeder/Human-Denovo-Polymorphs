@@ -58,7 +58,7 @@ all_peeps = curr.fetchall()
 for d00d in all_peeps:
 #	os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta | samtools view -Sbh | samtools sort - -f %s/%s_lookback.bam" &'%tuple([d00d[0]]*5))
 	if os.path.isfile('%s%s/Trinity_files.Trinity.fasta'%tuple([working_path,d00d[0]])):
-		os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s%s/Trinity_files.Trinity.fasta cannonical_sequences.fasta | samtools view -Sbh - | samtools sort - -f %s%s/%s_lookback.bam" &'%tuple([d00d[0],d00d[0],working_path,d00d[0],working_path,d00d[0],d00d[0]]))
+		os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s%s/Trinity_files.Trinity.fasta canonical_sequences.fasta | samtools view -Sbh - | samtools sort - -f %s%s/%s_lookback.bam" &'%tuple([d00d[0],d00d[0],working_path,d00d[0],working_path,d00d[0],d00d[0]]))
 		sleep(0.1)
 sleep(0.5)
 for d00d in all_peeps:
