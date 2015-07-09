@@ -58,7 +58,7 @@ all_peeps = curr.fetchall()
 for d00d in all_peeps:
 #	os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta | samtools view -Sbh | samtools sort - -f %s/%s_lookback.bam" &'%tuple([d00d[0]]*5))
 	if os.path.isfile('%s%s/Trinity_files.Trinity.fasta'%tuple([working_path,d00d[0]])):
-		os.system('bsub -J DBlookback_%s -o DBlookback_%s.lsf.out "bwa mem %s%s/Trinity_files.Trinity.fasta canonical_sequences.fasta | samtools view -Sbh - | samtools sort - -f %s%s/%s_lookback.bam" &'%tuple([d00d[0],d00d[0],working_path,d00d[0],working_path,d00d[0],d00d[0]]))
+		os.system('bsub -J DBlookback_%s -o /dev/null "bwa mem %s%s/Trinity_files.Trinity.fasta canonical_sequences.fasta | samtools view -Sbh - | samtools sort - -f %s%s/%s_lookback.bam" &'%tuple([d00d[0],d00d[0],working_path,d00d[0],working_path,d00d[0],d00d[0]]))
 		sleep(0.1)
 sleep(0.5)
 for d00d in all_peeps:
@@ -81,7 +81,10 @@ for i in retro_dict.keys():
 	old_dict[i] = retro_dict[i]
 
 for fund in all_finds:	#	If a site found on lookback is recorded in the DB, it's not a problem - remove from the list
-	retro_dict[fund[1]].pop(retro_dict[fund[1]].index(str(fund[2])))
+	try:
+		retro_dict[fund[1]].pop(retro_dict[fund[1]].index(str(fund[2])))
+	except ValueError:
+		print "Uhoh! that database entry wasn't confirmed by lookback!", fund
 
 new_dict = {}	#	Another copy for comparison
 for i in retro_dict.keys():
