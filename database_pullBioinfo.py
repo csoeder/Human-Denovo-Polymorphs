@@ -38,7 +38,7 @@ for location in all_places:
 bedfile.close()
 
 
-fastafile = open('cannonical_sequences.fasta', 'w')
+fastafile = open('canonical_sequences.fasta', 'w')
 for location in all_places:
 	curr.execute("SELECT seq FROM sequence WHERE sequence.sequence_pk = %s;"%tuple([location[4]]))
 	cannon_seq = curr.fetchone()[0]

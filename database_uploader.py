@@ -8,6 +8,7 @@ from subprocess import call, check_output
 
 script_path='/netscr/csoeder/1kGen/query-process/'
 working_path='/netscr/csoeder/1kGen/individuals/'
+#	working_path='/nas02/home/c/s/csoeder/Denovo_Candidates/'
 data_path='/netscr/csoeder/1kGen/data/'
 
 pwd = sys.argv[1]	#password
@@ -126,7 +127,7 @@ for d00d in dats:
 					ref_seq_pk = curr.fetchone()[0]
 
 				try:#is the transcriptome sequence one which has already been identified? 
-					curr.execute("SELECT sequence_pk FROM sequence WHERE seq = %s AND ref = 'hg19';", tuple(transcript_seq))
+					curr.execute("SELECT sequence_pk FROM sequence WHERE seq = %s AND ref = 'hg19';", tuple([transcript_seq]))
 					trans_seq_pk = curr.fetchone()[0]
 				except TypeError:#if not, put it in the DB
 					curr.execute("INSERT INTO sequence (seq, ref) VALUES (%s, %s);", tuple([transcript_seq, 'hg19']))
