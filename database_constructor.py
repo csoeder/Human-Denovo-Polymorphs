@@ -54,9 +54,6 @@ curr.execute("CREATE TABLE variant ( variant_pk serial PRIMARY KEY, chrom varcha
 
 print "... base rebuilt."
 
- 
-
-
 conn.commit()
 
 curr.close()
