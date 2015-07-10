@@ -11,7 +11,7 @@ curr = conn.cursor()
 
 
 with open('CHIMP.noncoding', 'rb') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter='\t')
+	spamreader = csv.reader(csvfile, delimiter='\t')
 	chimp_clean = list(spamreader)
 
 for location_pk in chimp_clean:
@@ -19,7 +19,7 @@ for location_pk in chimp_clean:
 	conn.commit()
 
 with open('GORILLA.noncoding', 'rb') as csvfile:
-    spamreader = csv.reader(csvfile, delimiter='\t')
+	spamreader = csv.reader(csvfile, delimiter='\t')
 	gorilla_clean = list(spamreader)
 
 for location_pk in gorilla_clean:
