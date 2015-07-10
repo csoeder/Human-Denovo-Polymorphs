@@ -29,6 +29,14 @@ for location_pk in gorilla_clean:
 	conn.commit()
 
 
+with open('unseen.bed', 'rb') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter='\t')
+	for loc in spamreader:
+		curr.execute("SELECT location_pk FROM location WHERE chrom = %s AND start = %s AND stop = %s;", tuple([loc[0], loc[1], loc[2]]))
+		loc_pk = curr.fetchone()[0]
+		curr.execute("UPDATE location SET pan_noncoding = True WHERE location.location_pk = %s;", tuple([loc_pk]))
+		curr.execute("UPDATE location SET gor_noncoding = True WHERE location.location_pk = %s;", tuple([loc_pk]))
+		conn.commit()
 curr.close()
 conn.close()
 
