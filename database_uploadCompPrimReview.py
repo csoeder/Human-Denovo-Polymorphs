@@ -15,7 +15,8 @@ with open('CHIMP.noncoding', 'rb') as csvfile:
 	chimp_clean = list(spamreader)
 
 for location_pk in chimp_clean:
-	curr.execute("UPDATE location SET pan_noncoding = True WHERE location.location_pk = %s;"%tuple([location_pk]))
+	print location_pk
+	curr.execute("UPDATE location SET pan_noncoding = True WHERE location.location_pk = %s;"%tuple(location_pk))
 	conn.commit()
 
 with open('GORILLA.noncoding', 'rb') as csvfile:
@@ -23,7 +24,8 @@ with open('GORILLA.noncoding', 'rb') as csvfile:
 	gorilla_clean = list(spamreader)
 
 for location_pk in gorilla_clean:
-	curr.execute("UPDATE location SET gor_noncoding = True WHERE location.location_pk = %s;"%tuple([location_pk]))
+	print location_pk
+	curr.execute("UPDATE location SET gor_noncoding = True WHERE location.location_pk = %s;"%tuple(location_pk))
 	conn.commit()
 
 
