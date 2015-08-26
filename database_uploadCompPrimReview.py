@@ -10,7 +10,7 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr = conn.cursor()
 
 
-with open('CHIMP.noncoding', 'rb') as csvfile:
+with open('CHIMP.nevercoding', 'rb') as csvfile:
 	spamreader = csv.reader(csvfile, delimiter='\t')
 	chimp_clean = list(spamreader)
 
@@ -19,7 +19,7 @@ for location_pk in chimp_clean:
 	curr.execute("UPDATE location SET pan_noncoding = True WHERE location.location_pk = %s;"%tuple(location_pk))
 	conn.commit()
 
-with open('GORILLA.noncoding', 'rb') as csvfile:
+with open('GORILLA.nevercoding', 'rb') as csvfile:
 	spamreader = csv.reader(csvfile, delimiter='\t')
 	gorilla_clean = list(spamreader)
 

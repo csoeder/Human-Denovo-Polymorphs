@@ -89,8 +89,8 @@ def reverse_ORFome():
 
 
 
-vial = open("%s.noncoding"%PRIMATE, 'w')
-
+non_vial = open("%s.noncoding"%PRIMATE, 'w')
+cod_vial = open("%s.coding"%PRIMATE, 'w')
 
 
 with open(FILE_IN, 'rb') as csvfile:
@@ -120,10 +120,10 @@ with open(FILE_IN, 'rb') as csvfile:
 
 			if check_output(['bedtools', 'intersect',  '-f', '0.75', '-b', 'ORFome.tmp', '-a', 'putative.tmp' ]) == '':
 				print 'no overlup ... homolog clean'
-				vial.write("%s\n"%tuple([name]))
+				non_vial.write("%s\n"%tuple([name]))
 			else:
 				print "homologous coding region in %s" % PRIMATE
-
+				cod_vial.write("%s\n"%tuple([name]))
 			os.remove('putative.tmp')
 			os.remove('ORFome.tmp')
 
