@@ -7,8 +7,8 @@ import os
 from subprocess import call, check_output
 
 script_path='/netscr/csoeder/1kGen/query-process/'
-working_path='/netscr/csoeder/1kGen/individuals/'
-#	working_path='/nas02/home/c/s/csoeder/Denovo_Candidates/'
+working_path='/netscr/csoeder/1kGen/individuals/'	#	Where the BAM/FA alignements are
+crunched_path='/nas02/home/c/s/csoeder/Denovo_Candidates/'	#	Where the pipeline results are kept
 data_path='/netscr/csoeder/1kGen/data/'
 
 pwd = sys.argv[1]	#password
@@ -110,7 +110,7 @@ for d00d in dats:
 			try:
 				#	print line
 				chro, begin, end, script_tag, dummy_variable, strand = line[:6]
-				seq_query = check_output(['samtools', 'faidx', '%s%s/Trinity_files.Trinity.fasta'%tuple([working_path, hombre_nombre]), script_tag])
+				seq_query = check_output(['samtools', 'faidx', '%s%s/Trinity_files.Trinity.fasta'%tuple([crunched_path, hombre_nombre]), script_tag])
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
 				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin, end])])
 				reference_seq = ''.join(seq_query.split('\n')[1:]).upper()#				the sequence which appears in the reference genome
