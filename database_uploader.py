@@ -113,7 +113,7 @@ for d00d in dats:
 				chro, begin, end, script_tag, dummy_variable, strand = line[:6]
 				seq_query = check_output(['samtools', 'faidx', '%s%s/Trinity_files.Trinity.fasta'%tuple([working_path, hombre_nombre]), script_tag])
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
-				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin, end])])
+				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin+1, end])])
 				reference_seq = ''.join(seq_query.split('\n')[1:]).upper()#				the sequence which appears in the reference genome
 
 				if strand == '-':	#	if it's on the reverse strand...
