@@ -96,12 +96,13 @@ for d00d in dats:
 
 	#add each person to the database
 
+	print '%s%s/mapt/no_compprim_homology.bed'%tuple([crunched_path, hombre_nombre])
 	try:	#	Try adding the finds from each person.
 
 		curr.execute('SELECT person_pk FROM person WHERE person_name = %s;', tuple([hombre_nombre]))	#	locate this d00d in the DB
 		person_pk = curr.fetchone()[0]
 
-		deNovos = open('%s%s/mapt/no_compprim_homology.bed'%tuple([working_path, hombre_nombre]), 'r')	#	open the output of the aligned_fork script for parsing and upload
+		deNovos = open('%s%s/mapt/no_compprim_homology.bed'%tuple([crunched_path, hombre_nombre]), 'r')	#	open the output of the aligned_fork script for parsing and upload
 		spamreader = csv.reader(deNovos, delimiter='\t')
 
 		curr.execute("UPDATE person SET rna_seq = TRUE WHERE person.person_pk = %s;"%tuple([person_pk]))		
@@ -110,7 +111,7 @@ for d00d in dats:
 			try:
 				#	print line
 				chro, begin, end, script_tag, dummy_variable, strand = line[:6]
-				seq_query = check_output(['samtools', 'faidx', '%s%s/Trinity_files.Trinity.fasta'%tuple([crunched_path, hombre_nombre]), script_tag])
+				seq_query = check_output(['samtools', 'faidx', '%s%s/Trinity_files.Trinity.fasta'%tuple([working_path, hombre_nombre]), script_tag])
 				transcript_seq = ''.join(seq_query.split('\n')[1:]).upper()#			the sequence which appears in the transcriptome
 				seq_query = check_output(['samtools', 'faidx', '%shg19.fa'%data_path, '%s:%s-%s'%tuple([chro, begin, end])])
 				reference_seq = ''.join(seq_query.split('\n')[1:]).upper()#				the sequence which appears in the reference genome
