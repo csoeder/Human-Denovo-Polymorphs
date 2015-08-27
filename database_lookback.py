@@ -63,7 +63,7 @@ for d00d in all_peeps:
 sleep(0.5)
 for d00d in all_peeps:
 	if os.path.isfile('%s%s/Trinity_files.Trinity.fasta'%tuple([working_path,d00d[0]])):
-		os.system('bsub -J retromap_%s -w "done(DBlookback_%s)" -o retromap_%s.lsf.out "samtools view -b -F4 %s%s/%s_lookback.bam | bedtools bamtobed -i - > %s%s/%s_lookback.bed " &'%tuple([d00d[0],d00d[0],d00d[0],working_path,d00d[0],d00d[0],working_path,d00d[0],d00d[0],]))
+		os.system('bsub -J retromap_%s -w "done(DBlookback_%s)" -o /dev/null "samtools view -b -F4 %s%s/%s_lookback.bam | bedtools bamtobed -i - > %s%s/%s_lookback.bed " &'%tuple([d00d[0],d00d[0],working_path,d00d[0],d00d[0],working_path,d00d[0],d00d[0],]))
 		sleep(0.1)
 os.system('while [[ `bjobs -w | grep retromap_ | wc -l` -gt 0 ]]; do sleep 60; bar=$(); f="#"; percent=$((100*$(bjobs -w | grep retromap_ | wc -l)/%s)) ; for (( c=1; c<=$((100-$percent)); c++)); do bar=$bar$f; done; echo -ne "$percent%% remaining $bar\r" ; done; echo "\n" '%tuple([len(all_peeps)]) )
 
