@@ -20,7 +20,7 @@ conn.commit()
 
 
 curr.execute("CREATE TYPE sex AS ENUM ('M', 'F');")	#	Define sex as a datatype
-curr.execute("CREATE TABLE person ( person_pk serial PRIMARY KEY, person_name varchar(20), person_access varchar(20), sex sex, mother serial references person(person_pk), father serial references person(person_pk), pop varchar(20), superpop varchar(20),  rna_seq boolean, meta text);")	#	a human is described as a sample ID and an accession number.
+curr.execute("CREATE TABLE person ( person_pk serial PRIMARY KEY, person_name varchar(20), person_access varchar(20), sex sex, mother serial references person(person_pk), father serial references person(person_pk), pop varchar(20), superpop varchar(20),  rna_seq boolean, pipelined boolean, meta text);")	#	a human is described as a sample ID and an accession number.
 #	pk, personal identifier ("HG00000"; "NA00000"), accession number (?), sex, mother, father, population, if they are in the RNA-Seq subset 
 #parents are listed; a search will return the siblings. 
 

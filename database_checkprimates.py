@@ -13,10 +13,10 @@ from time import sleep
 import numpy as np
 
 pwd = sys.argv[1]	#password
-conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
-curr = conn.cursor()
+#conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
+#curr = conn.cursor()
 
-primate_omes = '/netscr/csoeder/1kGen/data/primateomes/'
+primate_omes = '/proj/cdjones_lab/csoeder/primateomes/'
 
 
 missing_dict = {}	#	Were any sequences missing when the transcriptomes were reexamined?
@@ -25,12 +25,12 @@ start_dict = {}	#		All finds from the DB
 
 ###	0	:	DBpull
 
-curr.execute("SELECT id, chrom, start, stop FROM location;")
-all_places = curr.fetchall()
-curr.execute("SELECT id, source, loc, seq FROM find;")
-all_finds = curr.fetchall()
-curr.execute("SELECT id, pk FROM person;")
-all_peeps = curr.fetchall()
+#curr.execute("SELECT location_pk, chrom, start, stop FROM location;")
+#all_places = curr.fetchall()
+#curr.execute("SELECT find_pk, source, loc, seq FROM find;")
+#all_finds = curr.fetchall()
+#curr.execute("SELECT person_name, person_pk FROM person;")
+#all_peeps = curr.fetchall()
 
 
 ###	This is now handed by database_pullBioinfo.py ########################################################
@@ -52,11 +52,12 @@ all_peeps = curr.fetchall()
 
 ###	2	:	align it to ALL the transcriptomes
 
+tot_count=int(check_output('grep -c ">" genome_locations.compPrim_scrubbed.fa', shell=True))
 
 for sample in check_output('ls %s | grep -v the | grep -v out'%primate_omes, shell=True).split('\n'):
 	if sample !=' ':
 		print sample
-		os.system('bsub -J primalign_%s -o primalign_%s.lsf.out "bwa mem %s/Trinity_files.Trinity.fasta lookback.fasta | samtools view -Sbh - | samtools sort - -f %s/%s_lookback.bam" &'%tuple([sample,sample, '%s/%s'%tuple([primate_omes,sample]), '%s/%s'%tuple([primate_omes,sample]), sample]))
+		os.system('bsub -J primalign_%s -o primalign_%s.lsf.out "bwa mem %s/Trinity_files.Trinity.fasta genome_locations.compPrim_scrubbed.fa  | samtools view -Sbh - | samtools sort - -f %s/%s_lookback.bam" &'%tuple([sample,sample, '%s/%s'%tuple([primate_omes,sample]), '%s/%s'%tuple([primate_omes,sample]), sample]))
 		sleep(1)
 
 for sample in check_output('ls %s | grep -v the | grep -v out'%primate_omes, shell=True).split('\n'):
@@ -93,7 +94,7 @@ print "%s candidates appeared clean, ie were not observed in either chimps or go
 ###	4	:	add a flag field to the DB?
 ###				even better, add a location field to track where the chimp/gor homologs are
 
-curr.close()
-conn.close()
+#curr.close()
+#conn.close()
 
 

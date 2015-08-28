@@ -17,7 +17,7 @@ pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr= conn.cursor()
 
-curr.execute('SELECT location_pk FROM location WHERE location.poly IS TRUE;')
+curr.execute('SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.pan_noncoding IS TRUE AND location.gor_noncoding IS TRUE AND location.handchecked IS NOT FALSE ;')
 all_genes = curr.fetchall()
 
 assoc_list = []

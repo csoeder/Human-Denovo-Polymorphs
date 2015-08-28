@@ -14,7 +14,8 @@ import matplotlib.pyplot as plt
 pwd = sys.argv[1]	#password
 conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
 curr= conn.cursor()
-curr.execute('SELECT chrom, start, stop FROM location WHERE location.poly IS TRUE and handchecked IS TRUE;')
+#curr.execute('SELECT chrom, start, stop FROM location WHERE location.poly IS TRUE and handchecked IS TRUE;')
+curr.execute('SELECT chrom, start, stop FROM location WHERE location.poly IS TRUE and gor_noncoding IS TRUE AND pan_noncoding IS TRUE AND handchecked IS NOT FALSE AND lookback_clean IS TRUE;')
 locations = curr.fetchall()
 chrom_list = list(arange(1,23))
 chrom_list.extend(['X','Y'])

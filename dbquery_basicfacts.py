@@ -14,18 +14,15 @@ curr= conn.cursor()
 
 curr.execute("SELECT find_pk, source, seq, loc FROM find;")
 all_finds = curr.fetchall()
-curr.execute("SELECT location_pk, chrom, start, stop FROM location WHERE location.poly IS TRUE and handchecked IS TRUE;") #	add handchecked = True clause?
+curr.execute("SELECT location_pk, chrom, start, stop FROM location WHERE location.poly IS TRUE and pan_noncoding IS TRUE AND gor_noncoding IS TRUE AND handchecked IS NOT FALSE  AND lookback_clean IS TRUE;") #	add handchecked = True clause?
 all_places = curr.fetchall()
 curr.execute("SELECT person_pk, person_name, sex, pop FROM person;")
 all_peeps = curr.fetchall()
+curr.execute("SELECT person_pk, person_name, sex, pop FROM person WHERE rna_seq IS TRUE;")
+pipelined=curr.fetchall()
 transcriber_ids = []
-for find in all_finds:
-	transcriber_ids.append(find[1])
-transcriber_ids = list(set(transcriber_ids))
-transcribers=[]
-for thing in transcriber_ids:
-	curr.execute("SELECT person_pk, person_name, sex, pop FROM person where person_pk=%s;"%thing)
-	transcribers.extend(curr.fetchall())
+curr.execute("SELECT person_pk, person_name, sex, pop FROM person WHERE person_pk IN (SELECT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE and pan_noncoding IS TRUE AND gor_noncoding IS TRUE AND lookback_clean IS TRUE AND handchecked IS NOT FALSE AND lookback_clean IS TRUE));")
+transcribers=curr.fetchall()
 
 
 phial = open('genelist.dat', 'w')
@@ -39,16 +36,17 @@ phial = open('Basic_Facts.txt','w')
 phial.write('%s%s'%tuple(['%s'%'~'*50, '\n']))
 
 
-phial.write('Transcriptome measurements, processed through the pipeline, were collected from %s individuals. Of these, %s (%s percent) were observed transcribing at least one polymorphic de novo gene.\n'%tuple([len(all_peeps), len(transcribers),  len(transcribers)*100./len(all_peeps)] ))
+phial.write('Transcriptome measurements, processed through the pipeline, were collected from %s individuals.'%tuple([len(pipelined)]))#	change this
+phial.write(' Of these, %s (%s percent) were observed transcribing at least one polymorphic de novo gene.\n'%tuple([len(transcribers),  len(transcribers)*100./len(pipelined)])) # change this
 pop_dict = {}
 sex_dict = {'M':0, 'F':0}
-for person in all_peeps:
+for person in pipelined:
 	sex_dict[person[2]] +=1
 	if person[3] in pop_dict.keys():
 		pop_dict[person[3]] +=1
 	else:
 		pop_dict[person[3]] = 1
-phial.write('These %s included the following populations:\n'%len(all_peeps))
+phial.write('These %s included the following populations:\n'%len(pipelined))
 for key in pop_dict.keys():
 	phial.write('\t%s\t%s\n'%tuple([key, pop_dict[key]]))
 phial.write('\nand the following sex distribution:\n')
