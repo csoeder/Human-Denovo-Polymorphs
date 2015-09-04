@@ -10,7 +10,7 @@ python ../dbquery_genesperperson.py $pswd
 python ../dbquery_peoplepergene.py $pswd
 python ../dbquery_cumulativenovelty.py $pswd
 python ../dbquery_associativity.py $pswd
-
+python ../dbquery_expressEnt.py $pswd
 #
 #dbquery_compareexpression.py
 #

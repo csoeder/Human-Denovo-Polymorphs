@@ -36,13 +36,14 @@ plt.ylabel('# Genomic Sites')
 plt.title('Distribution of ORF Lengths')
 plt.savefig('ORF_Lengths.png')
 
-number_transcribed_sequences=array([])
+number_transcribed_sequences=[]
 curr.execute("SELECT count( distinct seq) FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE and gor_noncoding IS TRUE AND pan_noncoding IS TRUE AND handchecked IS NOT FALSE AND lookback_clean IS TRUE) GROUP BY loc;")
 all_nums=curr.fetchall()
 for numb in all_nums:
 	number_transcribed_sequences.append(int(numb[0]))
+number_transcribed_sequences=array(number_transcribed_sequences)
 
-phial.write("The %s genome sites had a minimum length of %s nt (compared to a cutoff of 75 nt). The maximum length was %s, the mean was %s, and the median was %s.\n"%tuple([min(curated_sites), max(curated_sites), mean(curated_sites), median(curated_sites)]))
+phial.write("The %s genome sites had a minimum length of %s nt (compared to a cutoff of 75 nt). The maximum length was %s, the mean was %s, and the median was %s.\n"%tuple([len(curated_sites), min(curated_sites), max(curated_sites), mean(curated_sites), median(curated_sites)]))
 phial.write("Each genomic site was represented by at least one sequence variant in the assembled transcripts. %s sites had more than one transcribed sequence observed. The maximum was %s. \n"%tuple([len(number_transcribed_sequences[number_transcribed_sequences>1]), max(number_transcribed_sequences)]))
 
 

@@ -28,14 +28,14 @@ conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.i
 curr= conn.cursor()
 
 
-curr.execute("SELECT id FROM location WHERE location.poly IS TRUE;")
+curr.execute("SELECT location_pk FROM location WHERE location.poly IS TRUE and pan_noncoding IS TRUE AND gor_noncoding IS TRUE AND handchecked IS NOT FALSE  AND lookback_clean IS TRUE ;")
 all_genes = curr.fetchall()
 popS = {}
 sexS = {}
 for jean in all_genes:
 	pop_dict={}
 	sax_dict={}
-	curr.execute("SELECT pop, sex FROM person WHERE person.pk IN (SELECT source FROM find WHERE find.loc=%s);"%tuple([jean[0]]))
+	curr.execute("SELECT pop, sex FROM person WHERE person_pk IN (SELECT source FROM find WHERE find.loc=%s);"%tuple([jean[0]]))
 	peepz = curr.fetchall()
 	for p in peepz:
 		if p[0] not in pop_dict.keys():
@@ -91,7 +91,7 @@ plt.ylabel('Entropy')
 plt.savefig("Population_expression_entropy_plot.png")
 plt.close()
 
-n, bins, patches = plt.hist(all_pop_S, bins=15)
+n, bins, patches = plt.hist(all_sex_S, bins=15)
 plt.vlines(0, 0, max(n), color='k')
 plt.vlines(S([1]*2), 0, max(n), color='k')
 plt.title("Shannon Entropy of Gene Expression Across Sexes")
