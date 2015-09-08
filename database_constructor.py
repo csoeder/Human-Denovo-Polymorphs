@@ -39,11 +39,11 @@ curr.execute("CREATE TABLE gorilla_location ( gorLoc_pk serial PRIMARY KEY, chro
 # Define a genomic location for the homologous sequences in chimps
 #	pk, chromosome, start, stop, reference genome, sequence, mapsplice coverage per gor142; per gor143; 
 
-curr.execute("CREATE TABLE find (find_pk serial PRIMARY KEY, source serial references person(person_pk), seq serial references sequence(sequence_pk), loc serial references location(location_pk), assembly text, meta text );")
+curr.execute("CREATE TABLE find (find_pk serial PRIMARY KEY, source serial references person(person_pk), seq serial references sequence(sequence_pk), loc serial references location(location_pk), assembly text, absolute_coverage float, FPKM float, meta text );")
 #A find is an observation of a specific candidate in a specific individual's transcpriptome.
 #	pk, person, sequence, location, assembly of observation, 
 
-curr.execute("CREATE TABLE antifind (antifind_pk serial PRIMARY KEY, source serial references person(person_pk), seq serial references sequence(sequence_pk), loc serial references location(location_pk), meta text );")
+curr.execute("CREATE TABLE antifind (antifind_pk serial PRIMARY KEY, source serial references person(person_pk), seq serial references sequence(sequence_pk), loc serial references location(location_pk), absolute_coverage float, FPKM float, meta text );")
 #An  antifind is the observed *lack* of a specific candidate in a specific individual's transcpriptome.
 # Primarily to store metadata, eg transcription levels
 
