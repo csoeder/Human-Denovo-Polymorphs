@@ -81,13 +81,23 @@ plt.ylabel("# Genes")
 plt.savefig("Population_expression_entropy_hist.png")
 plt.close()
 
+
+fig, ax = plt.subplots()
+all_dats=[]
 for thing in popS.items():
+	Smax = S([1]*thing[0])
+	plt.plot([thing[0]-0.5, thing[0]+0.5], [Smax, Smax], 'r-')
+#	all_dats.append(thing[1])
+#	plt.boxplot(thing[1])
 	for ess in thing[1]:
 		plt.plot(thing[0], ess, 'ko')
 #		plt.hlines( , thing[0]-0.25, thing[0]+0.25, color='r', linestyles='dashed')
+#plt.boxplot(all_dats)
 plt.title("Shannon Entropy of Gene Expression Across Populations\nAs A Function of Expression Prevalence")
 plt.xlabel('# Individuals Expressing')
+plt.xticks(popS.keys())
 plt.ylabel('Entropy')
+plt.ylim(-0.1, 1.5)
 plt.savefig("Population_expression_entropy_plot.png")
 plt.close()
 
