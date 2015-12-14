@@ -39,7 +39,7 @@ curr.execute("CREATE TABLE gorilla_location ( gorLoc_pk serial PRIMARY KEY, chro
 # Define a genomic location for the homologous sequences in chimps
 #	pk, chromosome, start, stop, reference genome, homologous location in humans, sequence, mapsplice coverage per gor142; per gor143; 
 
-curr.execute("CREATE TABLE find (find_pk serial PRIMARY KEY, source serial references person(person_pk), seq serial references sequence(sequence_pk), loc serial references location(location_pk), assembly text, absolute_coverage float, FPKM float, meta text );")
+curr.execute("CREATE TABLE find (find_pk serial PRIMARY KEY, source serial references person(person_pk), seq serial references sequence(sequence_pk), loc serial references location(location_pk), assembly text, absolute_coverage float, FPKM float, splice_warning boolean, sequence_error_warning boolean, low_cov_warning boolean, meta text );")
 #A find is an observation of a specific candidate in a specific individual's transcpriptome.
 #	pk, person, sequence, location, assembly of observation, 
 
