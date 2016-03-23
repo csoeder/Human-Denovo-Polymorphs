@@ -18,7 +18,7 @@ SCRIPT_DIR='/netscr/csoeder/1kGen/data-scrape'
 ##################################################################################																					#
 ###		Remove annotated human genes 											#																					#
 ###			-	UCSC Genes 														#																					#
-bedtools intersect -split -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed	#
+bedtools intersect -split -a $1 -b $DATA_DIR/UCSC_genes.bed > no_UCSC.bed	#		
 bedtools intersect -split -a $1 -b $DATA_DIR/refSeq_genes.bed > no_refSeq.bed	#
 cat no_UCSC.bed no_refSeq.bed > no_genes.bed
 if [[ -s no_genes.bed ]]; then

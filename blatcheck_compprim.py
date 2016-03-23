@@ -6,7 +6,7 @@ A homology detector: given the chimp & gorilla hits from autoblat_compprim.py,
 	$1	:	BLAT output file (*.psl)
 	$2	:	genome to be compared
 '''
-
+	
 
 ########################################################
 ###	Gather toolbox
