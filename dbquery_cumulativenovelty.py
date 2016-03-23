@@ -1,27 +1,30 @@
-import matplotlib 
-matplotlib.use('agg')
-import psycopg2
-from Bio import SeqIO
-import string
 import csv
 import sys
-import os
-from numpy import arange, mean, median
 from random import shuffle, uniform
-from subprocess import call, check_output
 import matplotlib.pyplot as plt
 
-pwd = sys.argv[1]	#password
-conn = psycopg2.connect("dbname=denovogenes user=gene password=%s host=bioapps.its.unc.edu"%pwd)
-curr= conn.cursor()
 
- 
-#curr.execute("SELECT person_pk FROM person WHERE person.person_pk IN (SELECT DISTINCT source FROM find WHERE find.loc IN (SELECT location_pk FROM location WHERE location.poly IS TRUE AND location.lookback_clean is TRUE AND location.pan_noncoding IS TRUE AND location.gor_noncoding IS TRUE AND location.handchecked IS NOT FALSE  ));")
-curr.execute("SELECT person_pk FROM person WHERE person.rna_seq IS TRUE;")
-all_peeps = curr.fetchall()
+candidate_vs_people = sys.argv[1]
+people=sys.argv[2]
+
+with open(candidate_vs_people, 'rb') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter='\t')
+	rose=list(spamreader)
+
+with open(people, 'rb') as csvfile:
+	spamreader = csv.reader(csvfile, delimiter='\t')
+	peeps=list(spamreader)
+
+expression_dict={}
 peeplist = []
-for d00d in all_peeps:
+for d00d in peeps:
+	expression_dict[d00d[0]]=[]
 	peeplist.append(d00d[0])
+
+for rho in rose:
+	if rho[0] in expression_dict.keys():
+		expression_dict[rho[0]].append(rho[1])
+
 
 def chunks(l, n):
     """ Yield successive n-sized chunks from l.
@@ -30,28 +33,25 @@ def chunks(l, n):
     for i in xrange(0, len(l), n):
         yield l[i:i+n]
 
+
 def stochastic_sampler(lust):
 	#Inputs lust, a list of individuals in the database. This is shuffled, binned, and the added novelty of each bin is computed.
-	bin_size = 5#	size of the bin
+	bin_size = 5 
 	shuffle(lust)
 	old_news = []
+	new_news = []
 	novelty = [0]
 	abcissa = [0]
 	truffle_shuffle = list(chunks(lust, bin_size))
 	counted = 0
 	nov=0
 	for members in truffle_shuffle:
+		new_news=list(old_news)
 		for goonie in members:
-			curr.execute("SELECT location_pk FROM location WHERE location_pk IN (SELECT loc FROM find WHERE find.source=%s) AND location.poly IS TRUE AND location.lookback_clean is TRUE AND location.pan_noncoding IS TRUE AND location.gor_noncoding IS TRUE AND location.handchecked IS NOT FALSE;"%goonie)
-			all_genes = curr.fetchall()
-			for jean in all_genes:
-				if jean[0] in old_news:
-					pass
-				else:
-					nov+=1
-					old_news.append(jean[0])
+				new_news.extend(expression_dict[goonie])
+		old_news = set(new_news)
 		counted+=len(members)
-		novelty.append(nov)
+		novelty.append(len(old_news))
 		abcissa.append(counted)
 	return novelty, abcissa
 
