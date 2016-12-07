@@ -1,4 +1,14 @@
 
+# hmmm... lookups from all the precandidates are being carried over in the lookup table
+# this will cut out all but the candidates
+echo "CREATE TABLE dummy (lookup int);" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "INSERT INTO dummy (lookup) SELECT l.precandlookup_pk FROM precandidate_lookup l LEFT JOIN candidate c ON l.precand_id = c.precand_pk WHERE c.chrom IS NULL;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "DELETE FROM precandidate_lookup WHERE precandlookup_pk IN (SELECT lookup FROM dummy);" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "DROP TABLE dummy;" | mysql --user=csoeder --password=tha_snazzle murple -N
+
+
+echo "SELECT chrom, start, stop, precand_pk FROM candidate;" | mysql --user=csoeder --password=tha_snazzle murple -N > candidates_v4.bed 
+bedtools sort -i candidates_v4.bed > candidates_v4.sorted.bed
 bedtools intersect -wa -wb -a candidates_v3.sorted.bed -b candidates_v4.sorted.bed | awk 'BEGIN{OFS="\t"}{if($2==$7)print}' | awk 'BEGIN{OFS="\t"}{if($3==$8)print}' | awk 'BEGIN{OFS="\t"}{if($4!=$9)print}' | cut -f 4,9 > v3_v4.dischord.list
 echo "ALTER TABLE candidate ADD COLUMN v3_pk int;"| mysql --user=csoeder --password=tha_snazzle murple -N
 cat v3_v4.dischord.list | awk '{print "UPDATE candidate SET v3_pk ="$1" WHERE precand_pk="$2";"}' | mysql --user=csoeder --password=tha_snazzle murple -N
@@ -18,8 +28,6 @@ echo "LOAD DATA INFILE 'pop_upload.dat' INTO TABLE temp (name, mom, dad, sex, po
 echo "update person p, temp t SET p.population=t.pop, p.sex=t.sex, p.mother=t.mom, p.father=t.dad WHERE p.person_name = t.name;" | mysql --user=csoeder --password=tha_snazzle murple -N
 echo "INSERT INTO person (population, sex, mother, father) SELECT t.pop, t.sex, t.mom, t.dad FROM temp t WHERE NOT EXISTS (SELECT person_pk FROM person p WHERE p.person_name=t.name) ; " | mysql --user=csoeder --password=tha_snazzle murple -N
 echo "drop table temp;" | mysql --user=csoeder --password=tha_snazzle murple -N
-
-
 
 echo "UPDATE person SET superpop='EAS' WHERE population='CHB'; "| mysql --user=csoeder --password=tha_snazzle murple -N
 echo "UPDATE person SET superpop='EAS' WHERE population='JPT'; "| mysql --user=csoeder --password=tha_snazzle murple -N
@@ -95,6 +103,14 @@ echo "DROP TABLE temp;" | mysql --user=csoeder --password=tha_snazzle murple -N
 
 echo "SELECT chrom, start, stop, precand_pk FROM candidate;" | mysql --user=csoeder --password=tha_snazzle murple -N > candidates.v4.unFiltered.bed
 
+#cleanup pathological mappings:
+#$ cat candidates.v4.unFiltered.bed | awk '{print $0, $3-$2}' | tr ' ' '\t' | sort -g -r -k 5 | head 
+#chr11	0	126071019	8050	126071019
+#[...]
+#chr7	0	23511784	6355	23511784
+#chr4	189712404	189716049	2735	3645
+
+
 
 
 ###########
@@ -113,7 +129,7 @@ bsub "vcftools --gzvcf /proj/cdjones_lab/Genomics_Data_Commons/variation/homo_sa
 
 vcf-concat -p  miniVCF_*.gz > merged.vcf
 
-# bgzip merged.vcf
+bgzip merged.vcf
 # tabix merged.vcf.gz
 python VCF_to_SQLuploadPrepper.py merged.vcf merged # 	---> merged_variant.dat, merged_variantLookup.dat
 sudo cp merged_variant.dat /usr/local/mysql/data/murple/
