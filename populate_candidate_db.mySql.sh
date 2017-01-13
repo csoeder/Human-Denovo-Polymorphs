@@ -28,8 +28,8 @@ bedtools sort -i candidates_v4.unFiltered.bed > candidates_v4.unFiltered.sorted.
 bedtools intersect -wa -wb -a candidates_v3.sorted.bed -b candidates_v4.unFiltered.sorted.bed | awk 'BEGIN{OFS="\t"}{if($2==$7)print}' | awk 'BEGIN{OFS="\t"}{if($3==$8)print}' | awk 'BEGIN{OFS="\t"}{if($4!=$9)print}' | cut -f 4,9 > v3_v4.dischord.list
 echo "ALTER TABLE candidate ADD COLUMN v3_pk int;"| mysql --user=csoeder --password=tha_snazzle murple -N
 cat v3_v4.dischord.list | awk '{print "UPDATE candidate SET v3_pk ="$1" WHERE precand_pk="$2";"}' | mysql --user=csoeder --password=tha_snazzle murple -N
-
-
+echo "UPDATE candidate SET v3_pk = precand_pk WHERE v3_pk IS NULL AND precand_pk < 4287;" | mysql --user=csoeder --password=tha_snazzle murple -N 
+##	^^ cutoff point
 
 echo "ALTER TABLE candidate ADD COLUMN v3_igv_thumbs VARCHAR(20);"| mysql --user=csoeder --password=tha_snazzle murple -N
 echo "ALTER TABLE candidate ADD COLUMN v3_igv_notes TEXT;"| mysql --user=csoeder --password=tha_snazzle murple -N
@@ -113,6 +113,13 @@ echo "UPDATE person SET superpop='SAS' WHERE population='BEB'; "| mysql --user=c
 echo "UPDATE person SET superpop='SAS' WHERE population='STU'; "| mysql --user=csoeder --password=tha_snazzle murple -N
 echo "UPDATE person SET superpop='SAS' WHERE population='ITU'; "| mysql --user=csoeder --password=tha_snazzle murple -N
 # source; http://www.1000genomes.org/category/frequently-asked-questions/population
+
+#PHASE 3 ORPHANS: no phase 3 DNA-Seq available
+#put this list together during v3
+echo "ALTER TABLE person ADD COLUMN phase3orphan BOOLEAN;" | mysql --user=csoeder --password=tha_snazzle murple -N 
+echo "UPDATE person SET phase3orphan = 0;" | mysql --user=csoeder --password=tha_snazzle murple -N 
+echo "SELECT person_name FROM person WHERE phase3orphan = 1;" | mysql --user=csoeder --password=tha_snazzle glurge -N | awk '{print "UPDATE person SET phase3orphan = 1 WHERE person_name = |"$1"|;"}' | tr "|" "'" | mysql --user=csoeder --password=tha_snazzle murple -N
+
 
 ## orfs
 #orf sequences
