@@ -1,0 +1,1353 @@
+4	looks like a spurious indel	down	NULL
+6	looks like a spurious indel	down	NULL
+7	looks legit	up	NULL
+9	looks legit; 3/3 nonexpressers have a SNP; 0/1 expressers do	up	NULL
+32	repetitive; wonky alignment	down	NULL
+35	spurious SNP ATT->ATG? doesn't even occur in reads wtf	down	NULL
+39	looks legit	up	NULL
+42	spurious indel?	down	NULL
+53	??	down	NULL
+54	looks legit; snp in start codon	up	NULL
+55	looks legit	up	NULL
+57	looks legit	up	NULL
+58	looks legit; solidly polymorphic in orf and transcript	up	NULL
+81	looks legit; true insertion ( rs397695946) activates ORF!!!	up	NULL
+87	spurious snp? unannotated; 2/3 reads have it though	down	NULL
+92	spurious indel? 2/4 reads agree	down	NULL
+110	bad indel	down	NULL
+111	spurious snp?	down	NULL
+118	looks legit	up	NULL
+121	looks legit; snp in start codon	up	NULL
+124	looks legit	up	NULL
+125	looks legit	up	NULL
+140	bad snp	down	NULL
+142	spurious indel?	down	NULL
+144	looks legit; repetitive; hella legit indels	up	NULL
+145	spurious snp?	down	NULL
+149	looks legit	up	NULL
+153	part of the problematic 153/1598/2152/2384 locus; numerous legit variants in a repetitive region; spurious indel but may still be viable;	meh	NULL
+155	sequencing error → spurious indel?	down	NULL
+156	sequencing error → spurious indel? 2/2 agree	down	NULL
+176	looks legit; snp in start codon... but the individual doesn't have it :(	down	NULL
+178	sequencing error → spurious indel?	down	NULL
+179	looks legit; snp in start codon! (some nonexpressers also have it)	up	NULL
+182	2/3 reads agree? sequencing error → spurious snp	meh	NULL
+187	looks legit	up	NULL
+189	sequencing error → spurious snp	down	NULL
+195	looks legit; many transcripts countain rs397729201	up	why isn't NA19247 an expresser????
+197	??? decent-looking alignment in a variable repeat region???	up	Look at this one again
+200	doesn't even appear in the reads??? sequencing error → spurious indel?	down	NULL
+201	looks legit	up	NULL
+220	weird clipping	meh	NULL
+224	weird clipping	meh	NULL
+230	looks legit	up	NULL
+231	sequencing error → spurious snp	down	NULL
+232	looks legit; activating SNP!	up	NULL
+238	looks legit	up	NULL
+239	looks legit	up	NULL
+240	sequencing error → spurious indel?	down	NULL
+241	sequencing error → spurious indel?	down	NULL
+248	looks legit	up	NULL
+255	sequencing error → spurious snp	down	NULL
+256	sequencing error → spurious snp	down	NULL
+279	sequencing error → spurious snp	down	NULL
+282	sequencing error → spurious indel?	down	NULL
+287	sequencing error → spurious snp	down	NULL
+289	looks legit	up	NULL
+291	sequencing error → spurious indel?	down	NULL
+298	looks legit; repetitive	up	NULL
+302	sequencing error → spurious snp	down	NULL
+307	sequencing error → spurious indel?	down	NULL
+308	very questionable alignment to repetitive region	meh	NULL
+324	looks legit; activating SNP!	up	NULL
+325	sequencing error → spurious snp	down	NULL
+337	sequencing error → spurious indel?	down	NULL
+340	looks legit	up	NULL
+344	looks legit	up	NULL
+349	looks legit	up	NULL
+350	looks legit	up	NULL
+351	looks legit	up	NULL
+352	sequencing error → spurious snp	down	NULL
+355	looks legit; activating SNP!	up	NULL
+356	looks legit	up	NULL
+357	looks legit	up	NULL
+359	sequencing error → spurious snp	down	NULL
+363	sequencing error → spurious snp	down	NULL
+367	looks legit; big ol' indel in the start codon	up	NULL
+370	??? SPlicing ??? I don't think so. Looks like a wonked out sequence.	meh	NULL
+381	looks legit	up	NULL
+384	looks legit	up	NULL
+410	looks legit; activating SNP!	up	NULL
+413	looks legit	up	NULL
+418	looks legit	up	NULL
+419	questionable sequence; may still be viable regardless; hella variable repetitive region	up	Uh... bad SNP in the middle? unannotated indels?
+421	looks legit	up	NULL
+424	looks legit; contains altering insertion	up	NULL
+426	looks legit	up	NULL
+428	looks legit	up	NULL
+441	questionable sequence; may still be viable regardless	meh	NULL
+442	looks legit	up	NULL
+470	sequencing error → spurious indel?	down	NULL
+496	sequencing error → spurious snp	down	NULL
+499	sequencing error → spurious snp	down	NULL
+501	looks legit	up	NULL
+508	sequencing error → spurious snp	down	NULL
+512	legit; altered by indel	up	but is the indel real?????
+516	looks legit	up	NULL
+517	looks legit	up	NULL
+522	sequencing error → spurious indel?	down	NULL
+524	looks legit	up	NULL
+525	sequencing error → spurious snp	down	NULL
+543	looks legit	up	NULL
+549	sequencing error → spurious snp	down	NULL
+550	looks legit	up	NULL
+551	sequencing error → spurious snp	down	NULL
+552	looks legit	up	NULL
+558	looks legit	up	NULL
+563	looks legit	up	NULL
+564	looks legit	up	NULL
+566	looks legit	up	NULL
+571	looks legit	up	NULL
+572	looks legit; activating INDEL!	up	NULL
+573	looks legit	up	NULL
+590	looks legit	up	NULL
+591	sequencing error → spurious snp	down	NULL
+618	looks legit	up	NULL
+619	sequencing error → spurious indel?	down	NULL
+620	questionable sequence	meh	NULL
+621	looks legit	up	NULL
+622	looks legit	up	NULL
+631	looks legit	up	NULL
+641	looks legit	up	NULL
+642	looks legit; co-located with 641	up	NULL
+647	sketchy alignment	meh	NULL
+650	questionable sequence	meh	NULL
+657	sequencing error → spurious snp	down	NULL
+658	sequencing error → spurious snp	down	NULL
+662	sequencing error → spurious indel?	down	NULL
+666	sequencing error → spurious indel?	down	NULL
+669	questionable sequence	meh	NULL
+672	sequencing error → spurious indel?	down	NULL
+673	sequencing error → spurious snp	down	NULL
+674	sequencing error → spurious snp	down	NULL
+676	looks legit	up	NULL
+677	sequencing error → spurious snp	down	NULL
+678	looks legit	up	NULL
+679	looks legit	up	NULL
+683	sequencing error → spurious snp	down	NULL
+702	sequencing error → spurious indel?	down	NULL
+713	looks like an ambiguously placed but real indel activates!	up	NULL
+719	looks legit	up	NULL
+727	sequencing error → spurious indel?	down	NULL
+734	questionable sequence 	meh	NULL
+735	activated by a SNP!	up	NULL
+738	looks legit	up	NULL
+741	sequencing error → spurious indel?	down	NULL
+742	looks legit	up	NULL
+744	legit; activating SNP!	up	NULL
+745	looks legit	up	NULL
+746	looks legit	up	NULL
+749	sequencing error → spurious indel?	down	NULL
+755	sequencing error → spurious snp; remainder legit?	down	NULL
+761	looks legit	up	NULL
+763	looks legit	up	NULL
+764	looks legit	up	NULL
+766	looks legit	up	NULL
+801	looks legit	up	NULL
+802	questionable sequence 	meh	NULL
+803	looks legit	up	NULL
+804	?? transcript is wonky; may contain activating indel??	meh	NULL
+817	glitchy alignment/sequence	meh	NULL
+820	legit; hella real SNPs	up	NULL
+822	sequencing error → spurious indel?	down	NULL
+826	sequencing error → spurious snp	down	NULL
+827	looks legit	up	NULL
+848	sequencing error → spurious indel?	down	NULL
+849	looks legit	up	NULL
+850	sequencing error → spurious indel?	down	NULL
+858	orf looks legit; transcript alignment is a little sketchy (repetitive)	meh	NULL
+859	looks legit	up	NULL
+867	looks legit	up	NULL
+873	looks legit	up	NULL
+876	sequencing error → spurious snp	down	NULL
+877	looks legit; characteristic indel!	up	NULL
+878	sequencing error → spurious snp	down	NULL
+879	looks legit	up	NULL
+883	sequencing error → spurious snp	down	NULL
+888	looks legit	up	NULL
+891	looks legit	up	NULL
+900	looks legit; characteristic indel!	up	NULL
+902	sequencing error → spurious indel?	down	NULL
+920	looks legit; weak conserved domain hits	up	NULL
+922	splicing evidence? no, wonky alignment to rpt. may still be legit. weak conserved domain hits	meh	NULL
+923	splicing evidence? no, wonky alignment to rpt. may still be legit. 	meh	NULL
+926	sequencing error → spurious snp	down	NULL
+929	sequencing error → spurious indel?	down	NULL
+930	looks legit	up	NULL
+931	looks legit - snp in start codon!	up	NULL
+932	sequencing error → spurious indel?	down	NULL
+934	looks legit	up	NULL
+935	sequencing error → spurious indel?	down	NULL
+939	looks legit	up	NULL
+940	looks legit	up	NULL
+941	looks legit	up	NULL
+942	looks legit	up	NULL
+944	looks legit	up	NULL
+945	looks legit	up	NULL
+948	looks legit	up	NULL
+949	looks legit	up	NULL
+950	sequencing error → spurious indel?	down	NULL
+951	looks legit	up	NULL
+952	looks legit	up	NULL
+953	looks legit	up	NULL
+956	looks legit	up	NULL
+960	looks legit	up	NULL
+961	looks legit	up	NULL
+962	looks legit	up	NULL
+963	looks legit	up	NULL
+964	looks legit	up	NULL
+965	sequencing error → spurious indel?	down	NULL
+966	looks legit	up	NULL
+967	sequencing error → spurious indel?	down	NULL
+985	sequencing error → spurious snp	down	NULL
+995	activated by a SNP!	up	Variants are hella noisy
+998	sequencing error → spurious snp	down	NULL
+1006	looks legit	up	NULL
+1008	looks legit	up	NULL
+1015	looks legit	up	looks like a nonexpresser accumulates onto a gene :(
+1017	looks legit	up	NULL
+1018	bad snp; weird alignment	meh	NULL
+1020	sequencing error → spurious snp	down	NULL
+1027	looks legit	up	NULL
+1031	looks legit	up	NULL
+1032	sequencing error → spurious snp	down	NULL
+1043	sequencing error → spurious snp	down	NULL
+1045	bad indel; may be legit even without?? weak blast conserved domain hits	meh	NULL
+1047	sketchy alignment	meh	NULL
+1050	sequencing error → spurious snp	down	NULL
+1051	same bad indel in multiple peeps???	meh	NULL
+1059	sequencing error → spurious indel?	down	NULL
+1061	looks legit	up	NULL
+1069	sequencing error → spurious snp	down	NULL
+1070	sequencing error → spurious snp	down	NULL
+1074	sequencing error → spurious snp	down	NULL
+1077	bad indel; may be legit even without??	meh	NULL
+1087	sequencing error → spurious snp	down	NULL
+1100	sequencing error → spurious indel?	down	NULL
+1102	bad indel; may be legit even without??	meh	NULL
+1106	sequencing error → spurious snp	down	NULL
+1117	sequencing error → spurious snp	down	NULL
+1126	questionable alignment	meh	NULL
+1128	looks legit	up	NULL
+1129	looks legit	up	NULL
+1131	looks legit	up	NULL
+1132	looks legit	up	NULL
+1134	looks legit	up	NULL
+1135	sequencing error → spurious snp	down	NULL
+1138	transcript alignmet wonky; orf looks legit	up	NULL
+1145	looks legit	up	NULL
+1147	transcript alignmet wonky; orf looks legit	up	NULL
+1150	looks legit	up	NULL
+1153	looks legit	up	NULL
+1159	sequencing error → spurious snp	down	NULL
+1175	looks legit	up	NULL
+1177	activated by a INDEL!	up	weird lookin variant calls
+1178	sequencing error → spurious indel?	down	NULL
+1180	looks legit	up	NULL
+1184	sequencing error → spurious indel?	down	NULL
+1187	looks legit	up	NULL
+1194	sequencing error → spurious snp	down	NULL
+1195	looks legit; stop codon from an indel	up	NULL
+1196	bad snp -> fake stop codon; still legit?	meh	NULL
+1198	looks legitish	meh	NULL
+1199	looks legit	up	NULL
+1200	looks legit	up	NULL
+1202	looks legit	up	NULL
+1206	bad alignment; repetitive	down	NULL
+1212	looks legit	up	NULL
+1222	sequencing error → spurious snp	down	NULL
+1224	sequencing error → spurious snp	down	NULL
+1225	bad indel -> fake stop codon; still legit?	meh	NULL
+1229	sequence clipping	meh	NULL
+1233	sequencing error → spurious indel?	down	NULL
+1236	sequencing error → spurious indel?	down	NULL
+1241	looks legit	up	NULL
+1243	looks legit	up	NULL
+1248	looks legit	up	NULL
+1249	looks legit	up	NULL
+1254	looks legit	up	NULL
+1255	looks legit; activating SNP!	up	NULL
+1257	looks legit	up	NULL
+1259	sequencing error → spurious indel?	down	NULL
+1262	looks legit	up	NULL
+1264	looks legit	up	NULL
+1265	looks legit	up	NULL
+1267	looks legit	up	NULL
+1268	clipped sequence	meh	NULL
+1269	looks legit	up	NULL
+1271	clipped sequence	meh	NULL
+1273	looks legit	up	NULL
+1278	looks legit	up	NULL
+1280	looks legit	up	NULL
+1281	looks legit	up	NULL
+1282	looks legit	up	NULL
+1283	looks legit	up	NULL
+1287	sequencing error → spurious indel?	down	NULL
+1289	sequencing error → spurious snp	down	NULL
+1292	looks legit	up	NULL
+1295	looks legit	up	NULL
+1296	looks legit	up	NULL
+1297	looks legit	up	NULL
+1298	looks legit	up	NULL
+1299	looks legit	up	NULL
+1301	looks legit	up	NULL
+1321	looks legit	up	NULL
+1324	looks legit - snp in start codon!	up	NULL
+1325	looks legit	up	NULL
+1326	looks legit	up	NULL
+1333	wonky transcript alignment (rpt); orf looks legit	meh	NULL
+1335	looks legit	up	NULL
+1336	looks legit	up	NULL
+1339	looks legit	up	NULL
+1340	looks legit	up	NULL
+1343	sequencing error → spurious indel?	down	NULL
+1351	activated by an INDEL!	up	NULL
+1354	activated by a SNP!	up	NULL
+1355	activated by an INDEL!	up	NULL
+1356	sequencing error → spurious indel?	down	NULL
+1358	sequencing error → spurious snp	down	NULL
+1360	looks legit	up	NULL
+1363	sequencing error → spurious indel?	down	NULL
+1364	looks legit	up	NULL
+1365	sequencing error → spurious snp	down	NULL
+1367	looks legit	up	NULL
+1368	looks legit	up	NULL
+1386	sequencing error → spurious snp	down	NULL
+1398	sequencing error → spurious indel?	down	NULL
+1403	sequencing error → spurious snp	down	NULL
+1406	sequencing error → spurious snp	down	NULL
+1409	looks legit	up	NULL
+1410	looks legit	up	NULL
+1415	looks legit	up	NULL
+1426	LOOKS SPLICED WOOHOO	up	some expressers don't have transcripts!
+1430	sequencing error → spurious indel?	down	NULL
+1433	sequencing error → spurious indel?	down	NULL
+1449	looks legit	up	looks like there's an activating SNP!
+1451	looks legit	up	NULL
+1456	looks legit	up	NULL
+1457	looks legit	up	NULL
+1461	looks legit	up	NULL
+1480	sequencing error → spurious snp	down	NULL
+1483	activated by a SNP!	up	NULL
+1488	sequencing error → spurious indel?	down	NULL
+1493	sequencing error → spurious snp	down	NULL
+1495	sequencing error → spurious snp	down	NULL
+1499	looks legit	up	NULL
+1503	looks legit	up	NULL
+1506	looks legit	up	NULL
+1514	wonky alignment; splicing??? mapsplice includes a junction, but not a good one, sorry :( BUT! some spliced ESTs agree with the exon calls, eg EG328403	meh	NULL
+1515	sequencing error → spurious indel?	down	NULL
+1516	looks legit	up	NULL
+1529	looks legit; some wonkiness 	up	NULL
+1530	sequencing error → spurious snp	down	NULL
+1533	sequencing error → spurious snp	down	NULL
+1534	sequencing error → spurious indel?	down	NULL
+1537	sequencing error → spurious snp	down	NULL
+1538	sequencing error → spurious snp	down	NULL
+1547	activated by an INDEL!	up	NULL
+1548	gross repetitive alignment :(	meh	NULL
+1551	sequencing error → spurious indel?	down	NULL
+1560	repetitive alignment a *little* wonky but looks legit	meh	NULL
+1565	looks legitish?	meh	NULL
+1575	??? SNP in an annotated location but wrong allele???	meh	NULL
+1576	weird alignment clipping	meh	NULL
+1580	sequencing error → spurious snp	down	NULL
+1582	weird alignment clipping	meh	NULL
+1583	spurious stop codon - longer gene??	meh	NULL
+1590	looks legit	up	NULL
+1592	sequencing error → spurious indel?	down	NULL
+1594	looks legit	up	NULL
+1595	sequencing error → spurious snp	down	NULL
+1597	sequence / alignment wonky, but might be rescued by two (!) variants!!	meh	NULL
+1598	part of the problematic 153/1598/2152/2384 locus; looks liks a wonky alignment to a rpt region... but, shares a start codon with many others. the 'real' stop codon is disabled in all transcripts I've seen; i haven't seen one which contains the next stop in line.	meh	NULL
+1600	wonky transcript alignment (rpt); orf looks legit	meh	NULL
+1601	wonky alignment; splicing??? MapSplice says no junction :(	meh	NULL
+1602	sequencing error → spurious snp	down	NULL
+1604	looks legit	up	NULL
+1605	looks legit; snp in start codon	up	NULL
+1607	looks legit; activating SNP!	up	NULL
+1608	looks legit; activating SNP!	up	NULL
+1609	sequencing error → spurious indel?	down	NULL
+1613	looks legit	up	NULL
+1620	sequencing error → spurious snp	down	NULL
+1623	looks legit; activating INDEL!	up	NULL
+1624	looks legit	up	NULL
+1625	looks legit	up	NULL
+1628	looks legit	up	NULL
+1629	looks legit; activated by indel?	up	NULL
+1632	looks legit	up	NULL
+1633	looks legit	up	NULL
+1634	looks legit	up	NULL
+1635	looks legit	up	looks activated by a SNP/INDEL!
+1653	weird alignment clipping	meh	NULL
+1655	looks legit	up	NULL
+1666	sequencing error → spurious snp	down	NULL
+1673	sequencing error → spurious snp	down	NULL
+1680	looks legit	up	NULL
+1681	activated by INDEL?!	up	NULL
+1683	looks legit	up	NULL
+1686	sequencing error → spurious indel?	down	NULL
+1695	weird alignment clipping	meh	NULL
+1696	sequencing error → spurious snp	down	NULL
+1698	looks legit	up	NULL
+1702	looks legit	up	NULL
+1703	?? SPLICING??? mapsplice says no junction :(	meh	NULL
+1706	looks legit	up	NULL
+1717	sequencing error → spurious snp	down	NULL
+1721	?? SPLICING??? MapSplice confirms junction!	up	looks like there are fragments of more exons in some non-expressers??
+1724	sequencing error → spurious snp	down	NULL
+1725	looks legit	up	NULL
+1733	): sequencing error → spurious indel?	down	NULL
+1734	looks legit	up	WTF????????
+1742	??? bad indel but may be legit anyway??	meh	NULL
+1745	looks legit	up	NULL
+1753	looks legit	up	NULL
+1754	sequencing error → spurious snp	down	NULL
+1759	transcript alignmet wonky; orf looks legit	meh	NULL
+1765	looks legit	up	NULL
+1766	looks legit	up	NULL
+1767	questionable SNP activation	meh	NULL
+1774	sequencing error → spurious snp	down	NULL
+1775	sequencing error → spurious indel?	down	NULL
+1776	sequencing error → spurious snp	down	NULL
+1777	sequencing error → spurious snp	down	NULL
+1788	sequencing error → spurious indel?	down	NULL
+1798	sequencing error → spurious indel?	down	NULL
+1799	looks legit	up	NULL
+1804	looks legit	up	NULL
+1805	?? maybe a misplaced indel??	meh	NULL
+1809	looks legit, hella variable rpt region	up	NULL
+1817	sequencing error → spurious snp	down	NULL
+1822	looks legit	up	NULL
+1824	sequencing error → spurious snp	down	NULL
+1825	sequencing error → spurious indel?	down	NULL
+1826	looks legit	up	NULL
+1830	sequencing error → spurious indel?	down	NULL
+1837	sequencing error → spurious indel?	down	NULL
+1838	looks legit	up	NULL
+1843	activated by SNP!	up	activation confirmed
+1844	looks legit	up	NULL
+1845	looks legit	up	NULL
+1847	looks legit	up	NULL
+1853	activated by SNP!	up	NULL
+1855	activated by SNP!	up	NULL
+1856	looks ok; a bunch of unannotated snps in the body of the orf	meh	NULL
+1859	sequencing error → spurious snp	down	NULL
+1860	looks legit	up	NULL
+1861	looks legit	up	NULL
+1862	looks legit	up	NULL
+1863	looks legit	up	NULL
+1864	looks legit	up	NULL
+1865	looks legit; activated by indel?	up	NULL
+1868	looks legit	up	NULL
+1869	looks legit	up	NULL
+1870	looks legit	up	NULL
+1871	looks legit	up	Doesn't actually have RNA coverage???
+1873	looks legit	up	NULL
+1874	sketchy indel activates; may be a larger ORF?	meh	NULL
+1875	looks legit	up	NULL
+1877	looks legit	up	NULL
+1878	looks legit	up	NULL
+1879	sequencing error → spurious indel?	down	NULL
+1881	looks legit	up	NULL
+1882	looks legit	up	NULL
+1883	looks legit	up	NULL
+1884	looks legit	up	NULL
+1886	looks legit	up	NULL
+1920	sequencing error → spurious indel?	down	NULL
+1923	looks legit	up	NULL
+1932	looks legit	up	NULL
+1939	looks legit	up	NULL
+1940	legit, hella variable repetitive region	up	NULL
+1944	sequencing error → spurious snp	down	NULL
+1949	SPLICING??? MapSplice confirms the junction!	up	NULL
+1951	looks legit; characterized by SNP	up	NULL
+1957	questionable SNP activation	meh	NULL
+1967	legit; indel prevents longer orf	up	NULL
+1969	looks legit	up	NULL
+1970	looks legit	up	activated by SNP!
+1978	looks legit	up	NULL
+1979	looks legit	up	NULL
+1981	looks legit	up	NULL
+1982	looks legit	up	NULL
+1983	looks legit	up	NULL
+1985	sequencing error → spurious snp	down	NULL
+1986	looks legit	up	NULL
+1987	sequencing error → spurious indel?	down	NULL
+1988	weird alignment clipping	meh	NULL
+1991	looks legit	up	NULL
+2012	sequencing error → spurious snp	down	NULL
+2021	looks legit	up	NULL
+2022	looks legit	up	NULL
+2024	wonky transcript alignment (rpt); orf looks legit	meh	NULL
+2025	doublecheck: activating indel??	meh	NULL
+2029	weird alignment clipping	meh	NULL
+2031	looks legit	up	NULL
+2035	sequencing error → spurious snp	down	NULL
+2036	sequencing error → spurious indel?	down	NULL
+2038	sequencing error → spurious snp	down	NULL
+2047	sequencing error → spurious snp	down	NULL
+2050	looks legit	up	NULL
+2051	really gross alignment	meh	NULL
+2053	looks legit	up	NULL
+2058	sequencing error → spurious indel?	down	NULL
+2061	sequencing error → spurious snp	down	NULL
+2064	sequencing error → spurious snp	down	NULL
+2065	looks legit	up	NULL
+2070	sequencing error → spurious indel?	down	NULL
+2071	weird alignment clipping	meh	NULL
+2072	looks legit	up	activated by indel??
+2073	sequencing error → spurious snp	down	NULL
+2074	looks legit	up	NULL
+2077	sequencing error → spurious indel?	down	NULL
+2079	sequencing error → spurious snp	down	NULL
+2085	looks legit	up	NULL
+2091	sequencing error; still legit imho	meh	NULL
+2094	looks legit	up	NULL
+2098	sequencing error → spurious snp	down	NULL
+2102	activated by an INDEL!	up	NULL
+2106	looks legit; hella regulatory activity (nearby LINES)	up	NULL
+2107	looks legit	up	NULL
+2109	looks legit	up	NULL
+2110	looks legit	up	NULL
+2111	looks legit	up	NULL
+2113	sequencing error → spurious snp	down	NULL
+2114	big ol' activating SNP in the start codon!	up	NULL
+2116	sequencing error → spurious snp	down	NULL
+2119	looks legit	up	NULL
+2120	looks legit	up	NULL
+2122	weird alignment clipping	meh	NULL
+2124	sequencing error → spurious snp	down	NULL
+2131	SPLICING??? mapSplice confirms the junction! also UCSC mRNA 	up	NULL
+2132	looks legit	up	NULL
+2139	sequencing error → spurious indel?	down	NULL
+2144	sequencing error → spurious snp	down	NULL
+2145	sequencing error → spurious indel?	down	NULL
+2146	sequencing error → spurious indel?	down	NULL
+2149	looks legit	up	NULL
+2150	looks legit	up	NULL
+2152	part of the problematic 153/1598/2152/2384 locus	meh	NULL
+2156	sequencing error → spurious indel?	down	NULL
+2157	looks legit	up	NULL
+2174	looks legit	up	NULL
+2175	looks legit	up	NULL
+2181	looks legit	up	NULL
+2182	sequencing error → spurious indel?	down	NULL
+2185	looks legit	up	unannotated expressers??
+2186	weird alignment clipping	meh	NULL
+2188	sketchy alignment to rpt	meh	NULL
+2189	sequencing error → spurious indel?	down	NULL
+2196	looks legit	up	NULL
+2197	looks legit	up	NULL
+2198	looks legit	up	NULL
+2200	sequencing error → spurious indel?	down	NULL
+2204	sequencing error → spurious snp	down	NULL
+2205	looks legit	up	NULL
+2206	looks legit	up	NULL
+2207	looks legit	up	NULL
+2208	sequencing error → spurious snp	down	NULL
+2209	looks legit	up	NULL
+2211	sequencing error → spurious snp	down	NULL
+2212	SPLICING??? No, says MapSplice :(	meh	NULL
+2213	sequencing error → spurious indel?	down	NULL
+2214	sequencing error → spurious snp	down	NULL
+2218	weird alignment clipping	meh	NULL
+2219	doublecheck: activating indel??	up	looks good!
+2220	looks legit	up	NULL
+2221	sequencing error → spurious indel?	down	NULL
+2227	sequencing error → spurious snp	down	NULL
+2229	looks legit	up	NULL
+2230	looks legit	up	NULL
+2231	looks legit	up	NULL
+2233	looks legit	up	NULL
+2234	sequencing error → spurious indel?	down	NULL
+2235	looks legit	up	NULL
+2236	looks legit	up	NULL
+2237	sequencing error → spurious snp	down	NULL
+2238	looks legit	up	NULL
+2241	looks legit	up	NULL
+2244	sequencing error → spurious indel?	down	NULL
+2255	sequencing error → spurious snp	down	NULL
+2257	sequencing error → spurious snp	down	NULL
+2258	sequencing error → spurious snp	down	NULL
+2259	legit; activated by indel!	up	NULL
+2260	sequencing error → spurious snp	down	NULL
+2263	sequencing error → spurious snp	down	NULL
+2264	looks leigt	up	NULL
+2265	looks legit	up	NULL
+2266	sequencing error → spurious indel?	down	NULL
+2271	sequencing error → spurious snp	down	NULL
+2274	sequencing error → spurious snp	down	NULL
+2275	looks legit	up	NULL
+2277	looks legit	up	NULL
+2282	looks legit	up	NULL
+2289	sequencing error → spurious indel?	down	NULL
+2290	sequencing error → spurious indel?	down	NULL
+2292	looks legit	up	NULL
+2297	sequencing error → spurious indel?	down	NULL
+2299	legit candidate; orf alignment bad	meh	NULL
+2300	looks legit	up	NULL
+2301	iffy alignement, sequence	meh	NULL
+2302	large, questionable indel??	meh	NULL
+2304	legit; activated by indel!	up	NULL
+2310	sequencing error → spurious snp	down	NULL
+2311	looks legit	up	NULL
+2312	bad snp	down	NULL
+2313	activated by snp; stop codon is a little off	up	NULL
+2317	clipping	meh	NULL
+2318	bad snp	down	NULL
+2319	bad indel	down	NULL
+2324	bad snp	down	NULL
+2326	looks legit	up	NULL
+2328	bad indel	down	NULL
+2330	looks legit	up	NULL
+2331	looks legit	up	NULL
+2335	bad indel	down	NULL
+2336	bad snp	down	NULL
+2337	bad snp	down	NULL
+2343	bad snp	down	NULL
+2344	looks legit; characterized by SNP	up	NULL
+2345	looks legit; same transcript as 2344	up	NULL
+2346	bad indel	down	NULL
+2347	looks legisitsh?	meh	NULL
+2349	legit; activated by snp in start codon!	up	NULL
+2352	looks legit	up	NULL
+2353	looks legit	up	NULL
+2356	looks legit	up	NULL
+2359	bad snp	down	NULL
+2370	looks legitish	meh	NULL
+2381	bad snp	down	NULL
+2383	bad snp	down	NULL
+2384	part of the problematic 153/1598/2152/2384 locus	meh	NULL
+2385	looks legit	up	NULL
+2386	possible splicing???? MapSplice confirms!	up	NULL
+2387	looks legit	up	NULL
+2388	transcript alignment wonky; orf looks ok	meh	NULL
+2397	looks legit	up	NULL
+2399	looks lefit	up	NULL
+2401	activated by an INDEL!	up	NULL
+2402	bad snp	down	NULL
+2412	looks legit	up	NULL
+2413	bad snp	down	NULL
+2414	looks legit	up	NULL
+2416	activated by spurious snp	down	NULL
+2421	looks legit	up	NULL
+2427	looks legit	up	NULL
+2429	looks legit	up	NULL
+2430	looks legit	up	NULL
+2433	looks legit	up	NULL
+2436	bad indel	down	NULL
+2437	bad indel	down	NULL
+2438	bad indel	down	NULL
+2440	bad snp	down	NULL
+2444	looks legit	up	NULL
+2446	looks legit	up	NULL
+2450	looks legit	up	NULL
+2462	bad indel	down	NULL
+2467	bad snp	down	NULL
+2473	bad indel	down	NULL
+2475	bad snp	down	NULL
+2477	bad snp	down	NULL
+2478	activated by a SNP!	up	NULL
+2483	bad indel	down	NULL
+2486	bad snp	down	NULL
+2487	looks legit	up	NULL
+2488	looks legit	up	NULL
+2490	looks legit	up	NULL
+2500	bad snp	down	NULL
+2501	bad snp	down	NULL
+2503	bad snp	down	NULL
+2507	looks legit	up	NULL
+2508	bad indel	down	NULL
+2516	looks legit	up	NULL
+2517	weird alignment clipping; region overlaps http://www.ncbi.nlm.nih.gov/pmc/articles/PMC2374708/	meh	NULL
+2519	activated by a SNP!	up	NULL
+2520	bad snp	down	NULL
+2521	bad snp	down	NULL
+2527	looks legit	up	NULL
+2528	bad snp	down	NULL
+2530	bad snp	down	NULL
+2533	bad snp	down	NULL
+2539	bad snp	down	NULL
+2541	looks legit	up	NULL
+2542	activated by a SNP!	up	part of a larger splicing system??no evidence for snp activation in the reads :( 
+2543	bad indel	down	NULL
+2544	activated by an INDEL!	up	NULL
+2546	weird alignment clipping	meh	NULL
+2551	bad snp	down	NULL
+2555	looks legit	up	NULL
+2556	looks legit	up	NULL
+2557	bad snp	down	NULL
+2563	bad indel	down	NULL
+2564	bad snp	down	NULL
+2565	weird clipping	meh	NULL
+2566	looks legit	up	NULL
+2567	looks legit	up	NULL
+2570	bad snp	down	NULL
+2571	bad snp	down	NULL
+2573	looks legit	up	NULL
+2576	legitish?	down	NULL
+2578	looks legit	up	NULL
+2579	looks legit	up	involvement with known spliced EST
+2580	looks legit	up	NULL
+2582	legit; activated by snp!	up	no evidence for activation in DNA :(
+2583	bad snp	down	NULL
+2586	weird clipping	meh	NULL
+2592	legit; activated by indel!	up	NULL
+2597	bad indel	down	NULL
+2598	looks legit	up	NULL
+2600	legit; activated by snp!	up	looks good!
+2606	looks legit	up	NULL
+2608	looks legit	up	activated by SNP!
+2613	bad snp 	down	NULL
+2614	bad indel	down	NULL
+2615	can't tell if splicing or crappy alignment to rpt.... mapsplice says no	meh	NULL
+2618	looks legit	up	NULL
+2621	looks legit	up	NULL
+2623	looks legit	up	NULL
+2624	bad indel	down	NULL
+2629	bad snp 	down	NULL
+2632	legit; activated by indel!	up	reads confirm
+2634	bad indel	down	NULL
+2635	bad snp 	down	NULL
+2638	bad indel; may have legit subORF!	meh	NULL
+2643	looks legit	up	NULL
+2645	bad snp 	down	NULL
+2646	looks legit	up	a variant exists which causes early term
+2649	looks legit	up	NULL
+2656	looks legit	up	NULL
+2657	looks legit	up	NULL
+2658	looks legit	up	NULL
+2659	SPLICING???? MapSplice confirms junction!	up	NULL
+2660	looks legit	up	NULL
+2662	looks legit	up	NULL
+2663	looks legit	up	NULL
+2664	bad indel	down	NULL
+2667	looks legit	up	NULL
+2668	looks legit	up	NULL
+2669	looks legit	up	NULL
+2670	looks legit	up	NULL
+2671	looks legit	up	NULL
+2674	looks legit	up	NULL
+2687	bad snp 	down	NULL
+2688	bad snp 	down	NULL
+2690	legit; activated by indel!	up	NULL
+2695	bad indel; may be legit anyway	meh	NULL
+2698	sketchy indel responsible	meh	NULL
+2699	bad indel	down	NULL
+2700	bad snp 	down	NULL
+2701	looks legit	up	NULL
+2703	bad snp 	down	NULL
+2708	looks legit	up	NULL
+2709	weird clipping	meh	NULL
+2711	bad indel	down	NULL
+2713	looks legit	up	NULL
+2714	looks legit	up	NULL
+2718	bad snp 	down	NULL
+2720	looks legit	up	NULL
+2721	looks legit	up	NULL
+2722	bad indel	down	NULL
+2724	bad snp 	down	NULL
+2732	looks; alignment off; real start circa ~68,418,837-68,418,841	meh	NULL
+2734	looks legit	up	NULL
+2739	bad snp 	down	NULL
+2745	spurious snp makes fake start codon :(	down	NULL
+2754	bad indel	down	NULL
+2757	SPLICING???? MapSplice confirms junction!	up	NULL
+2760	bad snp 	down	NULL
+2761	bad snp	down	NULL
+2762	bad snp	down	NULL
+2766	activated by a SNP!	up	NULL
+2767	bad snp	down	NULL
+2768	looks legit	up	NULL
+2770	looks legit	up	NULL
+2771	looks legit	up	NULL
+2772	looks legit	up	NULL
+2782	bad snp	down	NULL
+2784	two different bad snps!	down	NULL
+2785	bad snp	down	NULL
+2787	bad snp	down	NULL
+2788	looks legit	up	NULL
+2797	bad snp	down	NULL
+2798	bad snp	down	NULL
+2799	looks legit	up	NULL
+2805	bad indel	down	NULL
+2807	bad snp	down	NULL
+2809	bad snp	down	NULL
+2811	weird clipping	meh	NULL
+2812	bad snp	down	NULL
+2815	weird clipping	meh	NULL
+2817	looks legit	up	NULL
+2821	looks legit	up	NULL
+2824	bad indel	down	NULL
+2826	looks legit	up	NULL
+2827	bad snp	down	NULL
+2832	bad snp	down	NULL
+2834	looks legit	up	NULL
+2836	bad snp	down	NULL
+2839	bad indel	down	NULL
+2840	bad snp	down	NULL
+2841	looks legit	up	NULL
+2846	bad snp	down	NULL
+2847	looks legit	up	NULL
+2848	looks legit	up	NULL
+2849	looks legit	up	NULL
+2851	looks legit	up	NULL
+2852	looks legit	up	NULL
+2853	looks legit	up	NULL
+2859	activated by a SNP!	up	NULL
+2868	looks legit; indel that preserves frame	up	NULL
+2870	can't tell if splicing or bad sequence??? Mapsplice says badseq	down	NULL
+2873	bad indel	down	NULL
+2875	activated by a SNP!	up	NULL
+2876	bad indel	down	NULL
+2877	activated by an INDEL!	up	NULL
+2878	looks legit; hella real variables conspiring!	up	NULL
+2881	looks legit	up	NULL
+2889	looks legit	up	NULL
+2890	looks legit	up	NULL
+2891	looks legitish	meh	NULL
+2892	bad snp	down	NULL
+2900	activated by a SNP!	up	NULL
+2901	bad snp	down	NULL
+2902	looks legit	up	NULL
+2905	bad indel; probably 1632	down	NULL
+2911	looks legit	up	NULL
+2912	bad snp	down	NULL
+2913	weird clipping	meh	NULL
+2914	looks legit	up	NULL
+2915	looks legit	up	NULL
+2916	bad snp	down	NULL
+2917	looks leigt	up	NULL
+2918	can't tell if splicing or sketchy alignment to rpt?? MapSplice says no splice	down	NULL
+2919	activated by an INDEL!	up	NULL
+2926	bad snp	down	NULL
+2927	bad snp	down	NULL
+2929	looks legit	up	NULL
+2930	looks legit	up	NULL
+2931	looks legit; frame preserving indel!	up	NULL
+2932	looks legit	up	NULL
+2936	bad indel	down	NULL
+2937	bad snp	down	NULL
+2940	bad snp	down	NULL
+2941	looks legit	up	NULL
+2942	bad indel	down	NULL
+2944	weird clipping	meh	NULL
+2945	transcript alignment sketchy; orf looks ok 	up	NULL
+2946	can't tell if spliced or bad alignment to rpt. Mapsplice says no splice	down	NULL
+2950	activated by an INDEL!	up	NULL
+2954	bad indel from sequencing error	down	NULL
+2956	bad indel	down	NULL
+2957	looks legit	up	NULL
+2960	activated by sketchy indels	meh	NULL
+2961	activated by an INDEL!	up	NULL
+2970	spurious indel; may be legit even so?	meh	NULL
+2973	looks legit	up	NULL
+2974	looks legit	up	NULL
+2975	looks legit	up	NULL
+2976	looks legit	up	NULL
+2988	activated by a SNP!	up	NULL
+2989	bad snp	down	NULL
+2992	looks legit	up	NULL
+2994	looks legit	up	NULL
+2995	bad snp	down	NULL
+2999	looks legit	up	NULL
+3000	bad indel	down	NULL
+3002	messy alignment; possibly legit	meh	NULL
+3003	bad snp; still legit	meh	NULL
+3004	looks legit	up	NULL
+3010	bad indel; residual may be legit?	meh	NULL
+3011	activated by a SNP!	up	NULL
+3012	bad indel	down	NULL
+3013	bad indel	down	NULL
+3016	bad snp	down	NULL
+3019	looks legit	up	NULL
+3021	weird clipping	meh	NULL
+3022	looks legit	up	NULL
+3024	bad snp	down	NULL
+3026	weird clipping	meh	NULL
+3029	bad snp	down	NULL
+3032	looks legit	up	NULL
+3034	looks legit	up	NULL
+3035	weird clipping	meh	NULL
+3036	looks legit	up	NULL
+3038	looks legit	up	NULL
+3040	looks legit	up	NULL
+3041	possible splicing? mapsplice says no :(	meh	NULL
+3042	looks legit	up	NULL
+3043	looks legit	up	NULL
+3044	weird clipping	meh	NULL
+3045	looks legit	up	NULL
+3046	orf looks legit	up	NULL
+3048	looks legit	up	NULL
+3062	??? SPLICING??? MapSplice says no	meh	NULL
+3068	looks legit; activated by indel!	up	NULL
+3072	looks legit	up	NULL
+3076	activated by a SNP!	up	NULL
+3077	looks legit	up	NULL
+3078	looks legit	up	NULL
+3086	weird clipping	meh	NULL
+3088	bad indel	down	NULL
+3089	looks legit	up	NULL
+3092	activated by a SNP!	up	NULL
+3093	activated by a SNP!	up	NULL
+3096	bad indel; residual may be legit?	meh	NULL
+3097	looks legit	up	NULL
+3098	looks legit	up	NULL
+3100	bad snp	down	NULL
+3101	bad snp	down	NULL
+3104	bad indel	down	NULL
+3110	activated by a SNP!	up	NULL
+3111	activated by a SNP!	up	NULL
+3112	looks legit	up	NULL
+3114	bad indel; residual may be legit?	meh	NULL
+3115	looks legit	up	NULL
+3117	looks legit	up	NULL
+3118	bad indel	down	NULL
+3119	looks legit	up	NULL
+3120	activated by a SNP!	up	NULL
+3121	looks legit	up	NULL
+3122	looks legit	up	NULL
+3123	activated by a SNP!	up	NULL
+3124	looks legit	up	NULL
+3125	transcript alignment sketchy; orf looks ok 	meh	NULL
+3126	looks legit	up	NULL
+3127	looks legit	up	NULL
+3128	bad snp???	meh	NULL
+3129	looks legit; characterized by a snp!	up	NULL
+3130	looks legit	up	NULL
+3132	looks legit	up	NULL
+3133	looks legit	up	NULL
+3134	looks legit	up	NULL
+3135	bad indel	down	NULL
+3136	looks legit	up	NULL
+3144	looks legit	up	NULL
+3147	looks legitish	meh	NULL
+3148	bad indel; residual may be legit?	meh	NULL
+3149	bad indel	down	NULL
+3151	bad indel	down	NULL
+3153	bad snp	down	NULL
+3158	bad snp	down	NULL
+3159	bad indel	down	NULL
+3160	looks legit	up	NULL
+3161	bad snp	down	NULL
+3162	looks legit	up	NULL
+3163	looks legit	up	NULL
+3164	bad indel	down	NULL
+3166	looks legit	up	NULL
+3172	looks legit	up	NULL
+3173	bad snp	down	NULL
+3179	splicing? big ol' indel? bad alignment to rpt?	meh	NULL
+3181	activated by a SNP!	up	NULL
+3182	looks legit	up	NULL
+3187	bad indel	down	NULL
+3188	looks legit	up	NULL
+3189	bad indel	down	NULL
+3192	activated by an INDEL!	up	NULL
+3193	bad indel	down	NULL
+3201	bad snp	down	NULL
+3204	looks legit; trans alignment wonky	up	NULL
+3205	weird clipping	meh	NULL
+3211	bad snp	down	NULL
+3214	activated by a rare SNP!	up	NULL
+3215	looks legit	up	NULL
+3216	looks legit	up	NULL
+3217	bad snp	down	NULL
+3227	looks legit	up	NULL
+3231	looks legit	up	NULL
+3240	looks legit	up	NULL
+3241	characterized by rare indel (it would be a lot longer without!)	up	
+3245	looks legit	up	
+3247	bad indel	down	
+3248	looks legit	up	
+3249	looks legit	up	
+3250	bad indel	down	
+3251	orf looks legit; transcript alignment is futzed ??	up	
+3252	weird clipping	meh	
+3257	looks legit	up	
+3258	looks legit	up	
+3259	bad indel	down	
+3260	bad indel	down	
+3261	bad snp	down	
+3262	bad snp	down	
+3263	looks legit	up	
+3279	bad snp; still legit	meh	
+3282	bad snp	down	
+3284	looks legit	up	
+3285	looks legit	up	
+3286	looks legit	up	
+3293	EXTREMELY QUESTIONABLE; COOL IF TRUE!	meh	
+3295	looks legit	up	
+3296	SPLICING??? MapSplice says no	meh	
+3297	bad indel	down	
+3298	bad indel	down	
+3299	weird clipping	meh	
+3308	weird clipping	meh	
+3309	??? :/	meh	
+3311	bad indel	down	
+3313	activated by an INDEL!	up	
+3314	bad indel	down	
+3325	looks legit!	up	
+3328	bad indel	down	
+3330	can't tell if splicing or bad alignment to rpt. MapSplice says no	meh	
+3332	bad snp	down	
+3333	bad snp	down	
+3340	bad snp	down	
+3341	looks legit	up	
+3342	looks legitish	meh	
+3344	looks legit	up	
+3345	bad indel	down	
+3347	bad snp	down	
+3348	looks legit	up	
+3349	bad snp	down	
+3359	bad snp	down	
+3366	activated by an INDEL!	up	
+3369	weird alignment clipping	meh	
+3370	looks legit	up	
+3371	bad snp	down	
+3376	looks legit	up	
+3377	weird clipping; bad indel?	meh	
+3379	looks legit	up	
+3380	activated by a SNP!	up	
+3382	looks legit	up	
+3390	bad indel	down	
+3391	bad snp	down	
+3397	looks legit	up	
+3398	bad snp	down	
+3402	looks legit	up	
+3403	bad indel; maybe still legit?	meh	
+3413	looks legit	up	
+3415	characterized by indel (it would be a lot longer without!)	up	
+3416	looks legit	up	
+3421	weird clipping	meh	
+3425	bad snp; still legit	meh	
+3426	looks legit	up	
+3430	looks legit	up	
+3431	looks legit	up	
+3432	looks legit	up	
+3439	bad snp	down	
+3440	looks legitish	meh	
+3442	bad snp	down	
+3449	activated by an INDEL!	up	
+3453	looks legit	up	
+3459	activated by a SNP!	up	
+3460	bad indel?	down	
+3461	looks legit	up	
+3464	looks legit	up	
+3466	bad snp	down	
+3468	bad snp	down	
+3469	looks legit	up	
+3470	bad indel	down	
+3473	maybe??	meh	
+3474	looks legit	up	
+3476	looks legit	up	
+3480	sketchy alignment to rpt	meh	
+3481	bad snp	down	
+3483	bad snp	down	
+3484	looks legit	up	
+3486	bad indel, still legit?	meh	
+3496	bad snp	down	
+3498	bad snp	down	
+3500	looks legit	up	
+3505	spurious indel causes activation	down	
+3509	bad indel	down	
+3510	activated by a SNP!	up	
+3512	looks legit	up	
+3513	activated by a SNP!	up	
+3515	characterized by an indel; would be longer without	up	
+3516	activated by a SNP!	up	
+3517	bad indel, still legit?	meh	
+3518	looks legit	up	
+3522	looks legit	up	
+3523	activated by a SNP!	up	
+3524	SPLICING??? MapSplice says no	meh	
+3525	looks legit	up	
+3526	looks legit	up	
+3527	bad snp	down	
+3540	bad snp	down	
+3541	looks legit	up	
+3543	bad snp	down	
+3545	can't tell if sketchy alignment to rpt or splicing... no mapsplice junction :(	meh	
+3546	questionable indel	meh	
+3549	looks legit	up	
+3553	SPLICING??? MapSplice says no	meh	
+3556	looks legit	up	
+3557	bad snp	down	
+3560	looks legit; activated by indel!	up	
+3562	activated by a SNP!	up	
+3564	bad snp	down	
+3566	bad indel	down	
+3569	activated by an INDEL and a SNP!	up	
+3571	bad indel	down	
+3572	activated by sketchy snp	down	
+3575	looks legit	up	
+3576	bad indel	down	
+3579	bad snp	down	
+3586	SPLICING??? MapSplice Confirms!	up	
+3587	bad indel	down	
+3589	bad snp	down	
+3591	bad snp	down	
+3596	bad snp?	down	
+3597	bad indel	down	
+3602	bad snp	down	
+3606	bad snp	down	
+3608	looks legit	up	
+3609	activated by a SNP!	meh	
+3611	SPLICING??? MapSplice confirms!	up	
+3612	activated by TWO SNPS!	meh	
+3613	bad indel	down	
+3614	looks legit	up	
+3616	bad snp	down	
+3617	bad indel	down	
+3620	bad snp	down	
+3621	looks legit	up	
+3622	bad indel	down	
+3625	looks legit	up	
+3627	activated by a SNP!	up	
+3628	looks legit	up	
+3629	looks legit	up	
+3630	looks legit	up	
+3631	looks legit	up	
+3632	looks legit	up	
+3633	bad indel	down	
+3636	looks legit	up	
+3638	bad indel	down	
+3639	bad indel	down	
+3641	looks legit	up	
+3657	looks legit	up	
+3659	legit	up	
+3660	looks legit	up	
+3663	bad snp	down	
+3666	bad snp??	down	
+3667	bad snp	down	
+3670	bad snp	down	
+3671	bad snp; might be longer without	meh	
+3672	bad snp	down	
+3681	looks legit	up	
+3682	looks legit	up	
+3683	sketchy transcript alignment; orf looks legit	up	
+3684	bad indel	down	
+3688	looks good; characterizing indel!	up	
+3689	bad indel	down	
+3691	bad indel	down	
+3695	looks legit	up	
+3696	bad indel	down	
+3702	bad snp	down	
+3705	bad snp	down	
+3706	?? SPLICING??  MapSplice Confirms!	up	
+3714	bad indel	down	
+3717	bad snp	down	
+3718	looks legit	up	
+3719	looks legit	up	
+3720	weird clipping	meh	
+3722	bad snp	down	
+3733	weird clipping	meh	
+3737	bad snp	down	
+3738	looks legit	up	
+3741	looks legit	up	
+3742	looks legit	up	
+3744	looks legit	up	
+3745	bad indel	down	
+3746	looks legit	up	
+3747	looks legit	up	
+3750	looks legit	up	
+3756	looks legit	up	
+3763	looks legit	up	
+3766	bad indel	down	
+3767	looks legit	up	
+3797	bad indel	down	
+3798	looks legit; characteristic indel!	up	
+3799	activated by a rare SNP!	up	
+3802	looks legit	up	
+3803	looks legit	up	
+3804	weird clipping	meh	
+3806	looks legit; characteristic LARGE indel!	up	
+3807	looks legit	up	
+3810	looks legit	up	
+3811	bad snp	down	
+3812	looks legit	up	
+3821	can't tell if splicing or bad alignment to rpt; MapSplice says no	meh	
+3824	bad indel	down	
+3829	bad indel	down	
+3830	bad indel	down	
+3832	bad snp	down	
+3833	weird alignment clipping	meh	
+3834	bad snp	down	
+3835	bad indel	down	
+3837	can't tell if sketchy alignment to rpt or splicing; MapSplice says no	meh	
+3847	bad indel	down	
+3851	wrong snp in the right place :(	meh	
+3853	weird clipping	meh	
+3855	bad indel; may still be legit	meh	
+3857	bad snp, still legit	meh	
+3866	bad indel	down	
+3869	bad indel	down	
+3871	looks legit	up	
+3873	can't tell if splicing or bad alignment to rpt; mapSplice says no	meh	
+3879	bad indel	down	
+3880	bad snp	down	
+3883	looks legit	up	
+3884	bad indel	down	
+3896	looks legit	up	
+3898	bad snp	down	
+3900	looks legit	up	
+3902	bad indel	down	
+3905	bad indel	down	
+3906	looks legit	up	
+3907	looks legit	up	
+3908	bad snp	down	
+3909	bad snp	down	
+3912	looks legit	up	
+3919	bad snp?	down	
+3920	looks legit	up	
+3924	looks legit	up	
+3933	bad snp	down	
+3934	bad snp	down	
+3935	looks legit	up	
+3942	looks legit; frame-preserving indel!	up	
+3944	can't tell if splicing or bad alignment to rpt; mapSplice says no	meh	
+3947	looks legit	up	
+3948	bad snp	down	
+3957	bad indel; longer without it though!	meh	
+3963	bad snp	down	
+3966	looks legit	up	
+3967	bad snp	down	
+3969	activated by an INDEL!	up	
+3979	indel weirdness; still legit	up	
+3980	activated by a SNP!	up	
+3981	activated by spurious indel; still valid? weak conserved domain hits (rpt region?)	meh	
+3986	bad snp	down	
+3987	bad snp	down	
+3996	bad indel	down	
+4006	activated by a rare SNP!	up	
+4008	bad snp	down	
+4010	bad snp	down	
+4016	looks legit	up	
+4017	looks legit	up	
+4018	looks legit	up	
+4024	bad snp	down	
+4025	looks legit	up	
+4027	looks legit	up	
+4028	looks legit	up	
+4029	looks legit	up	
+4031	looks legit	up	
+4032	looks legit	up	
+4033	looks legit	up	
+4034	looks legit	up	
+4035	characterized by an indel; would be longer without	up	
+4037	bad indel	down	
+4039	wrong snp in the right place :(	meh	
+4041	weird clipping	meh	
+4049	bad indel	down	
+4056	activated by an INDEL! also, a second, bad indel	up	
+4057	bad indel; is probably 867	meh	
+4058	activated by a rare INDEL!	up	
+4072	bad indel	down	
+4075	looks legit	up	
+4076	bad snp	down	
+4077	looks legit	up	
+4078	looks legit	up	
+4079	bad snp	down	
+4081	looks legit	up	
+4082	looks legit	up	
+4083	looks legit	up	
+4084	characterized by an indel; would be longer without	up	
+4085	looks legit	up	
+4086	activated by a SNP!	up	
+4087	looks legit	up	
+4088	looks legit	up	
+4090	bad indel	down	
+4091	bad snp	down	
+4092	looks legit	up	
+4093	bad snp would be longer without!	meh	
+4094	really bad alignment to rpt	down	
+4095	looks legit	up	
+4102	bad snp	down	
+4103	looks legit	up	
+4107	bad indel	down	
+4111	indel weirdness; still legit	meh	
+4113	activated by a SNP!	up	
+4116	looks legitish	meh	
+4120	bad snp	down	
+4121	bad indel	down	
+4129	splicing??? MapSplice Confirms!	up	
+4139	bad snp	down	
+4142	bad snp	down	
+4144	bad indel	down	
+4148	looks legit	up	
+4149	bad snp	down	
+4150	bad snp	down	
+4152	looks legit	up	
+4153	bad snp	down	
+4154	bad snp	down	
+4155	bad snp	down	
+4159	looks legit	up	
+4160	bad indel	down	
+4163	bad snp	down	
+4165	bad indel; longer without it though!	meh	
+4167	bad snp	down	
+4168	looks legit	up	
+4169	bad indel	down	
+4170	looks legit	up	
+4172	activated by a SNP!	up	
+4176	bad indel	down	
+4177	looks legit	up	
+4179	weird clipping	meh	
+4180	SPLicing??? MapSplice Confirms!	up	
+4182	looks legit	up	
+4188	bad snp	down	
+4191	activated by a SNP!	up	
+4192	single exon; looks legit	up	
+4195	bad indel; may still be legit	meh	
+4196	activated by a SNP!	up	
+4198	looks legit	up	
+4200	looks legit	up	
+4201	looks legit	up	
+4202	bad indel	down	
+4214	weird clipping	meh	
+4215	weird clipping	meh	
+4218	bad snp	down	
+4219	bad indel	down	
+4220	bad indel	down	
+4221	bad snp	down	
+4226	bad snp	down	
+4227	maybe splicing; probably just bad alignment; mapsplice says no	meh	
+4236	looks legit	up	
+4237	looks legit	up	
+4239	looks legit	up	
+4240	looks legit	up	
+4252	bad snp	down	
+4256	bad snp	down	
+4257	wonky transcript alignment	meh	
+4260	looks legit; wonky transcript alignment	up	
+4264	bad indel	down	
+4265	looks legit	up	
+4272	looks legit; characteristic indel!	up	
+4273	bad indel	down	
+4274	weird clipping	meh	
+4278	bad indel	down	
+4279	looks legit- activated by SNP; hella real variants	up	
+4286	looks legit	up	
+4287	bad indel	down	
+4288	bad indel	down	
+4289	transcript alignment sketchy; orf looks ok	up	
+4290	bad snp	down	
+4291	looks legit	up	
+4295	bad snp	down	
+4296	activated by two SNPs??	up	
+4297	bad indel	down	
+4302	bad snp	down	
+4305	bad snp	down	
+4306	activated by an INDEL!	up	
+4308	weird clipping	meh	
+4309	activated by a SNP!	up	
