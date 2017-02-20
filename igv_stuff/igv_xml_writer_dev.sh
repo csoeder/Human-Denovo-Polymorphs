@@ -23,7 +23,7 @@ echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
 
 
 #echo "<Session genome="/netscr/csoeder/1kGen/data/hg19.fa" hasGeneTrack="false" hasSequenceTrack="true" locus="chr15:59615957-59616520" path="/netscr/csoeder/igv_session_test.xml" version="8">"
-echo "<Session genome="'"/netscr/csoeder/1kGen/data/hg19.fa"'" hasGeneTrack="'"false"'" hasSequenceTrack="'"true"'" path="'"/netscr/csoeder/'$session_name'.xml"'" version="'"8"'">"
+echo "<Session genome="'"/proj/cdjones_lab/Genomics_Data_Commons/genomes/homo_sapiens/hg19/hg19.fa"'" hasGeneTrack="'"false"'" hasSequenceTrack="'"true"'" path="'"/netscr/csoeder/'$session_name'.xml"'" version="'"8"'">"
 
 
 echo "  <Resources>"
@@ -68,7 +68,7 @@ if [[ "$xpressr3" -ne "" ]]; then
 fi
 #       vcf
 echo "      <Resource path="'"'$VCFpath'/Expressers_'$peekay'.vcf"'"/>"
-echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates.sort.bed"'"/>"
+echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates_v4.unFiltered.sorted.bed"'"/>"
 echo "      <Resource path="'"/netscr/csoeder/1kGen/data/refSeq_genes.bed"'"/>"
 #echo "      <Resource path="'"/netscr/csoeder/1kGen/data/repeatmasker.bed"'"/>"
 echo "  </Resources>"
