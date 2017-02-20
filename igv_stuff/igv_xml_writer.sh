@@ -24,12 +24,12 @@ echo '<?xml version="1.0" encoding="UTF-8" standalone="no"?>'
 
 
 #echo "<Session genome="/netscr/csoeder/1kGen/data/hg19.fa" hasGeneTrack="false" hasSequenceTrack="true" locus="chr15:59615957-59616520" path="/netscr/csoeder/igv_session_test.xml" version="8">"
-echo "<Session genome="'"/netscr/csoeder/1kGen/data/hg19.fa"'" hasGeneTrack="'"false"'" hasSequenceTrack="'"true"'" path="'"/netscr/csoeder/'$session_name'.xml"'" version="'"8"'">"
+echo "<Session genome="'"/proj/cdjones_lab/Genomics_Data_Commons/genomes/homo_sapiens/hg19/hg19.fa"'" hasGeneTrack="'"false"'" hasSequenceTrack="'"true"'" path="'"/netscr/csoeder/'$session_name'.xml"'" version="'"8"'">"
 
 
 echo "  <Resources>"
 #   All candidates
-echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates.thumbsUp.sorted.bed"'"/>"
+echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates_v4.unFiltered.sorted.bed"'"/>"
 
 #   Three non-expressors
 #       psl
@@ -69,7 +69,7 @@ if [[ "$xpressr3" -ne "" ]]; then
 fi
 #       vcf
 echo "      <Resource path="'"'$VCFpath'/Expressers_'$peekay'.vcf"'"/>"
-echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates.sort.bed"'"/>"
+echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates_v4.unFiltered.sorted.bed"'"/>"
 echo "      <Resource path="'"/netscr/csoeder/1kGen/data/refSeq_genes.bed"'"/>"
 #echo "      <Resource path="'"/netscr/csoeder/1kGen/data/repeatmasker.bed"'"/>"
 echo "  </Resources>"
@@ -209,7 +209,7 @@ echo "  </Track>"
 echo "  </Panel>"
 
 echo " <Panel height="'"75"'" name="'"All Candidates"'" width="'"1111"'">"
-echo "      <Track altColor="'"0,0,178"'" autoScale="'"false"'" clazz="'"org.broad.igv.track.FeatureTrack"'" color="'"0,0,178"'" colorScale="'"ContinuousColorScale;0.0;8.0;255,255,255;0,0,178"'" displayMode="'"SQUISHED"'" featureVisibilityWindow="'"-1"'" fontSize="'"10"'" id="'"/netscr/csoeder/1kGen/candidates.sort.bed"'" name="'"All candidates"'" renderer="'"BASIC_FEATURE"'" sortable="'"false"'" visible="'"true"'" windowFunction="'"count"'">"
+echo "      <Track altColor="'"0,0,178"'" autoScale="'"false"'" clazz="'"org.broad.igv.track.FeatureTrack"'" color="'"0,0,178"'" colorScale="'"ContinuousColorScale;0.0;8.0;255,255,255;0,0,178"'" displayMode="'"SQUISHED"'" featureVisibilityWindow="'"-1"'" fontSize="'"10"'" id="'"/netscr/csoeder/1kGen/candidates_v4.unFiltered.sorted.bed"'" name="'"All candidates"'" renderer="'"BASIC_FEATURE"'" sortable="'"false"'" visible="'"true"'" windowFunction="'"count"'">"
 echo "      </Track>"
 echo "  </Panel>"
 

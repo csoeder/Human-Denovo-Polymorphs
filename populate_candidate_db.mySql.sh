@@ -55,11 +55,22 @@ cat query_process/v3_thumbs.tbl | awk '{print "UPDATE candidate SET v3_charlie_t
 
 
 
-
-
+#Once the IGV scan has been done:
 echo "ALTER TABLE candidate ADD COLUMN v4_triage_thumbs VARCHAR(20);"| mysql --user=csoeder --password=tha_snazzle murple -N
 echo "ALTER TABLE candidate ADD COLUMN v4_triage_notes TEXT;"| mysql --user=csoeder --password=tha_snazzle murple -N
 cat query_process/triage_v4.tbl |  tr ' ' '~' | tr '→' '~'|awk '{print "UPDATE candidate SET ucsc_coords=|"$2"|, v4_triage_thumbs=|"$3"|, v4_triage_notes=|"$4"| WHERE precand_pk="$1";"}' |  tr '|' '"' | tr "~" " " |  mysql --user=csoeder --password=tha_snazzle murple -N
+
+echo "ALTER TABLE candidate ADD COLUMN v4_igv_thumbs VARCHAR(20);"| mysql --user=csoeder --password=tha_snazzle murple -N 
+echo "ALTER TABLE candidate ADD COLUMN v4_igv_notes TEXT;"| mysql --user=csoeder --password=tha_snazzle murple -N
+
+echo "ALTER TABLE candidate ADD COLUMN confirmed_splice_v4 BOOLEAN;"| mysql --user=csoeder --password=tha_snazzle murple –N
+echo "UPDATE candidate SET confirmed_splice_v4=confirmed_splice_v3;"| mysql --user=csoeder --password=tha_snazzle murple –N
+
+cat igv_scan.raw | cut -f 1,5,6,7 | cut -f 1,3 | awk '{if($2!="")print"UPDATE candidate SET v4_igv_thumbs=|"$2"| WHERE precand_pk="$1";";}' | tr "|" "'" | mysql --user=csoeder --password=tha_snazzle murple –N
+cat igv_scan.raw | cut -f 1,5,6,7 | cut -f 1,4 | tr -d "'" | tr " " "~" | awk '{if($2!="")print "UPDATE candidate SET v4_igv_notes=|"$2"| WHERE precand_pk="$1";";}' | tr "|" "'"| tr "~" " " | mysql --user=csoeder --password=tha_snazzle murple -N
+
+cat query_process/splice_confirmation_v4.tbl | awk '{print "UPDATE candidate SET confirmed_splice_v4 ="$2" WHERE precand_pk ="$1";" }' | mysql --user=csoeder --password=tha_snazzle murple -N
+
 
 
 echo "ALTER TABLE candidate CHANGE COLUMN start old_start bigint(20);" | mysql --user=csoeder --password=tha_snazzle murple -N
@@ -69,7 +80,7 @@ echo "ALTER TABLE candidate ADD COLUMN stop bigint(20);" | mysql --user=csoeder 
 
 echo "UPDATE candidate SET start=old_start, stop=old_stop WHERE ucsc_coords IS NULL;" | mysql --user=csoeder --password=tha_snazzle murple -N
 echo "SELECT precand_pk, ucsc_coords FROM candidate WHERE (ucsc_coords IS NOT NULL AND ucsc_coords != '');"| mysql --user=csoeder --password=tha_snazzle murple -N | tr ":" "\t" | tr -d "," | tr "-" "\t" | awk '{print "UPDATE candidate SET start="$3", stop="$4" WHERE precand_pk="$1";"}' | mysql --user=csoeder --password=tha_snazzle murple -N
-
+echo "UPDATE candidate SET start=old_start, stop=old_stop WHERE start IS NULL;" | mysql --user=csoeder --password=tha_snazzle murple -N
 
 
 cat integrated_call_samples.20130502.ALL.ped | grep -v Fam | awk '{print $2,$3,$4,$5,$7}' | sed -e 's/ 1 / M /'| sed -e 's/ 2 / F /' | tr ' ' '\t' > pop_upload.dat 
@@ -179,6 +190,13 @@ echo "DROP TABLE temp;" | mysql --user=csoeder --password=tha_snazzle murple -N
 
 
 echo "SELECT c.precand_pk, o.person_name, o.sequence FROM candidate c, orf o, precandidate_lookup l WHERE l.precand_id = c.precand_pk AND l.orf_id =o.old_pk AND l.person_name=o.person_name ORDER BY c.precand_pk ASC;" |  mysql --user=csoeder --password=tha_snazzle murple -N | awk '{print ">"$1"_"$2"\n"$3}' > orfs_by_individual.fa
+
+
+
+#Pull candidate by pk:
+#peakay=144
+#echo "select o.person_name, o.old_pk, o.sequence orf, t.person_name, t.old_pk, t.sequence transcript from precandidate_lookup l, orf o, transcript t where l.orf_id=o.old_pk and l.person_name=o.person_name and t.comp_name=o.trans and t.person_name=o.person_name and  precand_id=$peakay;" | mysql --user=csoeder --password=tha_snazzle murple -N | awk '{print ">orf_"$1"_"$2"\n"$3"\n>trans_"$4"_"$5"\n"$6}'  
+
 
 
 #fine scale alignment:
@@ -294,6 +312,133 @@ cat intronicList.upload.sql | mysql --user=csoeder --password=tha_snazzle murple
 # 
 
 
+###		Merging indistinct candidates
+# echo "select chrom, start, stop, precand_pk, ucsc_coords from candidate where (v4_igv_thumbs='up' or v3_igv_thumbs='up');" | mysql --user=csoeder --password=tha_snazzle murple -N > candidates.dupeFind.full.bed;
+# cut -f 1,2,3,4 candidates.dupeFind.full.bed > candidates.dupeFind.bed 
+
+# #neither start nor stop shared (allegedly)
+# bedtools intersect -wa -wb -a candidates.dupeFind.bed -b candidates.dupeFind.bed | awk '{if($4!=$8)print;}' | awk '{if($2!=$6)print;}' | awk '{if($3!=$7)print;}' | awk '{if($4<$8)print}' > unsharedStop_unsharedStart.doublebed
+# #hand curation.......
+# #merge the degenerate cases
+# cat unsharedStop_unsharedStart.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep degen | cut -f 4,8,11,12 | awk '{print"UPDATE candidate SET start="$3", stop="$4" WHERE (precand_pk="$1" OR precand_pk="$2");"}' |  mysql --user=csoeder --password=tha_snazzle murple -N 
+# #make any corrections to the distinct cases
+# cat unsharedStop_unsharedStart.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep dist | cut -f 4,11,12 | head | awk '{print"UPDATE candidate SET start="$2", stop="$3" WHERE precand_pk="$1";"}' |  mysql --user=csoeder --password=tha_snazzle murple -N 
+# cat unsharedStop_unsharedStart.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep dist | cut -f 4,14,15 | head | awk '{print"UPDATE candidate SET start="$2", stop="$3" WHERE precand_pk="$1";"}' |  mysql --user=csoeder --password=tha_snazzle murple -N 
+
+# #only stops shared (allegedly)
+# bedtools intersect -wa -wb -a candidates.dupeFind.bed -b candidates.dupeFind.bed | awk '{if($4!=$8)print;}' | awk '{if($2!=$6)print;}' | awk '{if($3==$7)print;}' | awk '{if($4<$8)print}' > shared_stops.doublebed
+# cat shared_stops.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep degen | cut -f 4,8,11,12 | awk '{print"UPDATE candidate SET start="$3", stop="$4" WHERE (precand_pk="$1" OR precand_pk="$2");"}' | mysql --user=csoeder --password=tha_snazzle murple -N 
+# cat shared_stops.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep dist | cut -f 4,11,12 | head | awk '{print"UPDATE candidate SET start="$2", stop="$3" WHERE precand_pk="$1";"}' | mysql --user=csoeder --password=tha_snazzle murple -N 
+# cat shared_stops.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep dist | cut -f 4,14,15 | head | awk '{print"UPDATE candidate SET start="$2", stop="$3" WHERE precand_pk="$1";"}' | mysql --user=csoeder --password=tha_snazzle murple -N 
+
+# #only starts shared (allegedly)
+# bedtools intersect -wa -wb -a candidates.dupeFind.bed -b candidates.dupeFind.bed | awk '{if($4!=$8)print;}' | awk '{if($2==$6)print;}' | awk '{if($3!=$7)print;}' | awk '{if($4<$8)print}' > shared_starts.doublebed
+# cat shared_starts.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep degen | cut -f 4,8,11,12 | awk '{print"UPDATE candidate SET start="$3", stop="$4" WHERE (precand_pk="$1" OR precand_pk="$2");"}' | mysql --user=csoeder --password=tha_snazzle murple -N 
+# cat shared_starts.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep dist | cut -f 4,11,12 | head | awk '{print"UPDATE candidate SET start="$2", stop="$3" WHERE precand_pk="$1";"}' | mysql --user=csoeder --password=tha_snazzle murple -N 
+# cat shared_starts.predat | tr -d "," | tr ":" "\t" | tr "-" "\t" | grep dist | cut -f 4,14,15 | head | awk '{print"UPDATE candidate SET start="$2", stop="$3" WHERE precand_pk="$1";"}' | mysql --user=csoeder --password=tha_snazzle murple -N 
+
+# bedtools intersect -wa -wb -a candidates.dupeFind.bed -b candidates.dupeFind.bed | head
+# bedtools intersect -wa -wb -a candidates.dupeFind.bed -b candidates.dupeFind.bed | awk '{if($4!=$8)print;}' | awk '{if($2==$6)print;}' | awk '{if($3==$7)print;}' | cut -f 4,8 > trivial_duplications.list
+# bedtools intersect -wa -wb -a candidates.dupeFind.bed -b candidates.dupeFind.bed | awk '{if($4!=$8)print;}' | awk '{if($2==$6)print;}' | awk '{if($3!=$7)print;}' | awk '{if($4<$8)print}' > shared_starts.doublebed
+
+
+echo "select c.precand_pk, c.chrom, c.start, c.stop, c.strand, k.precand_pk, k.chrom, k.start, k.stop, k.strand from candidate c, candidate k where abs(c.start-k.start)<5 and c.start != k.start  and c.precand_pk != k.precand_pk and c.chrom=k.chrom ;" | mysql --user=csoeder --password=tha_snazzle murple -N > overlapping_starts.predat
+#	manual checking
+cat overlapping_starts.dat | tr -d "," | cut -f 1,11 | awk '{print "UPDATE candidate SET start="$2" WHERE precand_pk="$1";"}' |  mysql --user=csoeder --password=tha_snazzle murple -N 
+cat overlapping_starts.dat | tr -d "," | cut -f 6,12 | awk '{print "UPDATE candidate SET start="$2" WHERE precand_pk="$1";"}' |  mysql --user=csoeder --password=tha_snazzle murple -N 
+
+echo "select c.precand_pk, c.chrom, c.start, c.stop, c.strand, k.precand_pk, k.chrom, k.start, k.stop, k.strand from candidate c, candidate k where abs(c.stop-k.stop)<5 and c.stop != k.stop  and c.precand_pk != k.precand_pk and c.chrom=k.chrom and c.strand=k.strand ;" | mysql --user=csoeder --password=tha_snazzle murple -N > overlapping_stops.predat
+#	manual checking
+cat overlapping_stops.dat  | tr -d "," | cut -f 1,11 | awk '{print "UPDATE candidate SET stop="$2" WHERE precand_pk="$1";"}' |  mysql --user=csoeder --password=tha_snazzle murple -N 
+cat overlapping_stops.dat  | tr -d "," | cut -f 6,12 | awk '{print "UPDATE candidate SET stop="$2" WHERE precand_pk="$1";"}' |  mysql --user=csoeder --password=tha_snazzle murple -N 
+
+
+echo "CREATE TABLE gene SELECT * FROM candidate WHERE 1=0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v3_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN badmap;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v3_igv_thumbs;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v3_igv_notes;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN confirmed_splice_v3;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN notes_v3;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN morenotes_v3;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v3_charlie_thumbs;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN ucsc_coords;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v4_triage_thumbs;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v4_triage_notes;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN old_start;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN old_stop;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN phase3orphan;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v4_igv_notes;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN v4_igv_thumbs;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN confirmed_splice_v4;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN unseen_in_pan145;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN unseen_in_pan146;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN unseen_in_gor142;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN unseen_in_gor143;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN unseen_in_panNHPRTR;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene DROP COLUMN unseen_in_gorNHPRTR;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene ADD COLUMN cand_id INT;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene ADD COLUMN confirmed_splice BOOLEAN DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene ADD COLUMN triage_notes TEXT;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene ADD COLUMN legit BOOLEAN DEFAULT 1;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene ADD COLUMN gene_pk INT AUTO_INCREMENT PRIMARY KEY;" | mysql --user=csoeder --password=tha_snazzle murple -N
+
+echo "ALTER TABLE gene CHANGE COLUMN full_sneakthrough_ILS full_sneakthrough_ILS INT DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN full_sneakthrough_accum full_sneakthrough_accum INT DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN full_sneakthrough_other full_sneakthrough_other INT DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN fragmentary_lookback fragmentary_lookback INT DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN blast_ghosts blast_ghosts INT DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN fragmentary_in_pan145 fragmentary_in_pan145 BOOLEAN DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN fragmentary_in_pan146 fragmentary_in_pan146 BOOLEAN DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN fragmentary_in_gor142 fragmentary_in_gor142 BOOLEAN DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN fragmentary_in_gor143 fragmentary_in_gor143 BOOLEAN DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN fragmentary_in_panNHPRTR fragmentary_in_panNHPRTR BOOLEAN DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene CHANGE COLUMN fragmentary_in_gorNHPRTR fragmentary_in_gorNHPRTR BOOLEAN DEFAULT 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+
+echo "INSERT INTO gene (chrom, start, stop, strand) (SELECT DISTINCT chrom, start, stop, strand FROM candidate WHERE (v4_igv_thumbs='up' or v3_igv_thumbs='up'));" | mysql --user=csoeder --password=tha_snazzle murple -N
+
+#echo "SELECT DISTINCT chrom, start, stop, strand FROM candidate WHERE (v4_igv_thumbs='up' or v3_igv_thumbs='up');" | mysql --user=csoeder --password=tha_snazzle murple -N
+
+echo "CREATE TABLE gene_lookup SELECT * FROM precandidate_lookup WHERE 1=0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene_lookup CHANGE COLUMN precandlookup_pk genelookup_pk INT;" | mysql --user=csoeder --password=tha_snazzle murple -N
+echo "ALTER TABLE gene_lookup CHANGE COLUMN precand_id gene_id INT;" | mysql --user=csoeder --password=tha_snazzle murple -N
+
+echo "CREATE TABLE candidate_promotion (prom_pk INT AUTO_INCREMENT PRIMARY KEY, cand_id INT, gene_id INT);" | mysql --user=csoeder --password=tha_snazzle murple -N
+
+echo "SELECT precand_pk, chrom, start, stop, strand, full_sneakthrough_ILS, full_sneakthrough_accum, full_sneakthrough_other, blast_ghosts, fragmentary_in_pan145, fragmentary_in_pan146, fragmentary_in_gor142, fragmentary_in_gor143, fragmentary_in_panNHPRTR, fragmentary_in_gorNHPRTR FROM candidate WHERE (v4_igv_thumbs='up' or v3_igv_thumbs='up');" | mysql --user=csoeder --password=tha_snazzle murple -N | while read line; do 
+	cand_pk=$(echo $line | tr ' ' '\t' | cut -f 1) ; 
+	chrom=$(echo $line | tr ' ' '\t' | cut -f 2) ; 
+	start=$(echo $line | tr ' ' '\t' | cut -f 3) ; 
+	stop=$(echo $line | tr ' ' '\t' | cut -f 4) ; 
+	strand=$(echo $line | tr ' ' '\t' | cut -f 5) ; 
+	full_sneakthrough_ILS=$(echo $line | tr ' ' '\t' | cut -f 6) ; 
+	full_sneakthrough_accum=$(echo $line | tr ' ' '\t' | cut -f 7) ; 
+	full_sneakthrough_other=$(echo $line | tr ' ' '\t' | cut -f 8) ; 
+	blast_ghosts=$(echo $line | tr ' ' '\t' | cut -f 9) ; 
+	fragmentary_in_pan145=$(echo $line | tr ' ' '\t' | cut -f 10) ; 
+	fragmentary_in_pan146=$(echo $line | tr ' ' '\t' | cut -f 11) ; 
+	fragmentary_in_gor142=$(echo $line | tr ' ' '\t' | cut -f 12) ; 
+	fragmentary_in_gor143=$(echo $line | tr ' ' '\t' | cut -f 13) ; 
+	fragmentary_in_panNHPRTR=$(echo $line | tr ' ' '\t' | cut -f 14) ; 
+	fragmentary_in_gorNHPRTR=$(echo $line | tr ' ' '\t' | cut -f 15) ; 
+
+	gene_pk=$(echo "SELECT gene_pk FROM gene WHERE chrom='"$chrom"' AND start=$start AND stop=$stop AND strand='"$strand"';"| mysql --user=csoeder --password=tha_snazzle murple -N)
+	echo "UPDATE gene SET full_sneakthrough_ILS = full_sneakthrough_ILS + $full_sneakthrough_ILS, full_sneakthrough_accum = full_sneakthrough_accum + $full_sneakthrough_accum, full_sneakthrough_other = full_sneakthrough_other + $full_sneakthrough_other, blast_ghosts = blast_ghosts + $blast_ghosts WHERE gene_pk=$gene_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N 
+	echo "UPDATE gene SET fragmentary_in_pan145=$fragmentary_in_pan145, fragmentary_in_pan146=$fragmentary_in_pan146, fragmentary_in_gor142=$fragmentary_in_gor142, fragmentary_in_gor143=$fragmentary_in_gor143, fragmentary_in_panNHPRTR=$fragmentary_in_panNHPRTR, fragmentary_in_gorNHPRTR=$fragmentary_in_gorNHPRTR WHERE gene_pk=$gene_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N 
+#	echo "UPDATE gene SET triage_notes=CONCAT_WS(';', '$(echo "SELECT v3_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )',  '$(echo "SELECT notes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )', '$(echo "SELECT morenotes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )', '$(echo "SELECT v4_triage_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )', '$(echo "SELECT v4_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )' ) WHERE gene_pk=$gene_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N 
+#	echo "UPDATE gene SET triage_notes=CONCAT_WS(';', '$(echo "SELECT v3_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )',  '$(echo "SELECT notes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )', '$(echo "SELECT morenotes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )', '$(echo "SELECT v4_triage_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )', '$(echo "SELECT v4_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N | tr -d "?" | tr -d "!" )' ) WHERE gene_pk=$gene_pk;" 
+
+	echo "UPDATE gene SET triage_notes=CONCAT_WS(';', '$(echo "SELECT v3_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )',  '$(echo "SELECT notes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )', '$(echo "SELECT morenotes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )', '$(echo "SELECT v4_triage_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )', '$(echo "SELECT v4_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )' ) WHERE gene_pk=$gene_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N 
+	echo "UPDATE gene SET triage_notes=CONCAT_WS(';', '$(echo "SELECT v3_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )',  '$(echo "SELECT notes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )', '$(echo "SELECT morenotes_v3 FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )', '$(echo "SELECT v4_triage_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )', '$(echo "SELECT v4_igv_notes FROM candidate WHERE precand_pk=$cand_pk;" | mysql --user=csoeder --password=tha_snazzle murple -N )' ) WHERE gene_pk=$gene_pk;" 
+
+	echo "INSERT INTO gene_lookup (orf_id, aln_id, person_id, person_name, gene_id) (SELECT orf_id, aln_id, person_id, person_name, $gene_pk FROM precandidate_lookup WHERE precand_id=$cand_pk);" | mysql --user=csoeder --password=tha_snazzle murple -N 
+
+	echo "INSERT INTO candidate_promotion (cand_id, gene_id) VALUES ($cand_pk, $gene_pk);" | mysql --user=csoeder --password=tha_snazzle murple -N 
+done
+
+
+UPDATE gene SET confirmed_splice=1 WHERE  
+
 
 ###
 #	Annotate proteomics:
@@ -338,6 +483,16 @@ echo "UPDATE auxiliary_transcript s, temp t SET s.mrna_len=t.mrna_len, s.orf_len
 echo "DROP TABLE temp;" | mysql --user=csoeder --password=tha_snazzle murple -N
 
 
+#pull gene by pk
+#peakay=1
+#echo "select o.person_name, o.old_pk, o.sequence orf, t.person_name, t.old_pk, t.sequence transcript from gene_lookup l, orf o, transcript t where l.orf_id=o.old_pk and l.person_name=o.person_name and t.comp_name=o.trans and t.person_name=o.person_name and gene_id=$peakay;" | mysql --user=csoeder --password=tha_snazzle murple -N | awk '{print ">orf_"$1"_"$2"\n"$3"\n>trans_"$4"_"$5"\n"$6}'  
+#limit to three
+	echo "select o.person_name, o.old_pk, o.sequence orf, t.person_name, t.old_pk, t.sequence transcript from gene_lookup l, orf o, transcript t where l.orf_id=o.old_pk and l.person_name=o.person_name and t.comp_name=o.trans and t.person_name=o.person_name and gene_id=$peakay limit 3;" | mysql --user=csoeder --password=tha_snazzle murple -N | awk '{print ">orf_"$1"_"$2"\n"$3"\n>trans_"$4"_"$5"\n"$6}'  
+
+
+
+
+
 
 # candidate info: splicing data, lowcov warning
 # 
@@ -371,7 +526,7 @@ cat gwips.upload.sql | mysql --user=csoeder --password=tha_snazzle murple -N
 # grep -v NA results.txt | grep -v Stra |tr '_' ',' | awk '{if($3==1)print "chr"$2,$4,$5,$1,"+",$4,$5,"0,0,0",$6,$7}' | tr ' ' '\t' >> sorfs.spliced.prebed 
 # python ../Research/Human_deNovo/sorf_to_bed12.py > sorfs.spliced.bed 
 
-echo "ALTER TABLE candidate ADD COLUMN sorf_strong boolean;" | mysql --user=csoeder --password=tha_snazzle glurge -N
+echo "ALTER TABLE candidate ADD COLUMN sorf_strong boolean;" | mysql --user=csoeder --password=tha_snazzle murple -N
 for precand_pk in $(bedtools intersect -wa -wb -a candidates.bed -b data/sorfs_unspliced.bed | awk '{if($5==$10)print;}' | tr ' ' '\t' | cut -f 4 | sort | uniq); do
 	echo "UPDATE candidate SET sorf_strong=1 WHERE precand_pk = $precand_pk;" >> sorfs_upload.sql ;
 done
@@ -389,18 +544,21 @@ cat sorfs_upload.sql | mysql --user=csoeder --password=tha_snazzle glurge -N
 
 ##	Annotate absent_from_TRACE
 #	(web utility, copy-paste from spreadsheet...)
-echo "ALTER TABLE orf ADD COLUMN unseen_in_pan_trace boolean default 0;" | mysql --user=csoeder --password=tha_snazzle glurge -N 	#	the default assumption is that you don't need to look at trace
-cat absent_from_panTrace.dat | cut -f 1,3 |  awk '{ print "UPDATE orf SET unseen_in_pan_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle glurge -N 	#given that you're looking in trace, assume you can't find
-cat absent_from_panTrace.dat | grep NO | cut -f 1,4 | tr -d N | tr "O" "0" | awk '{ print "UPDATE orf SET unseen_in_pan_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle glurge -N 	#	mark all the ones that were found in race
-echo "ALTER TABLE orf ADD COLUMN unseen_in_gor_trace boolean default 0;" | mysql --user=csoeder --password=tha_snazzle glurge -N
-cat absent_from_gorTrace.dat | cut -f 1,3 |  awk '{ print "UPDATE orf SET unseen_in_gor_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle glurge -N 	#given that you're looking in trace, assume you can't find
-cat absent_from_gorTrace.dat | grep NO | cut -f 1,4 | tr -d N | tr "O" "0" | awk '{ print "UPDATE orf SET unseen_in_gor_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle glurge -N 	#	mark all the ones that were found in race
+echo "ALTER TABLE orf ADD COLUMN unseen_in_pan_trace boolean default 0;" | mysql --user=csoeder --password=tha_snazzle murple -N 	#	the default assumption is that you don't need to look at trace
+cat absent_from_panTrace.dat | cut -f 1,3 |  awk '{ print "UPDATE orf SET unseen_in_pan_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle murple -N 	#given that you're looking in trace, assume you can't find
+cat absent_from_panTrace.dat | grep NO | cut -f 1,4 | tr -d N | tr "O" "0" | awk '{ print "UPDATE orf SET unseen_in_pan_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle murple -N 	#	mark all the ones that were found in race
+echo "ALTER TABLE orf ADD COLUMN unseen_in_gor_trace boolean default 0;" | mysql --user=csoeder --password=tha_snazzle murple -N
+cat absent_from_gorTrace.dat | cut -f 1,3 |  awk '{ print "UPDATE orf SET unseen_in_gor_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle murple -N 	#given that you're looking in trace, assume you can't find
+cat absent_from_gorTrace.dat | grep NO | cut -f 1,4 | tr -d N | tr "O" "0" | awk '{ print "UPDATE orf SET unseen_in_gor_trace='\''"$2"'\'' WHERE orf.orf_pk="$1";" }' | mysql --user=csoeder --password=tha_snazzle murple -N 	#	mark all the ones that were found in race
 
 
 
 
 ###	Detonate
 for folder in $(ls) ; do cd $folder; bsub -q week ~/modules/detonate/rsem-eval/rsem-eval-calculate-score --keep-intermediate-files --paired-end *1.fastq *2.fastq Trinity_files.Trinity.fasta "$folder"_detonate 75 ; cd ..; done
+echo "ALTER TABLE transcript ADD COLUMN detonate_fpkm float;"| mysql --user=csoeder --password=tha_snazzle murple -N 
+echo "select person_name, comp_name from transcript;" | mysql --user=csoeder --password=tha_snazzle murple -N | sed -e 's/revComp_//' | awk '{print "grep -w "$2" individuals/"$1"/"$1"_detonate.genes.results | sed -e 's/^/'"$1"~'/' >> detonate_meta.dat"}' > detonate_collector.sh
+
 
 ###Direct riboseq evaluation
 

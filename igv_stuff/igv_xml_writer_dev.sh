@@ -28,7 +28,7 @@ echo "<Session genome="'"/proj/cdjones_lab/Genomics_Data_Commons/genomes/homo_sa
 
 echo "  <Resources>"
 #   All candidates
-echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates.thumbsUp.sorted.bed"'"/>"
+echo "      <Resource path="'"/netscr/csoeder/1kGen/candidates_v4.unFiltered.sorted.bed"'"/>"
 
 #   Three non-expressors
 #       psl
@@ -208,7 +208,7 @@ echo "  </Track>"
 echo "  </Panel>"
 
 echo " <Panel height="'"75"'" name="'"All Candidates"'" width="'"1111"'">"
-echo "      <Track altColor="'"0,0,178"'" autoScale="'"false"'" clazz="'"org.broad.igv.track.FeatureTrack"'" color="'"0,0,178"'" colorScale="'"ContinuousColorScale;0.0;8.0;255,255,255;0,0,178"'" displayMode="'"SQUISHED"'" featureVisibilityWindow="'"-1"'" fontSize="'"10"'" id="'"/netscr/csoeder/1kGen/candidates.sort.bed"'" name="'"All candidates"'" renderer="'"BASIC_FEATURE"'" sortable="'"false"'" visible="'"true"'" windowFunction="'"count"'">"
+echo "      <Track altColor="'"0,0,178"'" autoScale="'"false"'" clazz="'"org.broad.igv.track.FeatureTrack"'" color="'"0,0,178"'" colorScale="'"ContinuousColorScale;0.0;8.0;255,255,255;0,0,178"'" displayMode="'"SQUISHED"'" featureVisibilityWindow="'"-1"'" fontSize="'"10"'" id="'"/netscr/csoeder/1kGen/candidates_v4.unFiltered.sorted.bed"'" name="'"All candidates"'" renderer="'"BASIC_FEATURE"'" sortable="'"false"'" visible="'"true"'" windowFunction="'"count"'">"
 echo "      </Track>"
 echo "  </Panel>"
 
