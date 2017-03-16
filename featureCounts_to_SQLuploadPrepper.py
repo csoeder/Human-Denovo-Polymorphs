@@ -45,12 +45,12 @@ length_dict = {}
 abs_dict = {}
 rel_dict = {}
 for row in rows:
-	length_dict[int(row[0])] = float(row[5])  # dict key is the candidate pk
-	abs_dict[int(row[0])] = [
+	length_dict[row[0]] = float(row[5])  # dict key is the candidate pk
+	abs_dict[row[0]] = [
 		float(i) for i in row[6:]]  # absolute # frags covering
 	rel_dict[
-		int(row[0])] = [a/(m/1000000)/(float(row[5])/1000) for a, m in zip(
-			abs_dict[int(row[0])], total_mapped_reads)]  # calculate fpkm
+		row[0]] = [a/(m/1000000)/(float(row[5])/1000) for a, m in zip(
+			abs_dict[row[0]], total_mapped_reads)]  # calculate fpkm
 
 
 for d00d in header:
