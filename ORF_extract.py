@@ -25,7 +25,7 @@ def extractor(record):
 	# extract ORFs from record; outputs a list
 	# of record objects containing the ORFs
 	desc = record.description
-	seek = record.seq.tostring()
+	seek = record.seq.tostring().upper()
 	########################################################
 	# Modular dictionary of start and stop codons
 	start_dict = {0: [], 1: [], 2: []}
