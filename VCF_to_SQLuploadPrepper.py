@@ -89,10 +89,16 @@ for rec in parser:
 			'%s\t%s\t%s\t\n' % tuple([
 				variant_pk, het.sample, '%s|%s' % tuple(het.gt_alleles)]))
 
+	aaf_string = ''
+	saaf = 0.0
+	for af in rec.aaf:
+		aaf_string = '%s%s,' % tuple([aaf_string, str(af)])
+		saaf += float(af)
+
 	variant_sql.write(
-		"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % tuple([
+		"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % tuple([
 			variant_pk, "chr%s" % rec.CHROM, rec.POS, rec.REF,
 			alts, hetZyggy(rec), rec.var_type, rec.var_subtype,
-			piHat(rec), rec.ID]))
+			piHat(rec), rec.ID, aaf_string, saaf]))
 
 	variant_pk += 1
