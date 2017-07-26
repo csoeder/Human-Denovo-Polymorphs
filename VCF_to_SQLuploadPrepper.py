@@ -91,9 +91,12 @@ for rec in parser:
 
 	aaf_string = ''
 	saaf = 0.0
-	for af in rec.aaf:
-		aaf_string = '%s%s,' % tuple([aaf_string, str(af)])
-		saaf += float(af)
+	try:
+		for af in rec.aaf:
+			aaf_string = '%s%s,' % tuple([aaf_string, str(af)])
+			saaf += float(af)
+	except IndexError:
+		pass
 
 	variant_sql.write(
 		"%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\t%s\n" % tuple([
