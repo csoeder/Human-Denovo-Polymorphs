@@ -1,5 +1,5 @@
 configfile: 'config.yaml'
-#	module load python/3.6.6 bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
+#	module load python/3.6.6 sratoolkit/2.9.6 trinity  ##bedtools bedops samtools r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
 #rstudio/1.2.1335 
 
 #from itertools import combinations
@@ -7,6 +7,42 @@ configfile: 'config.yaml'
 sample_by_name = {c['name'] : c for c in config['data_sets']}
 ref_genome_by_name = { g['name'] : g for g in config['reference_genomes']}
 annotation_by_name = { a['name'] : a for a in config['annotations']}
+
+sra_by_name = {}
+for s in sample_by_name.keys():
+	if "SRA" in sample_by_name[s].keys():
+		sra_by_name[s] = sample_by_name[s]["SRA"]
+
+
+
+
+
+
+
+rule all:
+	input: 
+		pdf_out="results/1kGenHumanDenovoProjectOfDoom.pdf",
+	params:
+		runmem_gb=1,
+		runtime="0:01:00",
+		cores=1,
+	run:
+		shell(""" mkdir -p results/figures/; touch results/figures/null.png; for fig in results/figures/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date +%d_%b_%Y).png; done;  rm results/figures/null.*.png; """)
+		shell(""" mkdir -p results/figures/supp/ ; touch results/figures/supp/null.png; for fig in results/figures/supp/*png; do mv $fig $(echo $fig| rev | cut -f 2- -d . | rev ).$(date +%d_%b_%Y).png; done; rm results/figures/supp/null.*.png; """)
+
+		shell(""" mkdir -p results/tables/ ; touch results/tables/null.tmp ; for phial in $(ls -p results/tables/ | grep -v /); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/$phial results/tables/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/null.*.tmp; """)
+		shell(""" mkdir -p results/tables/supp/ ; touch results/tables/supp/null.tmp ; for phial in $(ls -p results/tables/supp/ | grep -v /); do pre=$(echo $phial | rev | cut -f 2- -d . | rev ); suff=$(echo $phial | rev | cut -f 1 -d . | rev ); mv results/tables/supp/$phial results/tables/supp/$pre.$(date +%d_%b_%Y).$suff; done ; rm results/tables/supp/null.*.tmp; """)
+
+		shell(""" mv results/1kGenHumanDenovoProjectOfDoom.pdf results/1kGenHumanDenovoProjectOfDoom.$(date +%d_%b_%Y).pdf """)
+		shell(""" tar cf results.$(date +%d_%b_%Y).tar results/ """)
+
+
+
+
+
+
+
+
 
 
 rule summon_reads_SRA:
@@ -18,12 +54,11 @@ rule summon_reads_SRA:
 		runtime="3:00:00",
 		cores=1,
 	run:
-		print("%s%s" % tuple(["FASTQ/", wildcards.path]))
 		try:
-			sra = sra_by_fqpath["%s%s/" % tuple(["FASTQ/", wildcards.path])]
+			sra = sra_by_name[wildcards.prefix]
 			shell(""" mkdir -p FASTQ/{wildcards.path}/ """)
 			shell("""
-				fasterq-dump  --split-3 --outdir FASTQ/{wildcards.path}/ {sra}
+				fasterq-dump --progress --split-3 --outdir FASTQ/{wildcards.path}/ --outfile {wildcards.prefix} {sra}
 			""")
 		except KeyError:
 			raise KeyError("Sample is listed as empirical but no reads found and no SRA to download!" )
@@ -191,6 +226,30 @@ rule mapsplice2_align_raw:
 			rm mapped_reads/mapspliceRaw/{wildcards.sample}/alignments.sam;
 			""")
 
+# trinity...... HALP!!!
+rule trinityHALP:
+	input:
+		reads_in = lambda wildcards: expand("{path}{sample}.clean.R{pair}.fastq", path=sample_by_name[wildcards.sample]['path'], sample=wildcards.sample, pair = [1,2]),
+	output:
+		transcriptome_out = "mapped_reads/mapspliceRaw/{sample}/{sample}.vs_{ref_genome}.mapspliceRaw.sort.bam",
+	params:
+		runmem_gb=16,
+		runtime="16:00:00",
+		cores=8,
+	message:
+		"aligning reads from {wildcards.sample} to reference_genome {wildcards.ref_genome} .... "
+	run:
+		ref_genome_split = ref_genome_by_name[wildcards.ref_genome]['split'],
+		ref_genome_bwt = ref_genome_by_name[wildcards.ref_genome]['bowtie'],
+		shell(""" mkdir -p mapped_reads/mapspliceRaw/{wildcards.sample}/ summaries/BAMs/""")
+		shell(""" 
+			python utils/MapSplice-v2.1.8/mapsplice.py -c {ref_genome_split} -x {ref_genome_bwt} -1 {input.reads_in[0]} -2 {input.reads_in[1]} -o mapped_reads/mapspliceRaw/{wildcards.sample} 
+			""")
+		shell(""" 
+			samtools view -Sbh mapped_reads/mapspliceRaw/{wildcards.sample}/alignments.sam | samtools sort - > mapped_reads/mapspliceRaw/{wildcards.sample}/{wildcards.sample}.vs_{wildcards.ref_genome}.mapspliceRaw.sort.bam;
+			samtools index {output.raw_bam};
+			rm mapped_reads/mapspliceRaw/{wildcards.sample}/alignments.sam;
+			""")
 
 
 
@@ -209,6 +268,30 @@ rule mapsplice2_align_raw:
 
 
 
+
+
+
+
+rule write_report:
+	input:
+		reference_genome_summary = ["summaries/reference_genomes.summary"],
+		reference_annotation_summary = ["summaries/reference_annotations.summary"],
+		sequenced_reads_summary=["summaries/sequenced_reads.dat"],
+#		aligned_reads_summary = expand("summaries/alignments.vs_dm6main.{aligner}.summary", aligner=["mapspliceRaw","mapspliceMulti","mapspliceUniq","mapspliceRando"]),
+	output:
+		pdf_out="results/1kGenHumanDenovoProjectOfDoom.pdf",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=2,
+	message:
+		"writing up the results.... "
+	run:
+		pandoc_path="/nas/longleaf/apps/rstudio/1.0.136/bin/pandoc"
+		pwd = subprocess.check_output("pwd",shell=True).decode().rstrip()+"/"
+		shell("""mkdir -p results/figures/supp/ results/tables/supp/""")
+		shell(""" R -e "setwd('{pwd}');Sys.setenv(RSTUDIO_PANDOC='{pandoc_path}')" -e  "peaDubDee='{pwd}'; rmarkdown::render('scripts/RNAseq_results.Rmd',output_file='{pwd}{output.pdf_out}')"  """)
+#		shell(""" tar cf results.tar results/ """)
 
 
 

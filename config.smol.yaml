@@ -1,0 +1,74 @@
+data_sets:
+    - name: HG00096
+      path: FASTQ/RNAseq/HG00096/
+      paired: True
+      readsfile1: HG00096_1.fastq
+      readsfile2: HG00096_2.fastq
+      sex: male
+      population: British
+      phase1Geno: 1
+      readLen: 75
+      nominalLen: 280
+      SRA: ERR188040
+    - name: HG00097
+      path: FASTQ/RNAseq/HG00097/
+      paired: True
+      readsfile1: HG00097_1.fastq
+      readsfile2: HG00097_2.fastq
+      sex: female
+      population: British
+      phase1Geno: 1
+      readLen: 75
+      nominalLen: 280
+      SRA: ERR188231
+    - name: HG00099
+      path: FASTQ/RNAseq/HG00099/
+      paired: True
+      readsfile1: HG00099_1.fastq
+      readsfile2: HG00099_2.fastq
+      sex: female
+      population: British
+      phase1Geno: 1
+      readLen: 75
+      nominalLen: 280
+      SRA: ERR188428
+    - name: HG00100
+      path: FASTQ/RNAseq/HG00100/
+      paired: True
+      readsfile1: HG00100_1.fastq
+      readsfile2: HG00100_2.fastq
+      sex: female
+      population: British
+      phase1Geno: 1
+      readLen: 75
+      nominalLen: 280
+      SRA: ERR188206
+    - name: HG00101
+      path: FASTQ/RNAseq/HG00101/
+      paired: True
+      readsfile1: HG00101_1.fastq
+      readsfile2: HG00101_2.fastq
+      sex: male
+      population: British
+      phase1Geno: 1
+      readLen: 75
+      nominalLen: 280
+      SRA: ERR188307
+
+reference_genomes:
+    - name: hg38
+      species: homo sapiens
+#      path: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13.fasta
+#      fai: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13.fasta.fai
+#      bowtie: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13_bowtie/dmel-r6.13
+#      split: /proj/cdjones_lab/Genomics_Data_Commons/genomes/drosophila_melanogaster/dmel-all-chromosome-r6.13_split/
+#      source: Flybase
+
+
+
+
+annotations:
+    - name: hg38_
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.bed
+      gtf_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/drosophila_melanogaster/dmel-all-r6.13.gtf
+      derived: False
