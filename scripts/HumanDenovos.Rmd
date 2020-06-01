@@ -1,0 +1,1126 @@
+---
+title: "Human Denovo Genes"
+author: "Charlie Soeder"
+date: "1/7/2020"
+output:
+  html_document: default
+  pdf_document: 
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+bibliography: references.bib
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+#knitr::opts_knit$set(root.dir = '/proj/cdjones_lab/csoeder/Human-Denovo-Polymorphs')
+knitr::opts_knit$set(root.dir = '/Users/csoeder/Research/Human_deNovo/Human-Denovo-Polymorphs')
+#knitr::opts_knit$set(root.dir=peaDubDee)
+#library("ggbio")
+#library("biomaRt")
+#library("org.Dm.eg.db")
+library("yaml")
+library("readr")
+library("tidyverse")
+library("gt")
+library("bib2df")
+library("magrittr")
+
+```
+
+
+
+
+```{r include=FALSE}
+
+human_readable_croncher <- function(num_in) {
+	dig <- 3
+	num_out <- formatC(num_in, digits=dig, format='g') %>% as.numeric() %>% sitools::f2si()
+	return(num_out)
+}
+
+bam_summary_loader <- function(filename, aligner="mapsplice", reference='dm6'){
+	
+	tmp.df <- read_delim(filename, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+	names(tmp.df) <- c("sample","measure","value")
+	
+	tmp.df$sample <- as.factor(tmp.df$sample)
+	tmp.df$measure <- as.factor(tmp.df$measure)
+	tmp.df$aligner <- as.factor(aligner)
+	tmp.df$reference <- as.factor(reference)
+	
+	return(tmp.df)
+	
+}
+
+fig_cnt <- 0
+tbl_cnt <- 0
+
+
+#marty <- useDataset("dmelanogaster_gene_ensembl",  useMart("ensembl",  host = "useast.ensembl.org") )
+#G_list <- getBM(attributes= c("flybase_gene_id", "external_gene_name"), mart= marty) 
+```
+
+
+
+## Introduction
+
+New protein-coding genes have traditionally been thought to arise from pre-existing genetic structures, through processes such as gene duplication, retrotransposition, and lateral gene transfer. [@Chen2013] An alternative process would require the formation of new peptides from previously non-coding sequences. This has traditionally been regarded as rare or impossible; [go right to 1970’s Ohno/Jacobs? @Carvunis2012a; @Wu2011] however, a growing abundance of genomic data are raising questions about this viewpoint. Typically through annotation-based comparative genomics backed up with wetlab assays, de novo origination of coding genes has been detected in viruses [@Sabath2012, @Pavesi2013 ] Sacchromyces [@Cai2008, @Li2010, @Carvunis2012a], Oryza [@Xiao2009], Arabidopsis [@Li2016], Drosophila [@Levine2006; @Begun2007; @Reinhardt2013; @Zhao2014], and primates [@Knowles2009; @Li2010a; @Wu2011, @Chen2015, @Ruiz-Orera2015, @Guerzoni2016], including clinically relevant genes specific to human tumors [@Samusik2013;@Suenaga2014]. 
+
+
+Next-generation sequencing technology [@Metzker2010] has made it possible to accumulate molecular biology data at an unprecedented scale, including initiatives to build population-scale genomic databases. [The Thousand Genomes Project Consortium 2010, 2012] This technology has also led to whole-transcriptome shotgun sequencing, (“RNA-Seq”), in which the RNA profile of a tissue sample is measured. 
+
+In order to search for candidate de novo gene originations in the human genome, a software pipeline was built to process  RNA-Seq datasets from the 1000 Genomes Project. These were assembled into personal transcriptomes and then aggressively filtered using published data sets to exclude RNA associated with known annotations The remaining portion is combed to collect all open reading frames (ORFs). These candidate genetic sites were used to populate a database, and the database was queried for information regarding the structure of the human population and relationships between primate genomes at these sites. 
+
+## Materials, Data, and Software
+```{r include=FALSE}
+
+trammel <- read_yaml("config.yaml")
+#trammel <- read_yaml("config.smol.yaml")
+```
+
+### Data Sources
+
+#### Reference Genomes
+
+
+
+```{r include=FALSE, echo = FALSE, message=FALSE}
+refGenomes_summary_df <- read_delim("summaries/reference_genomes.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(refGenomes_summary_df) <- c("refGenome","measure","value")
+
+```
+
+The hg38 reference genome was used for read alignment:
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+refGenomes_summary.gt <- refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",measure)) %>% spread(refGenome, value)   %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Size and Consolidation of Reference Genomes", sep = ""), subtitle="Homo Sapiens") %>%   fmt_number(columns = vars(hg38), rows = measure == "number bases", suffixing = TRUE, decimals=2) %>% cols_label(measure = " ")
+	
+refGenomes_summary.gt
+
+write(refGenomes_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeSummary.html", sep=""))
+
+```
+
+
+
+
+
+
+```{r include=FALSE, echo = FALSE, message=FALSE}
+refGenomes_detail <- read_delim(trammel$reference_genomes[[1]]$fai, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(refGenomes_detail) <- c("contig","size","cumulative","dummy1", "dummy2")
+refGenomes_detail %<>% select(c("contig","size")) %>% mutate(mainline = !grepl("_", contig))
+
+
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+refGenomes_consol.gt <- refGenomes_detail %>% group_by(mainline) %>% summarise(count = n(), total = sum(size)) %>% mutate(mainline = case_when(mainline ~ "consolidated", !mainline ~"miscellaneous" )) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Consolidation of hg38 Reference Genome", sep = ""), subtitle="mainline chromosomes vs unintegrated contigs") %>%   fmt_number(columns = "total", suffixing = TRUE, decimals=1) %>% cols_label(mainline = " ")
+	
+refGenomes_consol.gt
+
+write(refGenomes_consol.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeConsolidation.html", sep=""))
+
+```
+
+Chromosomes 1-22, X, Y, and M
+
+
+
+#### Reference Annotations
+
+
+The UCSC Genome Browser was a data source for annotation tracks, which were downloaded from the table browser as BED files. Several collections of annotations were downloaded as BED files from UCSC; in particular
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+annotations.df <- plyr::ldply(trammel$annotations, data.frame)
+annotations.df$name <- as.factor(annotations.df$name)
+annotations.df$genome <- as.factor(annotations.df$genome)
+annotations.df$operations <- as.factor(annotations.df$operations)
+
+
+
+
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE }
+
+ref_ann.stats <- read_delim("summaries/reference_annotations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(ref_ann.stats) <- c("annot", "measure", "type", "value")
+
+tbl_cnt <- tbl_cnt + 1
+ref_ann.stats.gt <- inner_join(ref_ann.stats  %>%   filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value),annotations.df %>% group_by(name) %>% summarise(operations=paste0(operations, collapse = ", "), ) , by=c("annot"="name")) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Reference Annotations and their Sizes", sep = ""), subtitle= md("&nbsp;") ) %>% fmt_number(columns = c("avg size", "total count", "total size"), decimals = 1, drop_trailing_zeros = T, suffixing = T ) %>% tab_spanner(label = "size (bp)", columns = c("avg size", "total size")) %>% cols_label(`avg size` = "average", `total size` = "total")
+
+ref_ann.stats.gt
+
+write(ref_ann.stats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationSummary.html", sep=""))
+
+```
+
+
+load, talk about trammel$annotations and summaries/reference_annotations.summary
+
+#### Next-Gen Sequencing
+
+A major source of data was the 1000 Genomes Project. This is a database of deep-sequenced genomes from geographically diverse human populations. (The Thousand Genomes Project 2010, 2012) The genomes were accessed as Variant Call Format files relative to the hg19 reference genome, available for download from EBI or NCBI. 
+
+In addition to genomic data, RNA-Seq data from lymphoblastoid tissue is available from a subset of 462 individuals from the 1000 Genomes project. (Lappalainen et al. 2013) These data were accessed as FASTQ files, available for download from EBI. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE  }
+data_sets.df <- plyr::ldply(trammel$data_sets, data.frame)
+data_sets.df$name <- as.factor(data_sets.df$name)
+data_sets.df$sex<- as.factor(data_sets.df$sex)
+data_sets.df$population<- as.factor(data_sets.df$population)
+
+data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>%  select(c(name,sex,population,readLen,phase1Geno))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+rnaSeq_indiv_demog_counts.gt <- data_sets.df.sparse %>% group_by(sex, population) %>% summarise(count=n()) %>% ungroup() %>% spread(key=sex, value=count) %>% mutate(total = male + female) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of 1kGen RNA-Seq Samples Available", sep = ""), subtitle="by sex and population") %>% grand_summary_rows(columns = vars(male, female, total),fns = list(total = ~sum(.)),formatter = fmt_number, decimals=0)
+	
+rnaSeq_indiv_demog_counts.gt
+
+write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_rnaSeq_indiv_demog.html", sep=""))
+
+
+```
+
+### Software Used 
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+softwareUsed.df <- plyr::ldply(trammel$software, data.frame)
+bibdf <- bib2df("scripts/references.bib",separate_names = TRUE)
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE }
+
+softwareUsed.smol.df <- softwareUsed.df %>% select(c("name","version", "purpose", "link","bibtex"))%>% separate_rows(bibtex) 
+
+softwareUsed.2Beeg.df<- inner_join(softwareUsed.smol.df, bibdf, by=c("bibtex" = "BIBTEXKEY"))  %>% unnest(cols=c("AUTHOR"))
+softwareUsed.2Beeg.counts <- softwareUsed.2Beeg.df %>% group_by(bibtex) %>% summarise(num_auth = n())
+softwareUsed.2Beeg.df <- inner_join(softwareUsed.2Beeg.df, softwareUsed.2Beeg.counts, by=c("bibtex"="bibtex"))
+
+
+
+#softwareUsed.2Beeg.df %>% filter(num_auth == 2 ) %>% group_by(bibtex) %>% mutate(full_name =paste0(full_name, collapse = " & ")) %>% ungroup()
+
+softwareUsed.cronch.df <- rbind(softwareUsed.2Beeg.df %>% filter(num_auth == 1 ), softwareUsed.2Beeg.df %>% filter(num_auth == 2 ) %>% group_by(bibtex) %>% mutate(full_name =paste0(full_name, collapse = " & ")) %>% ungroup(), softwareUsed.2Beeg.df %>% filter(num_auth > 2 ) %>% group_by(bibtex) %>%  mutate(full_name=paste(first(full_name), "et al. ")) %>% ungroup()) %>% mutate(cite = paste(full_name, YEAR, sep = " ")) %>% select(c(name, bibtex, cite)) %>%  unique() %>% group_by(name) %>% summarise(allCit = paste0(cite, collapse = "; ")) %>% ungroup()
+
+
+#%>% select(c(bibtex, full_name, YEAR, TITLE, JOURNAL, VOLUME, NUMBER, PAGES)) %>% unique() 
+
+#softwareUsed.cronch.df <- softwareUsed.beeg.df %>% mutate(citation = paste(full_name, ", ", YEAR,". '", TITLE,"'. ",JOURNAL," Vol. ", VOLUME, ", No. ", NUMBER, "p. ",PAGES,".", sep="" )) %>% select(c("bibtex", "name","citation")) %>% unique() %>% group_by(name) %>% summarise(allCit = paste0(citation, collapse = ";"))
+
+softwareUsed.beeg.df <- inner_join(softwareUsed.cronch.df, softwareUsed.smol.df %>% select(-c("bibtex")) %>% unique() , by = c("name"="name")) 
+
+
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+
+softwareUsed.beeg.gt <- softwareUsed.beeg.df %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Software Used", sep = ""), subtitle="with link & citation") %>% cols_move_to_end(columns = c("allCit"))  %>% cols_label(allCit = "citation")
+
+softwareUsed.beeg.gt
+
+write(softwareUsed.beeg.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_softwareUsed.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
+
+softwareUsed.smol.df %>% mutate(bibtex = paste("@", bibtex, sep="")) %>% gt() %>% fmt_markdown(columns = c("bibtex"))
+```
+
+## Procedure: Identifying Candidate De Novos
+
+### Workflow Overview
+
+A SnakeMake pipeline [@Rahmann2017] was used to shepherd the data through. 
+
+RNA-Seq reads were mapped to the human genome (hg19) using MapSplice2 (Wang et al. 2010) for splice-aware alignment. The reads were also assembled (without the use of a reference genome to eliminate spurious alignments) using Trinity (Grabherr et al. 2011). The resulting transcripts were aligned to hg19 using BLAT (Kent 2002), and these were given a first-pass filter which excluded alignments whose length was less than 90% of the transcript. Once aligned, a transcript was rejected as 'known' if any quality alignment overlapped an annotated gene (refSeq,/UCSC), pseudogene (Yale), retroelement (UCSC) or complex repetitive element (repeatmasker). Simple repetitive regions were not filtered out, having been involved in previously identified peptide origination (Chen et al. 1997), though attention was paid during curation for ambiguity in mapping. The remaining transcripts were considered to be 'anomalous'.
+
+### Read Pre-Processing
+
+These reads were preprocessed with FASTP [@Chen2018] for quality control and analytics. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+fastp_summary <- read_delim("summaries/sequenced_reads.dat", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(fastp_summary ) <- c("name","type","measure","value")
+fastp_summary$name <- as.factor(fastp_summary$name)
+fastp_summary$type <- as.factor(fastp_summary$type)
+fastp_summary$measure <- as.factor(fastp_summary$measure)
+
+
+filtration_stats <- inner_join(fastp_summary %>%  filter(type=="prefiltered" | type == 'postfiltered'), data_sets.df.sparse, by=c("name"="name"))
+filtration_stats$type <- factor(filtration_stats$type, levels=c("prefiltered", "postfiltered"))
+```
+
+Starting FASTQ files contained a total of  $`r sum( filtration_stats %>% filter(type =='prefiltered') %>%  filter(measure=='total_reads') %>% select(value) ) %>% human_readable_croncher() `$ reads; after QC, this dropped to $`r sum( filtration_stats %>% filter(type =='postfiltered') %>%  filter(measure=='total_reads') %>% select(value) ) %>% human_readable_croncher() `$. 
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE }
+pre_post_counts <- filtration_stats %>% filter(measure=='total_reads') %>%  group_by(type)  %>%  summarise(minimum = min(value), average=mean(value) , maximum = max(value)) 
+
+retention_percent <- filtration_stats %>% filter(measure=='total_reads') %>% select(c(name,type,value)) %>%  spread(type,value) %>% mutate(retention=100*postfiltered/prefiltered) %>%  summarise(type='percent retention', minimum = min(retention), average=mean(retention) , maximum = max(retention))
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+read_retention_rate.gt <- rbind(pre_post_counts, retention_percent)  %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Read Retention Rate during Preprocessing", sep = ""), subtitle= md("&nbsp;")) %>%  fmt_number(columns = vars(minimum, average,maximum),suffixing = TRUE, decimals=0) %>% cols_label(type=" ")
+
+read_retention_rate.gt
+
+write(read_retention_rate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_FASTPreadRetentionRate.html", sep=""))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+readQual.gg <- ggplot(filtration_stats %>% filter(measure == "q30_rate")) + geom_line(aes(group=name, x=type,y=100*value)) +  geom_point(aes(x=type, y = 100*value, color=population, shape=sex)) + labs(title = paste("Figure ",fig_cnt, ". Percent of Reads with a mean QUAL > 30", sep = ""), y="Percent QUAL > 30", x="") + theme_bw() #+ geom_text(data= . %>% filter(type=="postfiltered") %>% filter(value<0.97), aes(type,100*value,label=name))
+
+readQual.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readQualityThruProcessing.png", sep=""))
+readQual.gg
+dev.off()
+
+
+```
+
+
+Duplicate reads were also detected
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+dupe_stats <- inner_join(fastp_summary %>% filter(type=='duplication' & measure =='rate') %>%  mutate(percent=value*100) %>% select(c(name,percent)), data_sets.df.sparse, by=c("name"="name"))
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+duplicationStats.gt <- dupe_stats %>%  summarise(minimum = min(percent), average=mean(percent), median=median(percent) , maximum = max(percent)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percentage Duplication", sep = ""), subtitle="FASTP estimate") %>% fmt_number(columns=vars(minimum,median,average,maximum), decimals=1, )
+
+duplicationStats.gt
+
+write(duplicationStats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_duplicationStats.html", sep=""))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+dupeStats.gg <- ggplot(dupe_stats) + geom_histogram(aes(x=percent), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (FASTP estimate)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
+
+dupeStats.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
+dupeStats.gg
+dev.off()
+
+
+```
+
+
+### Read Mapping
+
+RNA-Seq reads were mapped to the human genome (hg38) using MapSplice2 (Wang et al. 2010) for splice-aware alignment
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+vs_hg38.mapspliceRaw <- read_delim("summaries/alignments.vs_hg38.mapspliceRaw.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(vs_hg38.mapspliceRaw)<- c("ref_genome","aligner","sample","measure","value")
+
+vs_hg38.mapspliceRaw <- vs_hg38.mapspliceRaw %>% mutate(ref_genome = as.factor(ref_genome), aligner = as.factor(aligner), sample = as.factor(sample), ref_genome = as.factor(ref_genome))
+
+all_alignments <- rbind(vs_hg38.mapspliceRaw)#, vs_dm6.bwaUniq)
+
+vs_hg38.mapspliceRaw.meta <- inner_join(vs_hg38.mapspliceRaw, data_sets.df.sparse, by = c("sample"="name")) 
+
+
+vs_hg38.mapspliceRaw.meta <- inner_join(vs_hg38.mapspliceRaw.meta %>% select( c("ref_genome","aligner","sample","measure","value","sex","population"))%>% ungroup() %>% filter(measure %in% c("total_reads","total_mapped_count","properly_paired_count", "duplicate_reads", "spanned_breadth", "split_breadth")) %>% spread(key="measure", value="value") , filtration_stats %>% filter(type == "postfiltered" & measure== "total_reads" ) %>% mutate(total_reads = value) %>% select( c("name","total_reads")), by=c("sample"="name")  )%>% mutate(total_mapped_count = 2*total_mapped_count) %>% mutate(percent_mapped=total_mapped_count/total_reads, percent_proper = properly_paired_count/total_reads, percent_duplicate = duplicate_reads/total_mapped_count)
+
+#vs_hg38.mapspliceRaw.meta <- rbind(vs_hg38.mapspliceRaw.meta %>% select( c("ref_genome","aligner","sample","measure","value","sex","population")) )
+
+#all_alignments.meta <- inner_join(all_alignments, data_sets.df.sparse.collapse, by = c("sample"="name"))
+
+#vs_hg38.mapspliceRaw.meta  <- vs_hg38.mapspliceRaw.meta %>% ungroup() %>% filter(measure %in% c("total_reads","total_mapped_count","properly_paired_count", "duplicate_reads")) %>% spread(key="measure", value="value") 
+
+```
+
+Of the  $`r sum( vs_hg38.mapspliceRaw.meta  %>% select(total_reads) ) %>% human_readable_croncher() `$ reads, MapSplice was able to align  $`r sum( vs_hg38.mapspliceRaw.meta %>% filter(aligner=="mapspliceRaw") %>% select(total_mapped_count) )  %>% human_readable_croncher() `$ of them, for an overall mapping rate of  $`r 100*sum( vs_hg38.mapspliceRaw.meta %>% filter(aligner=="mapspliceRaw") %>% select(total_mapped_count) ) / sum( vs_hg38.mapspliceRaw.meta  %>% select(total_reads) ) `$ %.
+
+Individual mapping rates were generally more than 98%.
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+percentMapping.raw.gt <- vs_hg38.mapspliceRaw.meta  %>% select(percent_mapped) %>% mutate(mack = max(.$percent_mapped),min = min(.$percent_mapped), avg = mean(.$percent_mapped), med = median(.$percent_mapped)) %>% select(-c(percent_mapped)) %>% unique() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percent of Reads Mapping", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(mack,min,avg,med), decimals=1, ) %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_move(columns = c("min"), after="med")
+
+percentMapping.raw.gt
+
+write(percentMapping.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentMappingRaw.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+percentMappingIndv.raw.gg <- ggplot(vs_hg38.mapspliceRaw.meta)+ geom_histogram(aes(x=percent_mapped*100), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Percent Mapping (Raw) Histogram", sep = ""), x="Read Mapping Rate (percent)", y="Number Samples") + theme_bw()
+
+percentMappingIndv.raw.gg
+
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_percentMappingRawHistogram.png", sep=""))
+percentMappingIndv.raw.gg
+dev.off()
+
+```
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+
+percentDupe.raw.gt <- vs_hg38.mapspliceRaw.meta  %>% select(percent_duplicate) %>% mutate(percent_duplicate = percent_duplicate) %>% mutate(mack = max(.$percent_duplicate),min = min(.$percent_duplicate), avg = mean(.$percent_duplicate), med = median(.$percent_duplicate)) %>% select(-c(percent_duplicate)) %>% unique() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Percent of Duplicate Reads", sep = ""), subtitle="raw mapsplice output") %>% fmt_percent(columns=vars(mack,min,avg,med), decimals=1, ) %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_label(min="minimum", mack="maximum", avg="mean", med="median") %>% cols_move(columns = c("min"), after="med")
+
+percentDupe.raw.gt
+
+write(percentDupe.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentDuplicateRawMpSplc.html", sep=""))
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+dupeStats.gg <- ggplot(vs_hg38.mapspliceRaw.meta %>% mutate(percent = 100*percent_duplicate)) + geom_histogram(aes(x=percent), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (Raw Mapsplice Alignment)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
+
+dupeStats.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
+dupeStats.gg
+dev.off()
+
+
+```
+
+Although Samtools marks duplicates at a higher rate than FASTP, the estimates are correlated; in particular, both agree that FruLexa/Fru440 day 7 replicate 1 is a highly duplicated outlier. The NCBI reads are anomalous.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+
+
+dupeStatsCompare.gg <- ggplot(inner_join(dupe_stats , vs_hg38.mapspliceRaw.meta %>%  select(c("sample", "percent_duplicate")), by=c("name"="sample"))) + geom_point(aes(x=percent, y=100*percent_duplicate)) + labs(title=paste("Figure ",fig_cnt, ". Comparison of Duplication Rate Estimates", sep = ""), x="FASTP estimate (percent)", y="Samtools MarkDup estimate (percent)") + theme_bw()
+
+dupeStatsCompare.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_DupeRateExtCompare.png", sep=""))
+dupeStatsCompare.gg
+
+dev.off()
+
+```
+
+Genome-wide depth of coverage is not very meaningful here, in the case of RNA-Seq. Breadth of coverage (the fraction of the genome which is covered by at least one read) is, but the ideal case is not 100% coverage like in a DNA-Seq; rather, we'd expect breadth to approximate the fraction of the genome which is under active transcription. Another complication is whether the reads which fall on splice junctions are treated as covering the intronic region or not (this corresponds to the distinction between the percent of the genome which is a transcribed locus vs the percent which is a transcribed exon).
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+fig_cnt <- fig_cnt + 1
+
+breadthStats.raw.gg <- ggplot( vs_hg38.mapspliceRaw.meta  %>%  gather(spanned_breadth, split_breadth, key = "type", value = "breadth") %>% mutate(type=case_when(type == "spanned_breadth" ~ "locus", type =="split_breadth" ~"exon")) %>% mutate(type = as.factor(type)) %>% mutate(type = relevel(type, ref="locus")) )  + geom_point(aes(x=total_mapped_count, y=100*breadth))  + facet_grid(type~., scales='free_y') + labs(title=paste("Figure ",fig_cnt, ". Breadth of Coverage of Raw Mapsplice Alignment\nCompared to Read Count", sep = ""), x="Number Reads Sequenced", y="Percent of Genome Covered") + theme_bw()
+
+breadthStats.raw.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_breadthStatsRaw.png", sep=""))
+breadthStats.raw.gg
+
+dev.off()
+
+```
+
+There appears to be a slight dependence of breadth upon sequencing depth (ie, the number of reads sequenced), meaning that sequencing depth of these samples is not so great that the breadth covered is saturated. The unusally deep sequencing of the NCBI reads indicates the asymptotic behavior of this measure. When transcribed locii are considered, the breadth of the group-housed wildtype replicate 1 is unusually low given the sequencing depth.
+
+
+
+#### Filtered Alignments (Multi)
+
+
+From the raw MapSplice output, three filtered alignments were produced. The first, mapspliceMulti, has had duplicates marked and removed, and has been filtered to require proper pairing and a minimum mapping quality (SAM flags "-q 20 -F 0x0200 -F 0x04 -f 0x0002"; markdup flags "-rS"). Thus, mapspliceMulti is a filtered alignment that retains all locii for multimapped reads. 
+
+
+#### Downsampled Alignments (Rando)
+
+
+mapspliceRando is a downsampled alignment constructed by selecting at random a single location for each multimapped read, then merging the unambiguously located reads with mapspliceUniq. 
+
+#### Uniquely Mapped Alignments (Uniq)
+
+
+mapspliceUniq is derived from mapspliceMulti by further filtering out the multimapped reads and keeping only those which map uniquely. 
+
+
+
+
+
+### Transcriptome Assembly
+ reads were also assembled (without the use of a reference genome to eliminate spurious alignments) using Trinity (Grabherr et al. 2011). Transcriptome qualities were assessed using the TrinityStats.pl utility ( https://github.com/trinityrnaseq/trinityrnaseq/wiki/Transcriptome-Contig-Nx-and-ExN50-stats )
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+trinity_summary <- read_delim("summaries/assembled_transcripts/trinity_assemblies.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(trinity_summary ) <- c("sample","measure","value")
+trinity_summary$sample <- as.factor(trinity_summary$sample)
+trinity_summary$measure <- as.factor(trinity_summary$measure)
+
+trinity_summary.sprud <- trinity_summary %>% spread(measure, value)
+
+```
+
+The  $`r sum( filtration_stats %>% filter(type =='postfiltered') %>%  filter(measure=='total_reads') %>% select(value) ) %>% human_readable_croncher() `$ reads were assembled into   $`r sum(trinity_summary %>% filter(measure == "total_transcripts") %>% select(value)) %>% human_readable_croncher() `$  transcripts.
+
+This worked out to ~ $`r (trinity_summary %>% filter(measure == "total_transcripts") %>% summarise(avg=mean(value)))[[1]] %>% human_readable_croncher() `$  transcripts per person, which Trinity estimated to be ~ $`r (trinity_summary %>% filter(measure == "total_genes") %>% summarise(avg=mean(value)))[[1]] %>% human_readable_croncher() `$ genes per person. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+transcriptCount_hist.gg <- ggplot(trinity_summary.sprud %>% select(c(sample, total_genes, total_transcripts)) %>% gather(total_genes, total_transcripts, key = measure, value = value) %>% mutate(measure = as.factor(measure))) + geom_histogram(aes(x=value, group = measure, fill = measure), bins=15, alpha = 0.6, position="identity") + labs(title=paste("Figure ",fig_cnt, ". Histogram of Transcripts & Genes per Transcriptome", sep = ""), x=" # assembled", y="Number Samples") + scale_fill_discrete(name = "assembly type") + theme_bw()
+
+transcriptCount_hist.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerPersonHist.png", sep=""))
+transcriptCount_hist.gg
+dev.off()
+
+
+```
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+transcriptCount_assembliesPerRead.gg <- ggplot(inner_join(trinity_summary.sprud %>% select(c(sample, total_transcripts)), filtration_stats %>% filter(type=="postfiltered" & measure == "total_reads") %>% mutate(sequenced_reads=value) %>% select(c(name, sequenced_reads)) , by = c("sample"="name"))) +geom_point(aes(x=sequenced_reads, y=total_transcripts))  + labs(title=paste("Figure ",fig_cnt, ". Scatterplot of Assembled Transcripts vs  Filtered Reads", sep = ""), x=" # reads assembled", y="# assemblies")  + theme_bw()
+
+transcriptCount_assembliesPerRead.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerRead_scat.png", sep=""))
+transcriptCount_assembliesPerRead.gg
+dev.off()
+
+
+```
+
+
+
+A typical individual transcriptome had an N50 of $`r (trinity_summary %>% filter(measure == "full_N50") %>% summarise(avg=median(value)))[[1]] %>% human_readable_croncher() `$, with an average transcript size of $`r (trinity_summary %>% filter(measure == "full_avg_len") %>% summarise(avg=median(value)))[[1]] %>% human_readable_croncher() `$ and a median transcript size of $`r (trinity_summary %>% filter(measure == "full_med_len") %>% summarise(avg=median(value)))[[1]] %>% human_readable_croncher() `$
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+transcriptome_n50_hist.gg <- ggplot(trinity_summary.sprud ) + geom_histogram(aes(x=full_N50), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Histogram of Transcriptome N50s", sep = ""), x=" N50", y="Number Samples") + theme_bw()
+
+transcriptome_n50_hist.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptN50Hist.png", sep=""))
+transcriptome_n50_hist.gg
+dev.off()
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+typical_transcript_size_hist.gg <- ggplot(trinity_summary.sprud %>% mutate(median = full_med_len, mean = full_avg_len) %>% select(c(sample, median, mean)) %>% gather(median, mean, key = measure, value = value) %>% mutate(measure = as.factor(measure))) + geom_histogram(aes(x=value, group = measure, fill = measure), bins=15, alpha = 0.6, position="identity") + labs(title=paste("Figure ",fig_cnt, ". Histogram of Typical Transcript Sizes", sep = ""), x=" bp", y="Number Samples") + scale_fill_discrete(name = "statistic") + theme_bw()
+
+typical_transcript_size_hist.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptSizeHist.png", sep=""))
+typical_transcript_size_hist.gg
+dev.off()
+```
+
+To further assess transcriptome quality, the raw reads were mapped back to the assembled transcriptome using BowTie2 [@Langmead2012], as per Trinity documentation ( https://github.com/trinityrnaseq/trinityrnaseq/wiki/RNA-Seq-Read-Representation-by-Trinity-Assembly )
+
+
+On average, $`r (trinity_summary %>% filter(measure == "total_aligned") %>% summarise(avg=mean(value)))[[1]] `$ % reads mapped back to the transcriptome, with $`r (trinity_summary.sprud %>% mutate(conch = aligned_concord_uniq + aligned_concord_multi) %>% summarise(avg = mean(conch)) )[[1]] `$ % mapping concordantly at least once. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+transcript_backmapping_percent_hist.gg <- ggplot(trinity_summary.sprud %>% mutate(conch = aligned_concord_uniq + aligned_concord_multi) %>% select(c(sample, conch, total_aligned)) %>% gather(conch, total_aligned, key = measure, value = value) %>% mutate(measure = as.factor(measure))) + geom_histogram(aes(x=value, group = measure, fill = measure), bins=15, alpha = 0.6, position="identity") + labs(title=paste("Figure ",fig_cnt, ". Histogram of Transcriptome Back-Mapping Rates", sep = ""), x=" Percent of Reads Mapped", y="Number Samples") + scale_fill_discrete(name = "statistic") + theme_bw()
+
+transcript_backmapping_percent_hist.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptBackMappingHist.png", sep=""))
+transcript_backmapping_percent_hist.gg
+dev.off()
+```
+
+
+Do this with amount of transcriptome covered??
+
+
+
+
+### Transcript Alignment & Filtration
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+transcript_filtration.summary <- read_delim("summaries/assembled_transcripts/transcript_filtration.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(transcript_filtration.summary ) <- c("stage","type","trans_aligner","individual","measure","value")
+
+#trinity_summary.sprud <- trinity_summary %>% spread(measure, value)
+
+```
+
+
+The resulting transcripts were mapped to the reference genome using BLAT [@Kent2002a]. Across all samples, $` sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value))%>% human_readable_croncher()`$ of $`r sum(trinity_summary %>% filter(measure == "total_transcripts") %>% select(value)) %>% human_readable_croncher() `$ transcripts mapped to $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_locii" & type =="locus") %>% select(value))%>% human_readable_croncher() `$ total sites. Overall, $` sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value))/sum(trinity_summary %>% filter(measure == "total_transcripts") %>% select(value))*100 `$ % of transcripts mapped.  On average, a transcript mapped to $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_locii" & type =="locus") %>% select(value)) / sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value)) `$ locations. 
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+transcript_filtration.counts.smol <- inner_join(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% spread(key=measure, value=value) %>% mutate(mapped_transcripts = distinct_transcripts) %>% select(-c(distinct_transcripts)), trinity_summary %>% filter(measure == "total_transcripts") %>% spread(key=measure, value=value) %>% mutate(assembled_transcripts = total_transcripts) %>% select(-c(total_transcripts)), by=c("individual"="sample")  )
+
+
+transcript_filtration.counts.smol %<>% mutate( mapping_retention = mapped_transcripts/assembled_transcripts )
+
+```
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+transcript_filtration.mapping.gt <- transcript_filtration.counts.smol %>% gather(mapped_transcripts:mapping_retention,key="measure", value="value") %>% group_by(measure) %>% summarise(min=min(value),mean=mean(value),median=median(value),max=max(value)) %>% mutate(measure=gsub("_"," ", measure)) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Mapping Rate of Assembled Transcripts", sep = ""), subtitle="aligned with BLAT; unfiltered") %>% fmt_number(columns=vars(max,min,mean,median), decimals=1, suffixing = T) %>%  fmt_percent(columns=vars(max,min,mean,median), decimals=2, rows = measure=="mapping retention") %>% cols_label(measure=" ")
+ 
+transcript_filtration.mapping.gt
+
+write( transcript_filtration.mapping.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_mapping.html", sep=""))
+
+```
+
+
+The mapped transcripts were given a first-pass filter, in which at least 75 reads and at least 75% of all bases must match for the alignment to be retained. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+transcript_filtration.counts.smol <- inner_join(transcript_filtration.counts.smol, transcript_filtration.summary %>% filter(stage == "filtered" & measure == "distinct_transcripts" & type =="locus") %>% spread(key=measure, value=value) %>% mutate(filtered_transcripts = distinct_transcripts) %>% select(individual, filtered_transcripts), by = c("individual"="individual") ) 
+
+
+transcript_filtration.counts.smol %<>% mutate(filtered_retention = filtered_transcripts/mapped_transcripts)
+
+```
+
+
+
+ Across all samples, $`r sum(transcript_filtration.counts.smol %>% select(filtered_transcripts))%>% human_readable_croncher()`$ of $`r sum(transcript_filtration.counts.smol %>% select(mapped_transcripts))%>% human_readable_croncher() `$ mapped transcripts were retained after this filtration. ( $`r 100*sum(transcript_filtration.counts.smol %>% select(filtered_transcripts))/sum(transcript_filtration.counts.smol %>% select(mapped_transcripts)) `$  %) 
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+transcript_filtration.filt.gt <- transcript_filtration.counts.smol %>% gather(c(mapped_transcripts, filtered_transcripts,filtered_retention),key="measure", value="value") %>% group_by(measure) %>% summarise(min=min(value), mean=mean(value), median=median(value), max=max(value)) %>% mutate(measure=gsub("_"," ", measure)) %>% arrange(desc(measure))%>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Filtration of Mapped Transcripts", sep = ""), subtitle="aligned with BLAT; filtered to require >75bp and >75% of transcript to map") %>% fmt_number(columns=vars(max,min,mean,median), decimals=1, suffixing = T) %>%  fmt_percent(columns=vars(max,min,mean,median), decimals=2, rows = measure=="filtered retention") %>% cols_label(measure=" ")
+
+transcript_filtration.filt.gt
+
+write( transcript_filtration.filt.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_filtration.html", sep=""))
+
+```
+
+
+
+#### Direct
+
+Once aligned, a transcript was rejected as 'known' if any quality alignment overlapped an annotated gene (refSeq,/UCSC), pseudogene (Yale), retroelement (UCSC) or complex repetitive element (repeatmasker). Simple repetitive regions were not filtered out, having been involved in previously identified peptide origination (Chen et al. 1997), though attention was paid during curation for ambiguity in mapping.
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+tbl_cnt <- tbl_cnt + 1
+ref_ann.excluded.gt <- inner_join(ref_ann.stats  %>%   filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value),annotations.df %>% filter(operations=="exclude") %>% select(name), by=c("annot"="name")) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Known Annotations whose Direct Overlaps will be Excluded", sep = ""), subtitle= md("&nbsp;") ) %>% fmt_number(columns = c("avg size", "total count", "total size"), decimals = 1, drop_trailing_zeros = T, suffixing = T ) %>% tab_spanner(label = "size (bp)", columns = c("avg size", "total size")) %>% cols_label(`avg size` = "average", `total size` = "total")
+
+ref_ann.excluded.gt
+
+write(ref_ann.excluded.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationExcluded.html", sep=""))
+
+
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+
+forbidden_ann_squished <- read_delim("summaries/annotations/hg38.forbiddenAnnotations.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(forbidden_ann_squished ) <- c("measure","value")
+forbidden_ann_squished$measure <- as.factor(forbidden_ann_squished$measure)
+
+#### put this in the wrapup with the population-wides
+
+# 
+# 
+# 
+# 
+# trinity_summary.sprud <- trinity_summary %>% spread(measure, value)
+# 
+# tbl_cnt <- tbl_cnt + 1
+# 
+# ref_ann.excluded.gt <- inner_join(ref_ann.stats  %>%   filter(type == 'total' | type == 'avg') %>% unite("measure", c("type", "measure"), sep = " ") %>% spread(measure, value),annotations.df %>% filter(operations=="exclude") %>% select(name), by=c("annot"="name")) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Known Annotations whose Direct Overlaps will be Excluded", sep = ""), subtitle= md("&nbsp;") ) %>% fmt_number(columns = c("avg size", "total count", "total size"), decimals = 1, drop_trailing_zeros = T, suffixing = T ) %>% tab_spanner(label = "size (bp)", columns = c("avg size", "total size")) %>% cols_label(`avg size` = "average", `total size` = "total")
+# 
+# ref_ann.excluded.gt
+# 
+# write(ref_ann.excluded.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationExcluded.html", sep=""))
+
+```
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+transcript_filtration.counts.smol <- inner_join(transcript_filtration.counts.smol, transcript_filtration.summary %>% filter(stage == "noForbiddenAnnot" & measure == "distinct_transcripts" & type =="locus") %>% spread(key=measure, value=value) %>% mutate(noForbiddenAnnot_transcripts = distinct_transcripts) %>% select(individual, noForbiddenAnnot_transcripts), by = c("individual"="individual") ) 
+
+
+transcript_filtration.counts.smol %<>% mutate(noForbiddenAnnot_retention = noForbiddenAnnot_transcripts/filtered_transcripts)
+
+```
+
+
+ Across all samples, $`r sum(transcript_filtration.counts.smol %>% select(noForbiddenAnnot_transcripts))%>% human_readable_croncher()`$ of $`r sum(transcript_filtration.counts.smol %>% select(filtered_transcripts))%>% human_readable_croncher() `$ mapped transcripts were retained after this filtration. ( $`r 100*sum(transcript_filtration.counts.smol %>% select(noForbiddenAnnot_transcripts))/sum(transcript_filtration.counts.smol %>% select(filtered_transcripts)) `$  %) 
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+transcript_filtration.noForbiddenAnnot.gt <- transcript_filtration.counts.smol %>% gather(c(noForbiddenAnnot_transcripts, filtered_transcripts,noForbiddenAnnot_retention),key="measure", value="value") %>% group_by(measure) %>% summarise(min=min(value), mean=mean(value), median=median(value), max=max(value)) %>% mutate(measure=gsub("_"," ", measure)) %>% mutate(measure=factor(measure, levels=c("filtered transcripts", "noForbiddenAnnot transcripts","noForbiddenAnnot retention"))   ) %>% arrange(measure)%>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Transcripts not Directly Overlapping a Forbidden Annotation", sep = ""), subtitle="aligned with BLAT; filtered to require >75bp and >75% of transcript to map") %>% fmt_number(columns=vars(max,min,mean,median), rows = measure != "noForbiddenAnnot retention", decimals=1, suffixing = T) %>%  fmt_percent(columns=vars(max,min,mean,median), decimals=2, rows = measure=="noForbiddenAnnot retention") %>% cols_label(measure=" ")
+
+transcript_filtration.noForbiddenAnnot.gt
+
+write( transcript_filtration.filt.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_noForbiddenAnnot.html", sep=""))
+
+```
+
+
+Transcript exclusion breakdown
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+direct_forbidden_overlaps.roster <-read_delim("summaries/assembled_transcripts/direct_forbidden_overlaps.roster", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(direct_forbidden_overlaps.roster) <- c("individual","annotation","count")
+
+
+```
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+
+direct_annotated_transcripts.count <-sum(transcript_filtration.counts.smol %>% select(filtered_transcripts)) - sum(transcript_filtration.counts.smol %>% select(noForbiddenAnnot_transcripts))
+
+direct_forbidden_overlaps.roster.gt <- direct_forbidden_overlaps.roster %>% group_by(annotation) %>% summarize(fraction = sum(count)/direct_annotated_transcripts.count) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Fractions of Transcripts Overlapping Annotations, by Annotation Overlapped", sep = ""), subtitle="percentages sum to > 100 b/c many transcripts overlap multiple annotations")  %>%  fmt_percent(columns=vars(fraction), decimals=1) %>% cols_label(annotation=" ",fraction = "percent")
+
+
+
+direct_forbidden_overlaps.roster.gt
+
+write( direct_forbidden_overlaps.roster.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_directlyOverlappedAnnotPercents.html", sep=""))
+
+```
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+fig_cnt <- fig_cnt + 1
+
+transcriptCount_assembliesPerRead.gg <- ggplot(inner_join(transcript_filtration.counts.smol %>% select(c(individual, noForbiddenAnnot_transcripts)), filtration_stats %>% filter(type=="postfiltered" & measure == "total_reads") %>% mutate(sequenced_reads=value) %>% select(c(name, sequenced_reads)) , by = c("individual"="name"))) +geom_point(aes(x=sequenced_reads, y=noForbiddenAnnot_transcripts))  + labs(title=paste("Figure ",fig_cnt, ". Scatterplot of Assembled Transcripts (not directly overlapping a forbidden annotation) vs Filtered Reads", sep = ""), x=" # reads assembled", y="# assemblies (no direct overlap)")  + theme_bw()
+
+transcriptCount_assembliesPerRead.gg
+png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerRead_scat.png", sep=""))
+transcriptCount_assembliesPerRead.gg
+dev.off()
+
+
+```
+
+
+
+
+
+
+#### Contagious
+
+RNA-Seq reads mapping to the same region as an anomalous transcript were collected; then mapped reads within a read’s length (75 bp) of the collection were iteratively added to it. If the collection of accumulated reads indirectly associated with the transcript ever overlapped a forbidden region, the transcript was flagged.  
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+forbiddenAccumulation_individuals <- read_delim("summaries/accumulations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(forbiddenAccumulation_individuals)<- c("aligner","name","measure","value")
+forbiddenAccumulation_individuals.main <- forbiddenAccumulation_individuals %>% filter(startsWith(measure, "mainstream")) 
+
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+forbiddenAccumulation_populationWide.raw <- read_delim("summaries/annotations/vs_hg38.mapspliceRaw.forbiddenAccumulation.populationWide.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(forbiddenAccumulation_populationWide.raw)<- c("measure","value")
+
+forbiddenAccumulation_populationWide.raw$aligner <- as.factor("raw")
+
+forbiddenAccumulation_populationWide <- rbind(forbiddenAccumulation_populationWide.raw)
+
+forbiddenAccumulation_populationWide.main <- forbiddenAccumulation_populationWide %>% filter(startsWith(measure, "mainstream")) 
+
+
+
+
+
+tbl_cnt <- tbl_cnt + 1
+forbiddenAccumulation_populationWide.main.gt <- forbiddenAccumulation_populationWide.main %>% spread(measure, value) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Regions Accumulating onto Forbidden Annotations", sep = ""), subtitle= "Merged Across Population" ) %>% fmt_number(columns = c("mainstream_intervals", "mainstream_length"), decimals = 1, drop_trailing_zeros = T, suffixing = T ) %>% fmt_percent(columns=c("mainstream_coverage"), decimals=1) %>% cols_label(mainstream_intervals = "number of intervals", mainstream_length = "total interval length (bp)", mainstream_coverage = "fraction genome covered", aligner = " ")
+
+forbiddenAccumulation_populationWide.main.gt
+
+write(forbiddenAccumulation_populationWide.main.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_forbiddenAccumulation_populationWide_main.html", sep=""))
+
+```
+
+
+
+
+
+
+
+#### Anomalous Transcripts Summary
+
+Out of an initial ___ transcripts (___ per person), a total of ___ were retained as having no evidence of transcriptional association with any annotated gene or complex repetitive element. These were then scanned for open reading frames. 
+
+ The remaining transcripts were considered to be 'anomalous'.
+
+### ORFome
+ 
+
+#### Extraction
+ORFs were extracted from the anomalous transcripts; because the 1000 Genomes RNA-Seq used an unstranded protocol, the anomalous transcripts were reverse complemented and ORFs extracted.
+#### Filtration
+These were size-filtered with a lower length cutoff of 75 bp (see Hashimoto 2001 in Ruiz-Orera 2014) The size-filtered candidates were BLATed against the human genome and those with more than one quality hit were flagged as having genomic duplicates. 
+
+ORFs were BLASTed against the Protein Database to exclude known proteins. (e-value cutoff: 10)
+### Looking Back at the MetaTranscriptome
+
+Candidate sequences were then BLASTed against all the assembled transcriptomes. This identified false positives which were among the candidates because they passed filters in at least one individual but also failed them in at least one individual. Fragmentary BLAST hits, in which a non-ORF subsequence was identified in the transcriptomes, were tallied.
+
+
+### non-Human search
+
+ORFs were also BLATed against the chimp and gorilla genomes to establish possible sites of homology. These genomic locations were then given a first-order scan for coding sequence by enumerating all the same-strand ORFs in the site and the 4kb surrounding it. If one of the ORFs overlapped 75% or more the homologous site, it was flagged as having a homologous coding sequence in the primate in question. (h/t Jeremy Wang)
+
+Some candidate ORFs could not be identified in the chimp and/or gorilla genomes at all. These were BLASTed against the relevant TRACE archives using the NCBI web portal.
+
+### Aggregation
+
+Candidate sequences were then BLASTed against all the assembled transcriptomes. This identified false positives which were among the candidates because they passed filters in at least one individual but also failed them in at least one individual. Fragmentary BLAST hits, in which a non-ORF subsequence was identified in the transcriptomes, were tallied.  The candidates were also BLASTed against three chimp transcriptomes and three gorilla transcriptomes, two each assembled from published RNA-Seq data (???Scally et al. 2012???) and one each from the Non-Human Primate Reference Transcriptome Resource (Pipes et al. 2013). If the candidate sequence aligned to an ORF in a primate transcriptome, it was flagged. 
+
+A MySQL database was built to hold these data. (h/t Dave Turissini) At this point a locus was considered a candidate de novo gene if:
+* it has had a transcript aligning to it, which does not overlap or accumulate onto a forbidden region
+* its ORF does not code for a known PDB peptide
+* the homologous regions in chimp and gorilla, when they can be identified, do not contain an ORF overlapping 75%+ of the sequence
+* there is only one instance of the ORF found in the human genome.
+
+The candidate set was then refined; a locus was retained if:
+* it did not appear in a transcript overlapping or accumulating onto a forbidden region, in any individual
+* its ORF does not code for a known PDB peptide
+* the homologous regions in chimp and gorilla, when they can be identified, do not contain an ORF overlapping 75%+ of the sequence
+* there is only one instance of the ORF found in the human genome.
+* it did not BLAST to an ORF in any non-human primate transcriptome
+
+These candidates were visualized in IGV (Robinson 2011) and the UCSC Genome Browser (Kent et al, 2002), and hand-curated for ORFs which screened for:
+•	Sensibility of mappings
+•	RNA support for transcripts, alleged splice sites
+•	Annotation/DNA support for alleged variants in transcripts, especially those critical to the ORF. 
+•	…
+
+The candidate list was further narrowed with an updated and expanded search for potential coding regions in chimp, gorilla, orangutan and gibbon, and stricter consideration of local RNA mappling across the sequenced population. 
+
+This defined first an A-grade of candidates:
+•	Retained during manual curation
+•	No coding potential detected in the genomes or transcriptomes of examined non-human primates
+
+A stricter subset of this used as the AA-grade candidates:
+•	In no transcript sourcing a candidate, is the ORF uncovered by RNA
+•	RNA-seq mates were checked for overlap with forbidden regions
+•	Overlap with forbidden regions was checked across all sequenced RNA
+
+
+
+## Procedure: Control Data
+
+### Auxiliary ORFs
+
+To collect representative non-genic ORFs, the human genome was windowed into 2.5kb regions, sliding by 1kb. A non-exonic subset of windows was collected, which did not overlap an annotated exon. A further intergenic subset was collected, which did not overlap an annotated gene, repeat, retroelement, or pseudogene locus, introns included. ORFs in these windows were filtered for length and 2000 selected at random from each subset. A collection of 2000 random length-filtered sequences from the Ensembl CDS collection was used as representative coding ORFs. 
+
+To collect representative transcripts, 2000 Trinity assemblies each were collected randomly from those which had been classified as ILS_known or ILS_anomalies by the pipeline. 2.5 kb stretches of the genome were also collected, 2000 each of strictly intergenic and non-exonic chunks. 1500 RefSeq mRNA sequences were also chosen at random, and the transcripts used to test CPAT were also collected.  
+
+### Followup data
+
+To investigate biased tissue expression, RNA-Seq reads from tissues (brain, heart, kidney, liver, testis) across 6 humans (5 male, 1 female) (Brawand et al 2011) were downloaded and processed with Trinity and MapSplice. 
+
+### Scrambled ORFs
+
+## Procedure: Candidate Analyses
+
+Biochemical properties of the ORFs under investigation were calculated using the BioPython (Cock et al. 2009). Codon bias was calculated with data tabulated in (Nakamura et al 1999).  The transcripts were analyzed for coding potential with CPAT. (Wang et al 2013). RNA-Seq coverage at the candidate sites was measured with the FeatureCounts utility in the Subread package .(Liao et al 2014). RiboSeq data was taken from GWIPS (Michel et al. 2014) [AND RPFdb??? http://sysbio.sysu.edu.cn/rpfdb/browse.html ]. Candidates were also compared to the sORFs (Olexiouk et al 2015), LNCipedia (Volders et al 2015), and ____ databases. Variant annotations from 1000 Genomes (Abecasis et al 2012) were collected and processed with PyVCF (https://pyvcf.readthedocs.org/en/latest/). 
+
+
+
+
+## Results
+
+## Discussion
+
+### Candidate DNA Properties
+
+#### ORF length and GC Percent
+
+De novo, orphan, young, and otherwise novel genes tend to be relatively short compared to older and more widespread genes [@Toll-Riera2009][@Ekman2010][@Xie2012][@Murphy2012][@Zhao2014][@Ruiz-Orera2014][@Palmieri2014][@Ruiz-Orera2015][@Schlotterer2015][@Basile2017][@Vakirlis2017][@Wu2018], with well-characterized examples of a few hundred amino acids [@Chen2007][@Li2010a][@Guerzoni2016]. This was the case for these candidates, which were all shorter than 75 amino acids. Whereas de novo genes in previous studies were longer than expected by chance [@Schlotterer2015], those identified here were actually depleted of longer ORFs compared to controls sampled from non-genic regions in the  reference genome. One possible explanation is that the discrete nature of sequencing and transcript assembly biases against the discovery of long ORFs: if expression and sequencing depth are both sufficiently low, the probability of a sequencing gap increases with increasing ORF length. 
+
+ORF length is strikingly different between candidate de novos and annotated coding sequences, but this does not necessarily preclude that the candidates could be translated. The longest candidate contained 75 amino acids, longer than the mammalian micropeptides APELA (54aa) and myoregulin (46aa). A typical candidate had ~32 amino acids, similar to the mammalian DWORF (35aa) and insect Sarcolamban (28-29aa). The 75 nucleotide length threshold used would even have excluded the insect pri and the plant ENOD40 micropeptides (as small as 10aa) [see table 1 in Ruiz-Orera, J., & Albà, M. M. (2019). Translation of Small Open Reading Frames: Roles in Regulation and Evolutionary Innovation. Trends in Genetics, xx, 1–13. http://doi.org/10.1016/j.tig.2018.12.003 ]
+
+The monomer composition of a DNA polymer, its percentage of G-C pairs, has important implications for its biochemistry: being connected by three hydrogen bonds, a G-C base pair is more thermostable than an A-T pair, connected by two hydrogen bonds. As it relates to de novo genes, GC% is important because it predicts ORF distribution in a random sequence (since both start and stop codons are AT-rich, high GC tends towards fewer and longer ORFs wherase low GC tends towards more and shorter ORFs [@Mclysaght2016] (see also Oliver, J. L., & Marín, A. (1996). A relationship between GC content and coding-sequence length. Journal of Molecular Evolution, 43(3), 216–223. http://doi.org/10.1007/BF02338829 ?)). It may also pose a top-down influence on peptide properties, by skewing codon frequencies and amino acid use by extension [@Basile2017]. 
+
+Previous research has not shown consistent patterns of GC% in de novo and phylogenetically restricted genes, with some sudies finding high GC [@Chen2015][@Vakirlis2017] and others finding AT enrichment instead [@Ruiz-Orera2015][@Palmieri2014]. 
+
+(discuss basile 2017 in more depth?)
+
+De novo candidates uncovered here had a GC% which ranged from ~20 to ~55%, centered around 35% (compared to a chromosome-wide value of 40+% over the human genome: https://www.biostars.org/p/16169/ ). They are also depleted of GC base pairs relative to annotated CDS sequences as well as ORFs found in annotated lncRNAs and non-genic control ORFs. Because of the relationship between ORF length and GC percent, the sequencing process may be biasing discovery towards short ORFs and low GC simultaneously (see length vs GC scatterplot)
+
+[Casola 2018] sez GC content is positively correlated with transcriptional activity in mammals, citing Kudla &c 2006
+
+
+#### Codon Usage Bias
+
+Codon usage bias refers to the preference among synonymous codons, reflecting translational optimization. Young de novo genes might be expected to have less biased codon usage, having experience less selection. Previous studies of de novo genes tend to confirm that orphan (\cite{Palmieri2014}) and de novo genes (\cite{Vakirlis2017}\cite{Carvunis2012}) have lower codon usage bias than older established genes, and one study in viruses appeared to show an acclimation of de novo gene codon use to the rest of the genome with time \cite{Sabath2012}. In fact, codon usage bias can be used to identify de novo-orginated viral genes \cite{Pavesi2013}
+
+On the other hand, a studies of orphan domanin & genes in yeast (\cite{Ekman2010}) and primates (\cite{Toll-Riera2009}) found that their codon use was similar to that of ancient genes, and the human de novo gene PBOV1 was found to have an unusually high codon usage bias, possibly a factor in its emergence. [\cite{Samusik2013}]
+
+Codon usage was measured here with codon adaptation index (the Sharp & Li 1987 definition implemented in BioPython, using human codon frequencies from [@Nakamura1999] ). Although the range of values for these candidates overlapped with those calculated for annotated CDS sequences, the distribution was significantly lower of both coding sequences and presumably noncoding sequences drawn from annotated lncRNAs and the intergenic human genome. Furthermore, comparison of natural ORFs with scrambled counterfactual ORFs seems to show that, while most noncoding ORFs have an unusually high CAI given their base composition, these denovo candidates' CAI tends to be much more representative:
+
+```{r echo=FALSE, eval = F}
+ggplot(zee_valz.all.df %>%  filter(var=='cai')) + geom_freqpoly(aes(x=gene_z, y=..density.., color=type), bins=24) 
+
+```
+
+
+
+
+
+
+
+
+
+
+
+
+
+### Candidate Protein Properties
+
+Within the traditional view of molecular biology, DNA has biological function through proteins it encodes. When discussing the protein evolution, it is worth asking what biochemical traits novel proteins share and how they might influence their trajectory and function. In a study of mammalian genes for example, [@Villanueva-Canas2017] found that younger and more phylogentically restricted genes had a lower aromaticity (ie, fewer amino acids with aromatic rings) and  a higher isoelectric point (ie, fewer negatively charged amino acids) than did older and more typical genes. The latter is possibly due to antimicrobial immune function.
+
+The candidates identified here were found to have a higher aromaticity than annotated human genes, similar to intergenic controls. This might reflect a lack of evolutionary optimisation away from metabolically costly amino acids. On the other hand, isolectric point was found to be intermediate between annotated genes and controls. 
+
+#### Hydrophobicity, Disorder, and Aggregation
+
+
+candidates are more hydrophobic than controls or CDS.
+
+gravy:
+Higher than usual in de novos (Carvunis2012)
+Hydrophobicity negatively correlated with ISD (Wilson2017)
+GC effect on hydrophobicity in young bot not old gnees (Basile2017)
+
+Disorder:
+[Casola 2018] finds that overprinting on old genes is responsible for high disorder in rodent de novos, but also that old overprints don't have unusal disorder. Finds 
+
+
+### A Representative Example / Buttons & Knobs
+
+
+PCR confirmation...
+
+### Pros and Cons of annotation vs. empirical approaches
+"comparative rather than population genetic approaches" [Zhao et al. 2014], 
+
+Most previous discoveries of de novo originated genes have depended upon comparisons of previously-compiled bioinformatics databases such as gene annotations and peptide sequences [@Cai2008; @Xiao2009; @Levine2006; @Knowle2009; @Chen2015; @Guerzoni2016], or through the investigation of genes already of interest due to GWAS studies [@Li2010a] or due to clinical relevance[@Samusik2013;@Suenaga2014]. This has been a productive approach, but it also has its limitations. For example, incompletely sequenced genomes or tabulated gene lists may cause genes to be incorrectly classed as orphans. Nor are all annotations necessarily correct: FLJ33706 was incorrectly annotated as a protein-coding gene in chimpanzee, causing [@Knowles2009] to initially reject it as a human de novo gene [@Li2010a]. In another annotation-driven study, one identified de novo gene lies on a transcript which remains annotated as non-coding, in spite of evidence of translation; another gene has since been retired from the transcriptional Unigene database of transcripts, while retaining evidence of translation in peptide-based PRIDE/PeptideAtlas/gpmDB databases. [@Guerzoni2016]
+
+Next-generation sequencing provides an alternative to the annotation-based approach, in which the transcriptome is sequenced directly and filtered for candidate coding mRNAs. This does not depend on completeness of transcript annotations, and thus is better suited for discovery of unannotated gene candidates, especially those which are not fixed in the population. It also allows for easy quantification of tissue specificity and sex bias; next-generation sequencing can also be adapted for detecting ribosome-protected RNA fragments, which can be used to infer translation [cite?] 
+One example of this approach in drosophila is [@Zhao2014], in which the transcriptomes of several melanogaster strains were sequenced, assembled, and extant annotations excluded. RNA-Seq was also used to rule out the presence of these genes in related drosophila species. In this manner, 142 segregating and 106 fixed de novo gene candidates were identified, and their male-specificity confirmed. In another example, [@Ruiz-Orrera2015] used several dozen sequenced transcriptomes across a phylogeny and sampling multiple tissues. This uncovered several hundred human-specific de novo genes (including a protein-coding sequence in the Gilles de la Tourette syndrome chromosome region) and confirmed testis bias.
+
+another: not phylostratigraphic, don't need to worry about phylostratigraphy bias
+mention: moyers & zhange 2015, 2016, 2017, Casola 2018
+
+One example of conflicting annotations in this project comes from the internal distinction between an expresser of a candidate (which is an individual in whose Trinity-assembled transcripts the candidate ORF could be found) and an individual with nonzero expression at a candidate site (as measured by MapSplice2 + featureCount). Given the discrete nature of reads and the small read count due to low expression, the former is especially false-negative prone. Thus, although the gene annotated most frequently only has 7 expressers, MapSplice assigns at least one read to the ORF in at least 7 individuals, for `r sum(expression_stats.allPop.meta.counted$fraction_expressing  > tail(peeps_per_gene, n=1)$number_expressers/num_rna$count) ` gene candidates ( `r 100*sum(expression_stats.allPop.meta.counted$fraction_expressing  > tail(peeps_per_gene, n=1)$number_expressers/num_rna$count)/length(expression_stats.allPop.meta.counted$fraction_expressing) ` %)
+(UPDATE THIS IN LIGHT OF PCR RESULTS ^^^)
+
+
+### How do we know they aren't artefacts/contamination?
+mention blast via mycoplasma, other blast results
+
+### How do we rule out multiple loss?
+
+ very carefully
+
+### Noise 
+
+It is tempting to dismiss rare, low-expression transcripts such as these as "transcriptional noise"; however, this is a loosely defined term, whose different meanings have different implications. For example, "transcriptional noise" can be used to refer to stochastic transitions between discrete transcriptional states (eg, Blake, W. J., KÆrn, M., Cantor, C. R., & Collins, J. J. (2003). Noise in eukaryotic gene expression. Nature, 422(6932), 633–637. http://doi.org/10.1038/nature01546) or to variation in transcription which isn't accounted for by some collection of explanatory variables (e.g., Raj, A., & van Oudenaarden, A. (2008). Nature, Nurture, or Chance: Stochastic Gene Expression and Its Consequences. Cell, 135(2), 216–226. http://doi.org/10.1016/j.cell.2008.09.050). Although these are interesting considerations, they potentially apply to any transcriptional activity including established genes, and thus don't weight against the validity of these candidates. 
+
+In some cases, "noise" is defined operationally; the recently published CHESS human transcriptome eliminates "noisy transcripts" by filtering on properties like lack of splicing and low expression level. This is a reasonable heuristic for the purposes of assembling a reference transcriptome, but it is question-begging when it comes to excluding candidate de novos, which are often single-exon transcripts with low expression rates. 
+
+In other cases, "transcriptional noise" refers to transcription which isn't "functional" (e.g., Ponjavic, J., Ponting, C. P., & Lunter, G. (2007). Functionality or transcriptional noise? Evidence for selection within long noncoding RNAs. Genome Research, 17(5), 556–565.). Detecting and even defining function remains a vexing issue (Doolittle, W. F. (2018). We simply cannot go on being so vague about ‘function.’ Genome Biology, 19(1), 223. http://doi.org/10.1186/s13059-018-1600-4) but even were this clarified, nonfunctional transcription is still of legitimate interest in this context, since we're investigating the process by which nonfunctional genetic material is functionalized. (It also creates the awkward situation of relegating established transcription  without utility to the host, such as expressed pseudogenes or transposable elements, to the category of "noise"). (does noise refer to the fact of transcription, or variation in transcription?)
+
+Another meaning is transcription which is not under regulatory direction but is the product of promiscuous transcriptional machinery and "illegitimate promotors" (e.g., o	Ponjavic, J., Ponting, C. P., & Lunter, G. (2007). Functionality or transcriptional noise? Evidence for selection within long noncoding RNAs. Genome Research, 17(5), 556–565. ) On the other hand, this would make some proposed stages of de novo gene emergence noisy by definition, with sporadic expressions of potentially adaptive transcripts providing variation to select upon:
+>First, such an event may represent some sort of transcriptional leakage or noise, and only after the locus acquires a functional ORF may the transcriptional profile become regulated and optimized." [@Xie2012]
+
+Indeed, de novo genes in animals are often associated with tissues with permissive transcription states, such as the testis [e.g., \cite{Light2014}]. Disease states such as cancer provide another complication. The tumor-specific human de novo gene PBOV1 appears to function as an antigen which is expressed when healthy regulation breaks down. It might well be the case the PBOV1 is noisy in the sense of being the product of unregulated biochemistry at the cellular level, but it nonetheless acts as a functional signal at the organism level. Finally, it is also conceivable that sporadic, unregulated transcription and translation could act as a partially shielded selecting force removing maladaptive traits from the usually-silent genome [Masel, J. (2006). Cryptic genetic variation is enriched for potential adaptations. Genetics, 172(3), 1985–1991. http://doi.org/10.1534/genetics.105.051649]
+
+>"First, such an event may represent some sort of transcriptional leakage or noise, and only after the locus acquires a functional ORF may the transcriptional profile become regulated and optimized. Second, alternatively, the ancestral locus may encode a functional non-coding RNA with a specific transcrip- tional profile and transcript structure, and after the acquisition of an ORF, the new protein-coding gene largely adopts the pre- existing transcriptional profile. " \cite{Xie2012} 
+
+A recent review discussed the exaptation of transcriptional noise into functional sncRNAs in bacteria. [Jose, B. R., Gardner, P. P., & Barquist, L. (2019). Transcriptional noise and exaptation as sources for bacterial sRNAs. Biochemical Society Transactions, (February), BST20180171. http://doi.org/10.1042/BST20180171   ]
+
+
+
+In other words, the filtering of a biologically functional signal from transcriptional noise is an analagous process to the filtering of adaptive traits from the genomic noise of mutation. 
+
+Many of these considerations about transcriptional noise hold about translational noise; for example as a mechanism for partially shielding selection:
+>“The initial translation of the ORF might be no more than noise, but such noise could permit the removal of strongly deleterious ORFs by natural selection (McLysaght, A., & Guerzoni, D. (2015))”
+
+* transcription that isn't heritable
+(talk about PCR?)
+
+o	What’s the difference between noise and ultra-rapid transcriptional turnover?
+
+
+### Conservativism of approach
+* only sequence similarity, not e.g., synteny, used in exclusions
+* candidates get 462 opportunities to get kicked out in many comparisons
+
+Because the candidates are expressed at low levels, observation of a candidate in a sequenced individual is false-negative prone within the discovery pipeline. This is seen in the statistical impact of sequencing depth on number of genes called per individual (genes per person stats), observed expression level (check expression fits??), and increased novel sightings (Rarefaction plots). Rarefaction suggests that there may be many more canidates which could be resolved with larger sampled populations and/or deeper sequencing. 
+
+
+### Limitations of strand-scrambled RNA in this context
+Because the transcriptome was sequenced with an unstranded protocol, it is ambiguous which DNA strand the assembled transcripts originated on. This ambiguity means that roughly half of the candidates are expected to be artefacts. However, in the same sense that transcription is a prerequisite for translation, transcriptional availability is a prerequisite for properly-stranded transcription: wrong-stranded transcription still implies that the genomic region can support transcription, rather than eg being permanently bound in chromatin. This reuse of transcriptional context in general, and transcription antisense to established locii in particular, has been identified as a feature of de novo origination [Siepel 2009 via Li 2010; also see dicussion in Casola 2018] A survey of gene diversification events by duplication and frameshift found a substantial fraction involved the evolution of antisense transcription [Okamura et al (2006).]
+
+^^ take a look back at this in light of transcriptional interference on nested genes esp. same-sense (eg, Yu 2005, Lee 2013, Assis 2016)
+
+*simpson's paradox
+*bidirectional promotors
+*strand-specific cDNA prep???
+
+### Depth of coverage
+The number of gene candidate sighted per person depended significantly upon the mapping depth.
+
+The number of distinct observed candidates does not appear to asymptote when ranked by sequencing depth. 
+
+Low depth of coverage biases against longer ORFs in with low expression.
+
+#### Population-level transcriptional turnover
+By contrast, [@Neme2016] found a logarithmic increase of genomic region transcribed with number of genomes examined. (Fig 5)
+>"the data are consistent with the above outlined ideas that the evolutionary turnover leads to steady – and almost unlimited – transcriptional exploration of the genome, when summed over multiple parallel evolutionary lineages and taxa.[...] weak selection could act against many newly arising transcripts, such that they can exist for a short time at a population scale, but not over an extended time. Hence, we expect that the presence of such transcripts will be polymorphic at the population level, similar as it has been shown in Drosophila (Zhao et al., 2014). "
+
+### Chromsomal Distribution
+
+#### Between
+Chromosome 2 is one of the most highly populated; in humans it is the fusion product of two ancestral chromosomes. There is one grade AA candidate (#239, chr2:133807518-133807623) in the vicinity (~20Mb) of the vestigial centromere (q21.3–q22.1, says Wikipediea; https://en.wikipedia.org/wiki/Chromosome_2_(human); ie, chr2:135100000-142200000). There are none within a similar (12Mb) vicinity of the vestigial telomere (q13; chr2:110200000-114400000)
+
+Chromosome 6 has an unstable centromere[@Capozzi2009] and is one of the highest populated
+
+Chromosome 5 is one of the sparsest populated of annotated genes but has one of the highest counts and highest densities of de novos. 
+
+##### Sex chromosomes
+
+Studies of Drosophila have found fixed de novo genes are enriched on the X-chromosome, young genes still segregating in the population are under-represented on the X. (@Schlotterer2015, @Mclysaght2016, citing [@Palmieri2014], [@Levine2006],[@Begun2007],[@Zhao2014]
+Studies in humans have found X-chr depletion (1/60 on the X in @Wu2011 )
+X-chromosome evolution has been important in the emergence of orphan genes in Drosophila [@Palmieri2014]
+Among these candidates, the X chromosome was unexceptional in terms of count and had one of the smallest densities. 
+
+#### Within
+
+yeast de novos are biased towards the subtelomeric regions... [@Carvunis2012]; these did not appear to be. 
+
+### bidirectional promotors
+[@Wu2013]
+Regulatory activity; an AluY element between the two genes in 10kb_cluster #461
+But, they've got the wrong strand orientations - if it's a bidirector, these are both strand artifacts
+
+What about other things? annotations, etc
+
+RuizOrrera 2015 find no bidirectional promotor enrichment
+
+### low complexity sequence
+
+Microsatellite DNA has been associated with de novo gene emergence & stability [@Palmieri2014, @Schlotterer2015]; simple repeats were involved in the evolution of antifreeze proteins [@Chen1997]; many proteins contain repetive subsequences with a bias towards younger genes [@Toll-Riera2012]. They also make read mapping and quantification difficult. 
+
+### association with complex repeats
+Previous studies have found that orphan genes are often derived from transposable elements in primates [@Toll-Riera2009] though not it drosophila [@Palmieri2014]. This study specifically excluded direct involvement, but TEs can also provide regulatory elements like promotors [@Kozlov2016] (<- better ref?)
+
+
+
+
+### capacitance
+Capacitance refers to the accumulation of 'cryptic' variation in a population, which may occaisonally be exposed to selection. [@Masel2013] Various necessary transitions in the de novo emergence of coding genes from previously noncoding DNA involve a change in the selection forces. When transcription is acquired, variation which may have been neutral in silent DNA is exposed to an additions source of selection, based on its impact on things like RNA folding. (Variation in the fact of transcription, to the extent it's genetic, is similar but not necessarily cis-acting???) When a translated ORF arises, variants which may have been neutral in the RNA realm take on fitness effects as the reading frame reclassifies them as synonymous or not, with different amino acid variants having potential fitness impacts. 
+
+Of the 161 candidates,  ____% contained a SNP or INDEL of some sort within the population, meaning that not only is expression itself polymorphic, many of transcripts do not share the same sequence and both the fact of expression (all candidates had transcriptional evidence in some but not all individuals) and the specific sequence being transcribed, are potentially experiencing new selective pressures. 
+
+
+full-blown open reading frames detencted in Trinity with non-synonymous SNPs (rs11686443 I->V in #168; rs1191044960 V->A in #175; in dbSNP but not 1kGen)
+```{r echo=FALSE, eval=F}
+#select g.gene_pk, count( distinct o.sequence) from gene g, gene_lookup l, orf o where g.grade='AA' and g.legit=1 and g.gene_pk = l.gene_id and l.orf_id = o.old_pk and l.person_name = o.person_name group by gene_pk;
+```
+
+If these transitions are noisy, they may act as the shielding mechanism responsible for responsible for removing catastrophic variants while preserving those with smaller effect sizes, thus enriching the cryptic variation for potential adaptations[@Masel2006]
+
+
+
+### Continuum vs. preadaptation
+Compare de novo ORF to control ORFs from the genome to randomized ORFs.
+
+### Future directions
+* scan 'noncoding' annotations (RefSeq, lncipedia) for de novo ORFs, peptide evidence, differential transcription
+* check extant mini/micropeptide databases (sORF, others) for de novo ORFs
+* improve & update for cancer (e.g., fusion site detection)
+* Look at expression of iden
+
+
+## Bibliography
+
+bibtex::write_bib ? 
+
