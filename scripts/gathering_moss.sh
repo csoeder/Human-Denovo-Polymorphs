@@ -50,7 +50,7 @@ while [ $( cat "$filebase".diff.bed | wc -l) -ne 0 ]; do
 
 	echo -e "$j\tINTERSECTED\t$(date)\t0\t0";
 
-	cat "$filebase".footprints.renamed.bed | bedtools intersect -split -v -a - -b $megapath | bedtools bed12tobed6 -i | sort -k 1,1 -k2,2n | bedtools slop -b 100 -g "$fai" -i -  | bedtools merge -c 4 -o distinct -i - > "$filebase".noForbiddenAnnot.footprints.iter.bed
+	cat "$filebase".footprints.renamed.bed | bedtools intersect -split -v -a - -b $megapath | bedtools bed12tobed6 -i | sort -k 1,1 -k2,2n | bedtools slop -b 75 -g "$fai" -i -  | bedtools merge -c 4 -o distinct -i - > "$filebase".noForbiddenAnnot.footprints.iter.bed
 
 	echo -e "$j\tFILTERED\t$(date)\t0\t0";
 

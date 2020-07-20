@@ -1,7 +1,7 @@
 ---
 title: "Human Denovo Genes"
 author: "Charlie Soeder"
-date: "1/7/2020"
+date: "`r Sys.Date()`"
 output:
   html_document: default
   pdf_document: 
@@ -25,9 +25,36 @@ library("tidyverse")
 library("gt")
 library("bib2df")
 library("magrittr")
+library("UpSetR")
+library("grid")
 
 ```
 
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+#tbl_cnt <- tbl_cnt + 1
+#thing.gt <- asdfasdfasdf
+#thing.gt
+#write(thing.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_thing.html", sep=""))
+
+
+```
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+# fig_cnt <- fig_cnt + 1
+# thing.gg <- asdfasdfasd
+# thing.gg
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
 
 
 
@@ -53,6 +80,19 @@ bam_summary_loader <- function(filename, aligner="mapsplice", reference='dm6'){
 	
 }
 
+
+fmt_citation <- function(bibtex_in) {
+	bibdf <- bib2df::bib2df(bibtex_in,separate_names = TRUE)
+
+	bibdf.unnest <- bibdf  %>% unnest(cols=c("AUTHOR"))
+	bibdf.counts <- bibdf.unnest %>% group_by(BIBTEXKEY) %>% summarise(num_auth = n())
+
+	bibdf.rejoin <- inner_join(bibdf.unnest, bibdf.counts, by=c("BIBTEXKEY"="BIBTEXKEY"))
+
+	bibdf.join <- rbind( bibdf.rejoin %>% filter(num_auth == 1 )%>% ungroup() %>% select(c("BIBTEXKEY", "full_name", "YEAR")),bibdf.rejoin %>% filter(num_auth == 2 ) %>% group_by(BIBTEXKEY) %>% mutate(full_name =paste0(full_name, collapse = " & ")) %>% ungroup() %>% select(c("BIBTEXKEY","full_name", "YEAR")),bibdf.rejoin %>% filter(num_auth > 2 )%>% group_by(BIBTEXKEY) %>% summarise(first_auth = head(full_name, 1), full_name=paste(first_auth, "et al. "), YEAR=unique(YEAR)) %>% ungroup() %>% select(c("BIBTEXKEY","full_name", "YEAR"))) %>% ungroup() %>% mutate(cite = paste(full_name, YEAR, sep = " "))  %>% select(c(BIBTEXKEY, cite)) %>%  unique()# %>% group_by(BIBTEXKEY) %>% summarise(citation = paste0(cite, collapse = "; ")) %>% ungroup()
+
+	return(bibdf.join)
+}
 fig_cnt <- 0
 tbl_cnt <- 0
 
@@ -101,7 +141,7 @@ refGenomes_summary.gt <- refGenomes_summary_df  %>% mutate(measure=gsub("_"," ",
 	
 refGenomes_summary.gt
 
-write(refGenomes_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeSummary.html", sep=""))
+#write(refGenomes_summary.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeSummary.html", sep=""))
 
 ```
 
@@ -167,12 +207,18 @@ ref_ann.stats.gt <- inner_join(ref_ann.stats  %>%   filter(type == 'total' | typ
 
 ref_ann.stats.gt
 
-write(ref_ann.stats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationSummary.html", sep=""))
+#write(ref_ann.stats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationSummary.html", sep=""))
 
 ```
 
 
 load, talk about trammel$annotations and summaries/reference_annotations.summary
+
+#### Orthology
+
+Synteny was investigated using multiz 30 way alignment across 27 primates and 3 other mammals:
+http://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz30way/maf/
+
 
 #### Next-Gen Sequencing
 
@@ -186,7 +232,8 @@ data_sets.df$name <- as.factor(data_sets.df$name)
 data_sets.df$sex<- as.factor(data_sets.df$sex)
 data_sets.df$population<- as.factor(data_sets.df$population)
 
-data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>%  select(c(name,sex,population,readLen,phase1Geno))
+
+data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='1kGen') %>%  select(c(name,sex,population,readLen,phase1Geno))
 
 ```
 
@@ -194,11 +241,11 @@ data_sets.df.sparse <- data_sets.df %>% filter(subgroups=='all') %>%  select(c(n
 
 tbl_cnt <- tbl_cnt + 1
 
-rnaSeq_indiv_demog_counts.gt <- data_sets.df.sparse %>% group_by(sex, population) %>% summarise(count=n()) %>% ungroup() %>% spread(key=sex, value=count) %>% mutate(total = male + female) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of 1kGen RNA-Seq Samples Available", sep = ""), subtitle="by sex and population") %>% grand_summary_rows(columns = vars(male, female, total),fns = list(total = ~sum(.)),formatter = fmt_number, decimals=0)
+rnaSeq_indiv_demog_counts.gt <- data_sets.df.sparse %>% group_by(sex, population) %>% summarise(count=n()) %>% ungroup() %>% spread(key=sex, value=count) %>% mutate(total = male + female) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of 1kGen RNA-Seq Samples Available", sep = ""), subtitle="by sex and population") %>% grand_summary_rows(columns = vars(male, female, total),fns = list(total = ~sum(.)),formatter = fmt_number, decimals=0) %>% cols_label(population = " ",)
 	
 rnaSeq_indiv_demog_counts.gt
 
-write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_rnaSeq_indiv_demog.html", sep=""))
+#write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_rnaSeq_indiv_demog.html", sep=""))
 
 
 ```
@@ -206,7 +253,7 @@ write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl
 ### Software Used 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 softwareUsed.df <- plyr::ldply(trammel$software, data.frame)
-bibdf <- bib2df("scripts/references.bib",separate_names = TRUE)
+#bibdf <- bib2df("scripts/references.bib",separate_names = TRUE)
 
 ```
 
@@ -214,25 +261,41 @@ bibdf <- bib2df("scripts/references.bib",separate_names = TRUE)
 
 softwareUsed.smol.df <- softwareUsed.df %>% select(c("name","version", "purpose", "link","bibtex"))%>% separate_rows(bibtex) 
 
-softwareUsed.2Beeg.df<- inner_join(softwareUsed.smol.df, bibdf, by=c("bibtex" = "BIBTEXKEY"))  %>% unnest(cols=c("AUTHOR"))
-softwareUsed.2Beeg.counts <- softwareUsed.2Beeg.df %>% group_by(bibtex) %>% summarise(num_auth = n())
-softwareUsed.2Beeg.df <- inner_join(softwareUsed.2Beeg.df, softwareUsed.2Beeg.counts, by=c("bibtex"="bibtex"))
+#softwareUsed.2Beeg.df<- inner_join(softwareUsed.smol.df, bibdf, by=c("bibtex" = "BIBTEXKEY"))  %>% unnest(cols=c("AUTHOR"))
+#softwareUsed.2Beeg.counts <- softwareUsed.2Beeg.df %>% group_by(bibtex) %>% summarise(num_auth = n())
+#softwareUsed.2Beeg.df <- inner_join(softwareUsed.2Beeg.df, softwareUsed.2Beeg.counts, by=c("bibtex"="bibtex"))
 
 
 
 #softwareUsed.2Beeg.df %>% filter(num_auth == 2 ) %>% group_by(bibtex) %>% mutate(full_name =paste0(full_name, collapse = " & ")) %>% ungroup()
 
-softwareUsed.cronch.df <- rbind(softwareUsed.2Beeg.df %>% filter(num_auth == 1 ), softwareUsed.2Beeg.df %>% filter(num_auth == 2 ) %>% group_by(bibtex) %>% mutate(full_name =paste0(full_name, collapse = " & ")) %>% ungroup(), softwareUsed.2Beeg.df %>% filter(num_auth > 2 ) %>% group_by(bibtex) %>%  mutate(full_name=paste(first(full_name), "et al. ")) %>% ungroup()) %>% mutate(cite = paste(full_name, YEAR, sep = " ")) %>% select(c(name, bibtex, cite)) %>%  unique() %>% group_by(name) %>% summarise(allCit = paste0(cite, collapse = "; ")) %>% ungroup()
+#softwareUsed.cronch.df <- rbind(softwareUsed.2Beeg.df %>% filter(num_auth == 1 ), softwareUsed.2Beeg.df %>% filter(num_auth == 2 ) %>% group_by(bibtex) %>% mutate(full_name =paste0(full_name, collapse = " & ")) %>% ungroup(), softwareUsed.2Beeg.df %>% filter(num_auth > 2 ) %>% group_by(bibtex) %>% head(n=1) %>%  mutate(full_name=paste(full_name, "et al. ")) %>% ungroup()) %>% mutate(cite = paste(full_name, YEAR, sep = " ")) %>% select(c(name, bibtex, cite)) %>%  unique() %>% group_by(name) %>% summarise(allCit = paste0(cite, collapse = "; ")) %>% ungroup()
 
 
 #%>% select(c(bibtex, full_name, YEAR, TITLE, JOURNAL, VOLUME, NUMBER, PAGES)) %>% unique() 
 
 #softwareUsed.cronch.df <- softwareUsed.beeg.df %>% mutate(citation = paste(full_name, ", ", YEAR,". '", TITLE,"'. ",JOURNAL," Vol. ", VOLUME, ", No. ", NUMBER, "p. ",PAGES,".", sep="" )) %>% select(c("bibtex", "name","citation")) %>% unique() %>% group_by(name) %>% summarise(allCit = paste0(citation, collapse = ";"))
 
-softwareUsed.beeg.df <- inner_join(softwareUsed.cronch.df, softwareUsed.smol.df %>% select(-c("bibtex")) %>% unique() , by = c("name"="name")) 
+#softwareUsed.beeg.df <- inner_join(softwareUsed.cronch.df, softwareUsed.smol.df %>% select(-c("bibtex")) %>% unique() , by = c("name"="name")) 
+
+# fmt_citation <- function(bibtex_in) {
+# 	bibdf <- bib2df::bib2df(bibtex_in,separate_names = TRUE)
+# 
+# 	bibdf.unnest <- bibdf  %>% unnest(cols=c("AUTHOR"))
+# 	bibdf.counts <- bibdf.unnest %>% group_by(BIBTEXKEY) %>% summarise(num_auth = n())
+# 
+# 	bibdf.rejoin <- inner_join(bibdf.unnest, bibdf.counts, by=c("BIBTEXKEY"="BIBTEXKEY"))
+# 
+# 	bibdf.join <- rbind( bibdf.rejoin %>% filter(num_auth == 1 )%>% ungroup(),
+# 						 bibdf.rejoin %>% filter(num_auth == 2 ) %>% group_by(BIBTEXKEY) %>% mutate(full_name =paste0(full_name, collapse = " & ")) %>% ungroup(),
+# 						 bibdf.rejoin %>% filter(num_auth > 2 ) %>% group_by(BIBTEXKEY) %>% head(1)  %>% mutate(full_name=paste(full_name, "et al. "))%>% ungroup()
+# 						 ) %>% ungroup() %>% mutate(cite = paste(full_name, YEAR, sep = " "))  %>% select(c(BIBTEXKEY, cite)) %>%  unique() %>% group_by(BIBTEXKEY) %>% summarise(citation = paste0(cite, collapse = "; ")) %>% ungroup()
+# 
+# 	return(bibdf.join)
+# }
 
 
-
+softwareUsed.Beeg.df <- inner_join(softwareUsed.smol.df, fmt_citation("scripts/references.bib"), by=c("bibtex"="BIBTEXKEY")) %>% group_by(name) %>%  mutate(allCit = paste0(cite, collapse = "; ")) %>% select(-c(bibtex,cite)) %>% unique() %>% ungroup()
 
 ```
 
@@ -241,20 +304,16 @@ softwareUsed.beeg.df <- inner_join(softwareUsed.cronch.df, softwareUsed.smol.df 
 tbl_cnt <- tbl_cnt + 1
 
 
-softwareUsed.beeg.gt <- softwareUsed.beeg.df %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Software Used", sep = ""), subtitle="with link & citation") %>% cols_move_to_end(columns = c("allCit"))  %>% cols_label(allCit = "citation")
+softwareUsed.beeg.gt <- softwareUsed.Beeg.df  %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Software Used", sep = ""), subtitle="with link & citation") %>% cols_move_to_end(columns = c("allCit"))  %>% cols_label(allCit = "citation")
 
 softwareUsed.beeg.gt
 
-write(softwareUsed.beeg.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_softwareUsed.html", sep=""))
+#write(softwareUsed.beeg.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_softwareUsed.html", sep=""))
 
 ```
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
-
-softwareUsed.smol.df %>% mutate(bibtex = paste("@", bibtex, sep="")) %>% gt() %>% fmt_markdown(columns = c("bibtex"))
-```
 
 ## Procedure: Identifying Candidate De Novos
 
@@ -297,7 +356,7 @@ read_retention_rate.gt <- rbind(pre_post_counts, retention_percent)  %>% gt() %>
 
 read_retention_rate.gt
 
-write(read_retention_rate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_FASTPreadRetentionRate.html", sep=""))
+#write(read_retention_rate.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_FASTPreadRetentionRate.html", sep=""))
 
 ```
 
@@ -307,9 +366,9 @@ fig_cnt <- fig_cnt + 1
 readQual.gg <- ggplot(filtration_stats %>% filter(measure == "q30_rate")) + geom_line(aes(group=name, x=type,y=100*value)) +  geom_point(aes(x=type, y = 100*value, color=population, shape=sex)) + labs(title = paste("Figure ",fig_cnt, ". Percent of Reads with a mean QUAL > 30", sep = ""), y="Percent QUAL > 30", x="") + theme_bw() #+ geom_text(data= . %>% filter(type=="postfiltered") %>% filter(value<0.97), aes(type,100*value,label=name))
 
 readQual.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readQualityThruProcessing.png", sep=""))
-readQual.gg
-dev.off()
+#png(height =  500, width = 800, filename = #paste("results/figures/fig",fig_cnt,"_readQualityThruProcessing.png", sep=""))
+#readQual.gg
+#dev.off()
 
 
 ```
@@ -328,7 +387,7 @@ duplicationStats.gt <- dupe_stats %>%  summarise(minimum = min(percent), average
 
 duplicationStats.gt
 
-write(duplicationStats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_duplicationStats.html", sep=""))
+#write(duplicationStats.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_duplicationStats.html", sep=""))
 
 ```
 
@@ -338,9 +397,9 @@ fig_cnt <- fig_cnt + 1
 dupeStats.gg <- ggplot(dupe_stats) + geom_histogram(aes(x=percent), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (FASTP estimate)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
 
 dupeStats.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
-dupeStats.gg
-dev.off()
+#png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
+#dupeStats.gg
+#dev.off()
 
 
 ```
@@ -385,7 +444,7 @@ percentMapping.raw.gt <- vs_hg38.mapspliceRaw.meta  %>% select(percent_mapped) %
 
 percentMapping.raw.gt
 
-write(percentMapping.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentMappingRaw.html", sep=""))
+#write(percentMapping.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentMappingRaw.html", sep=""))
 
 ```
 
@@ -398,9 +457,9 @@ percentMappingIndv.raw.gg <- ggplot(vs_hg38.mapspliceRaw.meta)+ geom_histogram(a
 
 percentMappingIndv.raw.gg
 
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_percentMappingRawHistogram.png", sep=""))
-percentMappingIndv.raw.gg
-dev.off()
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_percentMappingRawHistogram.png", sep=""))
+# percentMappingIndv.raw.gg
+# dev.off()
 
 ```
 
@@ -413,7 +472,7 @@ percentDupe.raw.gt <- vs_hg38.mapspliceRaw.meta  %>% select(percent_duplicate) %
 
 percentDupe.raw.gt
 
-write(percentDupe.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentDuplicateRawMpSplc.html", sep=""))
+# write(percentDupe.raw.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_percentDuplicateRawMpSplc.html", sep=""))
 
 ```
 
@@ -423,14 +482,15 @@ fig_cnt <- fig_cnt + 1
 dupeStats.gg <- ggplot(vs_hg38.mapspliceRaw.meta %>% mutate(percent = 100*percent_duplicate)) + geom_histogram(aes(x=percent), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Duplication Histogram (Raw Mapsplice Alignment)", sep = ""), x="Read Duplication Rate (percent)", y="Number Samples") + theme_bw()
 
 dupeStats.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
-dupeStats.gg
-dev.off()
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_readDuplicationRate.png", sep=""))
+# dupeStats.gg
+# dev.off()
 
 
 ```
 
-Although Samtools marks duplicates at a higher rate than FASTP, the estimates are correlated; in particular, both agree that FruLexa/Fru440 day 7 replicate 1 is a highly duplicated outlier. The NCBI reads are anomalous.
+
+
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 
@@ -441,10 +501,10 @@ fig_cnt <- fig_cnt + 1
 dupeStatsCompare.gg <- ggplot(inner_join(dupe_stats , vs_hg38.mapspliceRaw.meta %>%  select(c("sample", "percent_duplicate")), by=c("name"="sample"))) + geom_point(aes(x=percent, y=100*percent_duplicate)) + labs(title=paste("Figure ",fig_cnt, ". Comparison of Duplication Rate Estimates", sep = ""), x="FASTP estimate (percent)", y="Samtools MarkDup estimate (percent)") + theme_bw()
 
 dupeStatsCompare.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_DupeRateExtCompare.png", sep=""))
-dupeStatsCompare.gg
-
-dev.off()
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_DupeRateExtCompare.png", sep=""))
+# dupeStatsCompare.gg
+# 
+# dev.off()
 
 ```
 
@@ -457,14 +517,13 @@ fig_cnt <- fig_cnt + 1
 breadthStats.raw.gg <- ggplot( vs_hg38.mapspliceRaw.meta  %>%  gather(spanned_breadth, split_breadth, key = "type", value = "breadth") %>% mutate(type=case_when(type == "spanned_breadth" ~ "locus", type =="split_breadth" ~"exon")) %>% mutate(type = as.factor(type)) %>% mutate(type = relevel(type, ref="locus")) )  + geom_point(aes(x=total_mapped_count, y=100*breadth))  + facet_grid(type~., scales='free_y') + labs(title=paste("Figure ",fig_cnt, ". Breadth of Coverage of Raw Mapsplice Alignment\nCompared to Read Count", sep = ""), x="Number Reads Sequenced", y="Percent of Genome Covered") + theme_bw()
 
 breadthStats.raw.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_breadthStatsRaw.png", sep=""))
-breadthStats.raw.gg
-
-dev.off()
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_breadthStatsRaw.png", sep=""))
+# breadthStats.raw.gg
+# 
+# dev.off()
 
 ```
 
-There appears to be a slight dependence of breadth upon sequencing depth (ie, the number of reads sequenced), meaning that sequencing depth of these samples is not so great that the breadth covered is saturated. The unusally deep sequencing of the NCBI reads indicates the asymptotic behavior of this measure. When transcribed locii are considered, the breadth of the group-housed wildtype replicate 1 is unusually low given the sequencing depth.
 
 
 
@@ -482,7 +541,7 @@ mapspliceRando is a downsampled alignment constructed by selecting at random a s
 #### Uniquely Mapped Alignments (Uniq)
 
 
-mapspliceUniq is derived from mapspliceMulti by further filtering out the multimapped reads and keeping only those which map uniquely. 
+mapspliceUniq is derived from mapspliceMulti by completely filtering out all multimapped reads and keeping only those which map uniquely. 
 
 
 
@@ -513,9 +572,9 @@ fig_cnt <- fig_cnt + 1
 transcriptCount_hist.gg <- ggplot(trinity_summary.sprud %>% select(c(sample, total_genes, total_transcripts)) %>% gather(total_genes, total_transcripts, key = measure, value = value) %>% mutate(measure = as.factor(measure))) + geom_histogram(aes(x=value, group = measure, fill = measure), bins=15, alpha = 0.6, position="identity") + labs(title=paste("Figure ",fig_cnt, ". Histogram of Transcripts & Genes per Transcriptome", sep = ""), x=" # assembled", y="Number Samples") + scale_fill_discrete(name = "assembly type") + theme_bw()
 
 transcriptCount_hist.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerPersonHist.png", sep=""))
-transcriptCount_hist.gg
-dev.off()
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerPersonHist.png", sep=""))
+# transcriptCount_hist.gg
+# dev.off()
 
 
 ```
@@ -529,9 +588,9 @@ fig_cnt <- fig_cnt + 1
 transcriptCount_assembliesPerRead.gg <- ggplot(inner_join(trinity_summary.sprud %>% select(c(sample, total_transcripts)), filtration_stats %>% filter(type=="postfiltered" & measure == "total_reads") %>% mutate(sequenced_reads=value) %>% select(c(name, sequenced_reads)) , by = c("sample"="name"))) +geom_point(aes(x=sequenced_reads, y=total_transcripts))  + labs(title=paste("Figure ",fig_cnt, ". Scatterplot of Assembled Transcripts vs  Filtered Reads", sep = ""), x=" # reads assembled", y="# assemblies")  + theme_bw()
 
 transcriptCount_assembliesPerRead.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerRead_scat.png", sep=""))
-transcriptCount_assembliesPerRead.gg
-dev.off()
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerRead_scat.png", sep=""))
+# transcriptCount_assembliesPerRead.gg
+# dev.off()
 
 
 ```
@@ -547,9 +606,9 @@ fig_cnt <- fig_cnt + 1
 transcriptome_n50_hist.gg <- ggplot(trinity_summary.sprud ) + geom_histogram(aes(x=full_N50), bins=15) + labs(title=paste("Figure ",fig_cnt, ". Histogram of Transcriptome N50s", sep = ""), x=" N50", y="Number Samples") + theme_bw()
 
 transcriptome_n50_hist.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptN50Hist.png", sep=""))
-transcriptome_n50_hist.gg
-dev.off()
+#png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptN50Hist.png", sep=""))
+#transcriptome_n50_hist.gg
+#dev.off()
 ```
 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
@@ -558,9 +617,9 @@ fig_cnt <- fig_cnt + 1
 typical_transcript_size_hist.gg <- ggplot(trinity_summary.sprud %>% mutate(median = full_med_len, mean = full_avg_len) %>% select(c(sample, median, mean)) %>% gather(median, mean, key = measure, value = value) %>% mutate(measure = as.factor(measure))) + geom_histogram(aes(x=value, group = measure, fill = measure), bins=15, alpha = 0.6, position="identity") + labs(title=paste("Figure ",fig_cnt, ". Histogram of Typical Transcript Sizes", sep = ""), x=" bp", y="Number Samples") + scale_fill_discrete(name = "statistic") + theme_bw()
 
 typical_transcript_size_hist.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptSizeHist.png", sep=""))
-typical_transcript_size_hist.gg
-dev.off()
+#png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptSizeHist.png", sep=""))
+#typical_transcript_size_hist.gg
+#dev.off()
 ```
 
 To further assess transcriptome quality, the raw reads were mapped back to the assembled transcriptome using BowTie2 [@Langmead2012], as per Trinity documentation ( https://github.com/trinityrnaseq/trinityrnaseq/wiki/RNA-Seq-Read-Representation-by-Trinity-Assembly )
@@ -575,9 +634,9 @@ fig_cnt <- fig_cnt + 1
 transcript_backmapping_percent_hist.gg <- ggplot(trinity_summary.sprud %>% mutate(conch = aligned_concord_uniq + aligned_concord_multi) %>% select(c(sample, conch, total_aligned)) %>% gather(conch, total_aligned, key = measure, value = value) %>% mutate(measure = as.factor(measure))) + geom_histogram(aes(x=value, group = measure, fill = measure), bins=15, alpha = 0.6, position="identity") + labs(title=paste("Figure ",fig_cnt, ". Histogram of Transcriptome Back-Mapping Rates", sep = ""), x=" Percent of Reads Mapped", y="Number Samples") + scale_fill_discrete(name = "statistic") + theme_bw()
 
 transcript_backmapping_percent_hist.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptBackMappingHist.png", sep=""))
-transcript_backmapping_percent_hist.gg
-dev.off()
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptBackMappingHist.png", sep=""))
+# transcript_backmapping_percent_hist.gg
+# dev.off()
 ```
 
 
@@ -599,7 +658,7 @@ names(transcript_filtration.summary ) <- c("stage","type","trans_aligner","indiv
 ```
 
 
-The resulting transcripts were mapped to the reference genome using BLAT [@Kent2002a]. Across all samples, $` sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value))%>% human_readable_croncher()`$ of $`r sum(trinity_summary %>% filter(measure == "total_transcripts") %>% select(value)) %>% human_readable_croncher() `$ transcripts mapped to $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_locii" & type =="locus") %>% select(value))%>% human_readable_croncher() `$ total sites. Overall, $` sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value))/sum(trinity_summary %>% filter(measure == "total_transcripts") %>% select(value))*100 `$ % of transcripts mapped.  On average, a transcript mapped to $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_locii" & type =="locus") %>% select(value)) / sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value)) `$ locations. 
+The resulting transcripts were mapped to the reference genome using BLAT [@Kent2002a]. Across all samples, $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value))%>% human_readable_croncher() `$ of $`r sum(trinity_summary %>% filter(measure == "total_transcripts") %>% select(value)) %>% human_readable_croncher() `$ transcripts mapped to $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_locii" & type =="locus") %>% select(value))%>% human_readable_croncher() `$ total sites. Overall, $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value))/sum(trinity_summary %>% filter(measure == "total_transcripts") %>% select(value))*100 `$ % of transcripts mapped.  On average, a transcript mapped to $`r sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_locii" & type =="locus") %>% select(value)) / sum(transcript_filtration.summary %>% filter(stage == "mapped" & measure == "distinct_transcripts" & type =="locus") %>% select(value)) `$ locations. 
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -618,12 +677,12 @@ transcript_filtration.mapping.gt <- transcript_filtration.counts.smol %>% gather
  
 transcript_filtration.mapping.gt
 
-write( transcript_filtration.mapping.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_mapping.html", sep=""))
+#write( transcript_filtration.mapping.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_mapping.html", sep=""))
 
 ```
 
 
-The mapped transcripts were given a first-pass filter, in which at least 75 reads and at least 75% of all bases must match for the alignment to be retained. 
+The mapped transcripts were given a first-pass filter, in which at least 75 bases and at least 75% of all bases must match for the alignment to be retained. 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
 transcript_filtration.counts.smol <- inner_join(transcript_filtration.counts.smol, transcript_filtration.summary %>% filter(stage == "filtered" & measure == "distinct_transcripts" & type =="locus") %>% spread(key=measure, value=value) %>% mutate(filtered_transcripts = distinct_transcripts) %>% select(individual, filtered_transcripts), by = c("individual"="individual") ) 
@@ -646,7 +705,7 @@ transcript_filtration.filt.gt <- transcript_filtration.counts.smol %>% gather(c(
 
 transcript_filtration.filt.gt
 
-write( transcript_filtration.filt.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_filtration.html", sep=""))
+#write( transcript_filtration.filt.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_filtration.html", sep=""))
 
 ```
 
@@ -663,7 +722,7 @@ ref_ann.excluded.gt <- inner_join(ref_ann.stats  %>%   filter(type == 'total' | 
 
 ref_ann.excluded.gt
 
-write(ref_ann.excluded.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationExcluded.html", sep=""))
+#write(ref_ann.excluded.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refAnnotationExcluded.html", sep=""))
 
 
 
@@ -671,7 +730,7 @@ write(ref_ann.excluded.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt
 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
 
 
 forbidden_ann_squished <- read_delim("summaries/annotations/hg38.forbiddenAnnotations.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
@@ -717,7 +776,7 @@ transcript_filtration.noForbiddenAnnot.gt <- transcript_filtration.counts.smol %
 
 transcript_filtration.noForbiddenAnnot.gt
 
-write( transcript_filtration.filt.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_noForbiddenAnnot.html", sep=""))
+#write( transcript_filtration.filt.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_noForbiddenAnnot.html", sep=""))
 
 ```
 
@@ -739,6 +798,7 @@ names(direct_forbidden_overlaps.roster) <- c("individual","annotation","count")
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
+
 tbl_cnt <- tbl_cnt + 1
 
 
@@ -750,7 +810,7 @@ direct_forbidden_overlaps.roster.gt <- direct_forbidden_overlaps.roster %>% grou
 
 direct_forbidden_overlaps.roster.gt
 
-write( direct_forbidden_overlaps.roster.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_directlyOverlappedAnnotPercents.html", sep=""))
+#write( direct_forbidden_overlaps.roster.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_directlyOverlappedAnnotPercents.html", sep=""))
 
 ```
 
@@ -762,9 +822,9 @@ fig_cnt <- fig_cnt + 1
 transcriptCount_assembliesPerRead.gg <- ggplot(inner_join(transcript_filtration.counts.smol %>% select(c(individual, noForbiddenAnnot_transcripts)), filtration_stats %>% filter(type=="postfiltered" & measure == "total_reads") %>% mutate(sequenced_reads=value) %>% select(c(name, sequenced_reads)) , by = c("individual"="name"))) +geom_point(aes(x=sequenced_reads, y=noForbiddenAnnot_transcripts))  + labs(title=paste("Figure ",fig_cnt, ". Scatterplot of Assembled Transcripts (not directly overlapping a forbidden annotation) vs Filtered Reads", sep = ""), x=" # reads assembled", y="# assemblies (no direct overlap)")  + theme_bw()
 
 transcriptCount_assembliesPerRead.gg
-png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerRead_scat.png", sep=""))
-transcriptCount_assembliesPerRead.gg
-dev.off()
+#png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCountPerRead_scat.png", sep=""))
+#transcriptCount_assembliesPerRead.gg
+#dev.off()
 
 
 ```
@@ -776,10 +836,59 @@ dev.off()
 
 #### Contagious
 
-RNA-Seq reads mapping to the same region as an anomalous transcript were collected; then mapped reads within a read’s length (75 bp) of the collection were iteratively added to it. If the collection of accumulated reads indirectly associated with the transcript ever overlapped a forbidden region, the transcript was flagged.  
+Mapped transcripts not directly overlapping annotations were then compared to mapped RNA-Seq reads. Exons from mapped transcripts were collected and slopped by a read length (75bp) to create regions. Then, the following process was used to aggressively associate reads with transcripts, in order to see if a "trail of breadcrumbs" led back to a forbidden annotation:
+
+	* for each region, intersecting read mappings were collected
+	* for all such mappings, the pair-mate was added if missing. If multi-mappers are present, all mappings of both reads pairs are also added to the collection
+	* the new regions covered by the collected reads are compared to the forbidden annotations. If a new region overlaps a forbidden exon, it is noted and removed.
+	* the new regions are re-slopped and merged to iterate 
+
+When iteration no longer adds new regions, it halts. Regions which have been noted as overlapping a forbidden exon are traced back to their source transcript mapping, and the mapped transcript removed from further consideration. 
 
 
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+transcript_filtration.counts.smol <- inner_join( transcript_filtration.counts.smol, transcript_filtration.summary %>% filter(startsWith(stage,"ILSAnom_") & measure == "distinct_transcripts" & type =="locus") %>% spread(key=stage, value=value)  %>% select(individual, starts_with("ILSAnom_")), by = c("individual"="individual") ) 
+
+transcript_filtration.counts.smol %<>% mutate(ILSAnomMulti_retention = ILSAnom_mapspliceMulti/noForbiddenAnnot_transcripts)
+
+#transcript_filtration.accumulationStep <- transcript_filtration.summary %>% filter(stage == "noForbiddenAnnot" | startsWith(stage, "ILSAnom_")) %>% filter(measure == "total_transcripts")
+
+
+```
+
+
+Across all samples, a total of $`r sum(transcript_filtration.counts.smol %>% select(noForbiddenAnnot_transcripts))%>% human_readable_croncher()`$ transcripts not directly overlapping any annotation were compared against mapped reads in order to eliminate transcripts through "guilt by association". The total remaining depended upon the specific read mapping strategy used:
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+transcript_filtration.noAccumulatedForbidden.counts.gt <- transcript_filtration.counts.smol %>% select(individual, noForbiddenAnnot_transcripts, starts_with("ILSAnom_")) %>% gather(key=key, value=value, -c(individual)) %>% group_by(key) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, "a. Transcript Counts, upon exclusion of transcripts implicated by mapped-read breadcrumbs", sep = ""), subtitle="starting counts and counts per strategy") %>% fmt_number(columns=vars(maximum,minimum,average,median), decimals=1, suffixing = T) %>% cols_label(key=" ")
+
+transcript_filtration.noAccumulatedForbidden.counts.gt
+
+#write( transcript_filtration.noAccumulatedForbidden.counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"a_transcriptFiltration_noAccumulatedCounts.html", sep=""))
+
+```
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+transcript_filtration.noAccumulatedForbidden.rates.gt <- transcript_filtration.counts.smol %>% select(individual,  starts_with("ILSAnom") ) %>% select(individual,  ends_with("retention") ) %>% gather(key=key, value=value, -c(individual)) %>% group_by(key) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, "b. Transcript retention rates, upon exclusion of transcripts implicated by mapped-read breadcrumbs", sep = ""), subtitle="by strategy") %>% fmt_percent(columns=vars(maximum,minimum,average,median), decimals=1) %>% cols_label(key=" ")
+
+transcript_filtration.noAccumulatedForbidden.rates.gt
+
+#write( transcript_filtration.noAccumulatedForbidden.counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"b_transcriptFiltration_noAccumulatedCounts.html", sep=""))
+
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
 
 forbiddenAccumulation_individuals <- read_delim("summaries/accumulations.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(forbiddenAccumulation_individuals)<- c("aligner","name","measure","value")
@@ -788,10 +897,7 @@ forbiddenAccumulation_individuals.main <- forbiddenAccumulation_individuals %>% 
 ```
 
 
-
-
-
-```{r echo=FALSE, message=FALSE, warning=FALSE}
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
 
 forbiddenAccumulation_populationWide.raw <- read_delim("summaries/annotations/vs_hg38.mapspliceRaw.forbiddenAccumulation.populationWide.stats", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(forbiddenAccumulation_populationWide.raw)<- c("measure","value")
@@ -816,36 +922,370 @@ write(forbiddenAccumulation_populationWide.main.gt %>%  as_raw_html(), paste("re
 ```
 
 
-
-
-
-
+These remaining transcripts were called "anomalous". 
 
 #### Anomalous Transcripts Summary
 
-Out of an initial ___ transcripts (___ per person), a total of ___ were retained as having no evidence of transcriptional association with any annotated gene or complex repetitive element. These were then scanned for open reading frames. 
 
- The remaining transcripts were considered to be 'anomalous'.
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+transcript_filtration.counts.smol %<>% mutate(totalMulti_retention = ILSAnom_mapspliceMulti/assembled_transcripts)#,totalRando_retention = ILSAnom_mapspliceRando/assembled_transcripts,totalUniq_retention = ILSAnom_mapspliceUniq/assembled_transcripts)
+
+```
+
+Out of an initial `r sum( transcript_filtration.counts.smol %>% select(assembled_transcripts) ) ` total assembled transcripts across all samples, between `r (transcript_filtration.counts.smol %>% select(starts_with("total")) %>% select(ends_with("retention")) %>% gather(key="measure", value="value") %>% summarize(minn = min(value)*100))$minn ` % and `r (transcript_filtration.counts.smol %>% select(starts_with("total")) %>% select(ends_with("retention")) %>% gather(key="measure", value="value") %>% summarize(macks = max(value)))$macks `% (depending on read mapping strategy) were retained as "anomalous" :
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+transcript_filtration.overallProcess.retentionRates.gt <- transcript_filtration.counts.smol %>% select(individual, starts_with("total")) %>% select(individual, ends_with("retention")) %>% gather(key=key, value=value, -c(individual)) %>% group_by(key) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Overall Transcript Retention Rates", sep = ""), subtitle="complete transcript filtration process") %>% fmt_percent(columns=vars(maximum,minimum,average,median), decimals=1) %>% cols_label(key=" ")
+
+transcript_filtration.overallProcess.retentionRates.gt
+
+#write( transcript_filtration.overallProcess.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_transcriptFiltration_fullProcess.html", sep=""))
+
+```
+
+
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE}
+
+transcript_filtration.counts.progress <- transcript_filtration.counts.smol %>% select(individual, -ends_with("retention"), ends_with("transcripts"), starts_with("ILSAnom_"))  %>% gather(-c(individual),key="measure", value="value") %>% separate(col=measure, into=c("stage","aligner"), remove=F) %>% mutate(stage=case_when(stage == "ILSAnom" ~ stage, T~measure), aligner = case_when(stage == "ILSAnom" ~ aligner), count=value) %>% select(-c(measure, value))
+
+transcript_filtration.counts.progress$stage <- factor(transcript_filtration.counts.progress$stage, levels = c("assembled_transcripts","mapped_transcripts","filtered_transcripts", "noForbiddenAnnot_transcripts","ILSAnom" ))
+
+fig_cnt <- fig_cnt + 1
+
+transcript_filtration.counts.progress.gg <- ggplot(transcript_filtration.counts.progress) +geom_point(aes(x=stage, y=count, color=aligner)) + geom_line(aes(x=stage, y=count, color=aligner, group=individual)) + scale_y_log10() + labs(title=paste("Figure ",fig_cnt, ". Transcript Retention through Filtration Workflow", sep = ""), x="filtration stage", y="# transcripts") + theme_bw()+ theme(axis.text.x = element_text(angle = 45, hjust=1))
+
+transcript_filtration.counts.progress.gg
+
+#png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_transcriptCount_fullProcess.png", sep=""))
+#transcript_filtration.counts.progress.gg
+#dev.off()
+
+
+```
+
+(look at more properties - length, etc)
+
+
 
 ### ORFome
- 
 
-#### Extraction
-ORFs were extracted from the anomalous transcripts; because the 1000 Genomes RNA-Seq used an unstranded protocol, the anomalous transcripts were reverse complemented and ORFs extracted.
-#### Filtration
-These were size-filtered with a lower length cutoff of 75 bp (see Hashimoto 2001 in Ruiz-Orera 2014) The size-filtered candidates were BLATed against the human genome and those with more than one quality hit were flagged as having genomic duplicates. 
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+ORFome_filtration.summary <- read_delim("summaries/basic_ORF_facts.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(ORFome_filtration.summary ) <- c("filter","tag","measure","value")
+ORFome_filtration.summary <- ORFome_filtration.summary %>% mutate(tag=gsub("vs_ref_","", tag)) %>% separate(col="tag", into=c("indv","assembler","null","ref_gen","ass_algn","read_algn"), extra = "merge") %>% select(-c("null"))
+
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ORFome_filtration.init <- ORFome_filtration.summary %>% filter(filter=="ilsAnom") %>% spread(key=measure, value = value)
+
+ORFome_filtration.init <- inner_join(ORFome_filtration.init, transcript_filtration.counts.progress %>% filter(stage=="ILSAnom") %>% mutate(transcript_count=count) %>% select(-c("stage", "count")), by=c("indv"="individual", "read_algn"="aligner"))
+
+ORFome_filtration.init<- ORFome_filtration.init %>% mutate(orfBearing_frac = unique_transcripts/transcript_count, orfPerTranscript = total_count/transcript_count)
+
+
+```
+
+
+
+ORFs were extracted from the anomalous transcripts; because the 1000 Genomes RNA-Seq used an unstranded protocol both the forard reading and the reverse complement were scanned. In cases where a stop codon had multiple upstream starts, the longest ORF was selected. A length threshold of 75 codons (not including start and stop) was used to ignore small ORFs.  (see Hashimoto 2001 in Ruiz-Orera 2014)
+
+
+From the $`r sum( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti) %>% select(transcript_count) ) %>% human_readable_croncher() `$ total anomalous transcripts considered across $`r count( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti %>% select(indv) %>% unique() ) `$ samples, $`r sum( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti") %>% select(total_count) ) %>% human_readable_croncher() `$ ORFs meeting these criteria were found. On average, $`r mean(ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti) %>% select(orfBearing_frac) )*100 `$ % of the anomalous transcripts contained at least one such ORF. 
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.init.retentionRates.gt <- ORFome_filtration.init %>% select(read_algn, transcript_count, unique_transcripts, total_count, orfBearing_frac, orfPerTranscript) %>% gather(key="measure", value="value", -c(read_algn)) %>% mutate(measure=case_when(measure=="orfBearing_frac" ~ "fraction of transcripts with ORFs",measure=="orfPerTranscript" ~ "average # ORFs per transcript", T ~measure))  %>% group_by(read_algn, measure) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Anomalous Transcripts and the ORFs they contain", sep = ""), subtitle="counts and rates") %>% fmt_number(columns=vars(maximum,minimum,average,median), decimals=1, suffixing = T)  %>% cols_label(measure=" ")
+
+ORFome_filtration.init.retentionRates.gt
+
+#write( ORFome_filtration.init.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+
+
+#### Duplicate Exclusion
+
+The identified ORFs were BLATed against the human genome. Hits were retained if they included at least 50 base pairs and at least 50% of the query sequence; hits to unconsolidated sequence (random, alt, and Un) were discarded. ORFs with more than one such quality hit were flagged as having genomic duplicates. 
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ORFome_filtration.nodupe <- ORFome_filtration.summary %>% filter(filter=="noDupe") %>% spread(key=measure, value = value) %>% mutate(noDupORFcount = total_count) %>% select(-c(total_count))
+
+ORFome_filtration.nodupe <- inner_join(ORFome_filtration.nodupe, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count))  , by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration.nodupe<- ORFome_filtration.nodupe %>% mutate(noDupe_frac = noDupORFcount/startingORFcount)
+
+
+```
+
+
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.noDupe.retentionRates.gt <- ORFome_filtration.nodupe %>% select(read_algn, startingORFcount, noDupORFcount, noDupe_frac) %>% gather(key="measure", value="value", -c(read_algn)) %>% mutate(measure=case_when(measure=="noDupe_frac" ~ "percent ORFs w/o duplicate", T ~measure))  %>% group_by(read_algn, measure) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". ORFs from Anomalous Transcripts w/ No Detected Duplicate", sep = ""), subtitle="BLAT vs hg38 finds at most 1 site w/50+ nts matching & 50+% sequence aligned") %>% fmt_number(columns=vars(maximum,minimum,average,median), decimals=1, suffixing = T)  %>% fmt_percent(columns=vars(maximum,minimum,average,median), rows = measure=="percent ORFs w/o duplicate", decimals=1, )  %>% cols_label(measure=" ")
+
+ORFome_filtration.noDupe.retentionRates.gt
+
+#write( ORFome_filtration.noDupe.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+
+
+#### Covert Protein Homology Exclusion
 
 ORFs were BLASTed against the Protein Database to exclude known proteins. (e-value cutoff: 10)
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ORFome_filtration.noPDB <- ORFome_filtration.summary %>% filter(filter=="noPDB") %>% spread(key=measure, value = value) %>% mutate(noPDBORFcount = total_count) %>% select(-c(total_count))
+
+ORFome_filtration.noPDB <- inner_join(ORFome_filtration.noPDB, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count))  , by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration.noPDB<- ORFome_filtration.noPDB %>% mutate(noPDB_frac = noPDBORFcount/startingORFcount)
+
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.noPDB.retentionRates.gt <- ORFome_filtration.noPDB %>% select(read_algn, startingORFcount, noPDBORFcount, noPDB_frac) %>% gather(key="measure", value="value", -c(read_algn)) %>% mutate(measure=case_when(measure=="noPDB_frac" ~ "percent ORFs w/o PDB hit", T ~measure))  %>% group_by(read_algn, measure) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". ORFs from Anomalous Transcripts w/ No Detected PDB Homology", sep = ""), subtitle="BLAST vs nr database finds no hit at e-value of 10") %>% fmt_number(columns=vars(maximum,minimum,average,median), decimals=1, suffixing = T)  %>% fmt_percent(columns=vars(maximum,minimum,average,median), rows = measure=="percent ORFs w/o PDB hit", decimals=1, )  %>% cols_label(measure=" ")
+
+ORFome_filtration.noPDB.retentionRates.gt
+
+#write( ORFome_filtration.noPDB.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+#### Homologous Genome ORF Exclusion
+
+ORFs were BLATted vs reference genome
+orthologyDB
+
+ORFs were also BLATed against the reference genomes of four other closely related primates (chimpanzee panTro6, gorilla gorGor5, orangutan ponAbe2, gibbon nomLeu3) to establish possible sites of homology. These genomic locations were then given a first-order scan for coding sequence by enumerating all the same-strand ORFs in the site and the 10kb surrounding it. If one of these ORFs overlapped 75% or more the homologous site, it was flagged as having a homologous coding sequence in the primate in question. (h/t Jeremy Wang) Although we will later look at the definitive orthologies determined through syntenic multiplice sequence alignment, this approach is used because it is more aggressive in eliminating candidates since it can only increase the number of sites examined, and thus the opportunities for an ORF to be excluded (consider a situation in which an ORF has been duplicated in the primate lineage with a human-specific loss of copy A. The true orthologous site for copy B may be deactivated in other primates, which would lead an orthology-only scan to incorrectly accept the ORF as having no related ORF in non-human primates).
+
+Some candidate ORFs could not be identified in the chimp and/or gorilla genomes at all. These were BLASTed against the relevant TRACE archives using the NCBI web portal.
+
+
+Currently accepting XR_* genes; is this good? No
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ORFome_filtration.cleanGenome <- ORFome_filtration.summary %>% filter(filter=="cleanGenome") %>% spread(key=measure, value = value) %>% mutate(cleanGenomeORFcount = total_count) %>% select(-c(total_count))
+
+ORFome_filtration.cleanGenome <- inner_join(ORFome_filtration.cleanGenome, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count))  , by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration.cleanGenome<- ORFome_filtration.cleanGenome %>% mutate(cleanGenome_frac = cleanGenomeORFcount/startingORFcount)
+
+
+```
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.cleanGenome.retentionRates.gt <- ORFome_filtration.cleanGenome %>% select(read_algn, startingORFcount, cleanGenomeORFcount, cleanGenome_frac) %>% gather(key="measure", value="value", -c(read_algn)) %>% mutate(measure=case_when(measure=="cleanGenome_frac" ~ "percent ORFs human-specific", T ~measure))  %>% group_by(read_algn, measure) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". ORFs from Anomalous Transcripts With No Corresponding ORF Outside Humans", sep = ""), subtitle="no analogous ORF detected in chimp, gorilla, gibbon or orang") %>% fmt_number(columns=vars(maximum,minimum,average,median), decimals=1, suffixing = T)  %>% fmt_percent(columns=vars(maximum,minimum,average,median), rows = measure=="percent ORFs human-specific", decimals=1, )  %>% cols_label(measure=" ")
+
+ORFome_filtration.cleanGenome.retentionRates.gt
+
+#write( ORFome_filtration.cleanGenome.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+##### non-human primate genome scan example
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+d00d <- "HG00096"
+
+
+ORFome_filtration.example.pan <- read_csv(paste("ORFs/precandidates/transcriptionally_anomalous/",d00d,"/",d00d,".trinity.vs_hg38.blat.mapspliceMulti.anomORFs.blat_to_panTro6.compPrim_cleanGenome.list", sep=""), col_names = FALSE)
+names(ORFome_filtration.example.pan) <- c("transcripts")
+
+ORFome_filtration.example.gor <- read_csv(paste("ORFs/precandidates/transcriptionally_anomalous/",d00d,"/",d00d,".trinity.vs_hg38.blat.mapspliceMulti.anomORFs.blat_to_gorGor5.compPrim_cleanGenome.list", sep=""), col_names = FALSE)
+names(ORFome_filtration.example.gor) <- c("transcripts")
+
+ORFome_filtration.example.pon <- read_csv(paste("ORFs/precandidates/transcriptionally_anomalous/",d00d,"/",d00d,".trinity.vs_hg38.blat.mapspliceMulti.anomORFs.blat_to_ponAbe3.compPrim_cleanGenome.list", sep=""), col_names = FALSE)
+
+names(ORFome_filtration.example.pon) <- c("transcripts")
+
+ORFome_filtration.example.nom <- read_csv(paste("ORFs/precandidates/transcriptionally_anomalous/",d00d,"/",d00d,".trinity.vs_hg38.blat.mapspliceMulti.anomORFs.blat_to_nomLeu3.compPrim_cleanGenome.list", sep=""), col_names = FALSE)
+names(ORFome_filtration.example.nom) <- c("transcripts")
+
+```
+
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+cleanGenomes.list <- list(pan = ORFome_filtration.example.pan$transcripts, gor = ORFome_filtration.example.gor$transcripts, pon = ORFome_filtration.example.pon$transcripts, nom = ORFome_filtration.example.nom$transcripts)
+
+upset(fromList(cleanGenomes.list),empty.intersections = "on", order.by = "freq", queries = list(list(query = intersects, params = list("pan", "gor", "nom", "pon"), color = "red", active = T, query.name = "No analogous ORF in any other primate examined")), mainbar.y.label = "# ORFs with No Analog in Subset of Primates", sets.x.label = "# ORFs with No Analog\nin Nonhuman Primate",  query.legend = "bottom")
+
+grid.text(paste("Figure ", fig_cnt, ". # ORFs Lacking an Analogous ORF\nin Non-Human Primates\n(",d00d," taken as example)"), x = 0.70, y=0.90, gp=gpar(fontsize=10))
+#dev.off()
+
+
+# fig_cnt <- fig_cnt + 1
+# thing.gg <- asdfasdfasd
+# thing.gg
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+##### ORFs which BLAT badly or not at all
+
+When sequences are mapped to a reference, they might map badly (eg, ~25 bp hits like you'd get from BLATTing, highly fragmented mappings) or it might be that no similarity can be detected at all. These are retained for the time being but such sequences will be reexamined later. 
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+ORFome_filtration.compPrim.badmaps <- ORFome_filtration.summary %>% filter( startsWith(filter, "badmap") ) %>% separate(col=filter, into=c("maptype","genome")) %>% mutate(count = as.numeric(measure) ) %>% select(-c("value", "measure")) 
+
+ORFome_filtration.compPrim.badmaps <- inner_join(ORFome_filtration.compPrim.badmaps, ORFome_filtration.init %>% select(c("indv","assembler","ref_gen","ass_algn","read_algn","total_count")), by=c("indv"="indv","assembler"="assembler","ref_gen"="ref_gen","ass_algn"="ass_algn","read_algn"="read_algn")) %>% mutate(missing_rate= count/total_count)
+
+
+```
+
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+ORFome_filtration.compPrim.badmaps.counts.gg <- ggplot(ORFome_filtration.compPrim.badmaps) + geom_jitter(aes(x=genome, y=count, color = genome), height=0) + labs(title=paste("Figure ",fig_cnt, ". Number of Anomalous-Transcript ORFs which BLAT to a non-Human Reference Genome,\nbut don't have a quality mapping", sep = ""), x="non-human primate", y="# ORFs") + theme_bw()
+ORFome_filtration.compPrim.badmaps.counts.gg
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+ORFome_filtration.compPrim.badmaps.frac.gg <- ggplot(ORFome_filtration.compPrim.badmaps) + geom_jitter(aes(x=genome, y=100*missing_rate, color = genome), height=0) + labs(title=paste("Figure ",fig_cnt, ". Fraction of Anomalous-Transcript ORFs which BLAT to a non-Human Reference Genome,\nbut don't have a quality mapping", sep = ""), x="non-human primate", y="% of ORFs") + theme_bw()
+
+ORFome_filtration.compPrim.badmaps.frac.gg
+
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+ORFome_filtration.compPrim.unseen <- ORFome_filtration.summary %>% filter( startsWith(filter, "unseen") ) %>% separate(col=filter, into=c("maptype","genome")) %>% mutate(count = as.numeric(measure) ) %>% select(-c("value", "measure")) 
+
+ORFome_filtration.compPrim.unseen <- inner_join(ORFome_filtration.compPrim.unseen, ORFome_filtration.init %>% select(c("indv","assembler","ref_gen","ass_algn","read_algn","total_count")), by=c("indv"="indv","assembler"="assembler","ref_gen"="ref_gen","ass_algn"="ass_algn","read_algn"="read_algn")) %>% mutate(missing_rate= count/total_count)
+
+
+```
+
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+ORFome_filtration.compPrim.unseen.counts.gg <- ggplot(ORFome_filtration.compPrim.unseen) + geom_jitter(aes(x=genome, y=count, color = genome), height=0) + labs(title=paste("Figure ",fig_cnt, ". Number of Anomalous-Transcript ORFs with No BLAT-Detected Similarity at All", sep = ""), x="non-human primate", y="# ORFs") + theme_bw()
+ORFome_filtration.compPrim.unseen.counts.gg
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+ORFome_filtration.compPrim.unseen.frac.gg <- ggplot(ORFome_filtration.compPrim.unseen) + geom_jitter(aes(x=genome, y=100*missing_rate, color = genome), height=0) + labs(title=paste("Figure ",fig_cnt, ". Fraction of Anomalous-Transcript ORFs with No BLAT-Detected Similarity at All", sep = ""), x="non-human primate", y="% of ORFs") + theme_bw()
+
+ORFome_filtration.compPrim.unseen.frac.gg
+
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+
+
+
+
+
+
+
+#### Homologous Transcriptome ORF Exclusion
+
+@Pipes2013 
+
+
 ### Looking Back at the MetaTranscriptome
 
 Candidate sequences were then BLASTed against all the assembled transcriptomes. This identified false positives which were among the candidates because they passed filters in at least one individual but also failed them in at least one individual. Fragmentary BLAST hits, in which a non-ORF subsequence was identified in the transcriptomes, were tallied.
 
 
-### non-Human search
-
-ORFs were also BLATed against the chimp and gorilla genomes to establish possible sites of homology. These genomic locations were then given a first-order scan for coding sequence by enumerating all the same-strand ORFs in the site and the 4kb surrounding it. If one of the ORFs overlapped 75% or more the homologous site, it was flagged as having a homologous coding sequence in the primate in question. (h/t Jeremy Wang)
-
-Some candidate ORFs could not be identified in the chimp and/or gorilla genomes at all. These were BLASTed against the relevant TRACE archives using the NCBI web portal.
 
 ### Aggregation
 
@@ -1003,6 +1443,8 @@ mention blast via mycoplasma, other blast results
 
 It is tempting to dismiss rare, low-expression transcripts such as these as "transcriptional noise"; however, this is a loosely defined term, whose different meanings have different implications. For example, "transcriptional noise" can be used to refer to stochastic transitions between discrete transcriptional states (eg, Blake, W. J., KÆrn, M., Cantor, C. R., & Collins, J. J. (2003). Noise in eukaryotic gene expression. Nature, 422(6932), 633–637. http://doi.org/10.1038/nature01546) or to variation in transcription which isn't accounted for by some collection of explanatory variables (e.g., Raj, A., & van Oudenaarden, A. (2008). Nature, Nurture, or Chance: Stochastic Gene Expression and Its Consequences. Cell, 135(2), 216–226. http://doi.org/10.1016/j.cell.2008.09.050). Although these are interesting considerations, they potentially apply to any transcriptional activity including established genes, and thus don't weight against the validity of these candidates. 
 
+
+
 In some cases, "noise" is defined operationally; the recently published CHESS human transcriptome eliminates "noisy transcripts" by filtering on properties like lack of splicing and low expression level. This is a reasonable heuristic for the purposes of assembling a reference transcriptome, but it is question-begging when it comes to excluding candidate de novos, which are often single-exon transcripts with low expression rates. 
 
 In other cases, "transcriptional noise" refers to transcription which isn't "functional" (e.g., Ponjavic, J., Ponting, C. P., & Lunter, G. (2007). Functionality or transcriptional noise? Evidence for selection within long noncoding RNAs. Genome Research, 17(5), 556–565.). Detecting and even defining function remains a vexing issue (Doolittle, W. F. (2018). We simply cannot go on being so vague about ‘function.’ Genome Biology, 19(1), 223. http://doi.org/10.1186/s13059-018-1600-4) but even were this clarified, nonfunctional transcription is still of legitimate interest in this context, since we're investigating the process by which nonfunctional genetic material is functionalized. (It also creates the awkward situation of relegating established transcription  without utility to the host, such as expressed pseudogenes or transposable elements, to the category of "noise"). (does noise refer to the fact of transcription, or variation in transcription?)
@@ -1025,6 +1467,9 @@ Many of these considerations about transcriptional noise hold about translationa
 
 * transcription that isn't heritable
 (talk about PCR?)
+
+* extreme individual specificity (compare tau for candidates vs controls)
+also do organ spec, organ-indv spec
 
 o	What’s the difference between noise and ultra-rapid transcriptional turnover?
 

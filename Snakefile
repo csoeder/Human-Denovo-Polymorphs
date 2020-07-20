@@ -1,6 +1,8 @@
 configfile: 'config.yaml'
-#	module load trinity bedtools samtools blat sratoolkit/2.9.6 python/3.6.6 bowtie2 fastx_toolkit ##bedops r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread
+#	module load trinity bedtools samtools blat sratoolkit/2.9.6 python/3.6.6 bowtie2 fastx_toolkit ##bedops r/3.6.0 rstudio/1.1.453 bowtie sratoolkit subread blast
+#	module load blast
 #	module unload perl
+#
 #rstudio/1.2.1335 
 
 #from itertools import combinations
@@ -12,11 +14,14 @@ annotation_by_name = { a['name'] : a for a in config['annotations']}
 
 annotation_by_operation = {}
 for anne in annotation_by_name:
+	gen = annotation_by_name[anne]['genome']
+	if gen not in annotation_by_operation.keys():
+		annotation_by_operation[gen] = {}
 	for op in annotation_by_name[anne]["operations"]:
-		if op in annotation_by_operation.keys():
-			annotation_by_operation[op].append(anne)
+		if op in annotation_by_operation[gen].keys():
+			annotation_by_operation[gen][op].append(anne)
 		else:
-			annotation_by_operation[op] = [anne]
+			annotation_by_operation[gen][op] = [anne]
 
 
 sra_by_name = {}
@@ -35,7 +40,6 @@ for s in sample_by_name.keys():
 			sampname_by_group[g].append(s)
 		else:
 			sampname_by_group[g] = [s]
-
 
 
 def return_filename_by_sampname(sampname):
@@ -371,7 +375,7 @@ rule spliced_alignment_reporter:
 
 rule summon_BAM_analytics:
 	input:
-		bam_reports = lambda wildcards: expand("summaries/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary", sample=sampname_by_group['all'], ref_genome=wildcards.ref_genome, aligner=wildcards.aligner)
+		bam_reports = lambda wildcards: expand("summaries/BAMs/{sample}.vs_{ref_genome}.{aligner}.summary", sample=sampname_by_group['1kGen'], ref_genome=wildcards.ref_genome, aligner=wildcards.aligner)
 	output:
 		full_report = "summaries/alignments.vs_{ref_genome}.{aligner}.summary"
 	params:
@@ -383,9 +387,9 @@ rule summon_BAM_analytics:
 	shell:
 		"""cat {input.bam_reports} | awk '{{print "{wildcards.ref_genome}\t{wildcards.aligner}\t"$0}}'> {output.full_report}"""
 
-
+###################################################################################
 ##########################	TRANSCRIPTOME ASSEMBLY 	###########################
-
+###################################################################################
 # trinity...... HALP!!!
 rule trinityHALP:
 	input:
@@ -396,14 +400,22 @@ rule trinityHALP:
 		runmem_gb=64,
 		runtime="56:00:00",
 		cores=8,
+		trin_params=" --seqType fq ",
 	message:
 		"Trinity is assembling {wildcards.sample} .... "
 	run:
 		shell(""" mkdir -p assembled_transcripts/{wildcards.sample}/trinity/ """)
 		r1=input.reads_in[0]
 		r2=input.reads_in[1]
+		trin_params = params.trin_params
+		try:
+			if sample_by_name[wildcards.sample]["stranded"]:
+				trin_params = " %s %s " %tuple([trin_params, " --SS_lib_type RF "])
+				#https://github.com/trinityrnaseq/trinityrnaseq/wiki/Running-Trinity#strand_specific_assembly
+		except KeyError:
+			pass
 		shell(""" 
-			Trinity --seqType fq  --max_memory 50G --left {r1}  --right {r2} --include_supertranscripts --output assembled_transcripts/{wildcards.sample}/trinity/
+			Trinity {trin_params}  --max_memory 50G --left {r1}  --right {r2} --include_supertranscripts --output assembled_transcripts/{wildcards.sample}/trinity/
 			""")
 		shell(""" 
 			mv assembled_transcripts/{wildcards.sample}/trinity/Trinity.fasta {output.transcriptome_out};
@@ -447,10 +459,13 @@ rule trinity_reporter:
 		shell("""cat {output.genom_cov} | grep -v -w genome | awk '{{if($2==1)print;}}' | cut -f 5  | awk -f utils/scripts/hist.awk -v bin_width=0.01 | sort -g -k 1 | awk '{{print"{wildcards.sample}\t"$0}}' > {output.cov_hist} """) 
 
 
+
 rule summon_trinity_analytics:
 	input:
-		bam_reports = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.stat", sample=sampname_by_group['all']),
-		cov_hists = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.cov.hist", sample=sampname_by_group['all']),
+		bam_reports = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.stat", sample=list(set(sampname_by_group['1kGen']).union(sampname_by_group['NHPRTR']))),
+		cov_hists = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.cov.hist", sample=list(set(sampname_by_group['1kGen']).union(sampname_by_group['NHPRTR']))),
+#		bam_reports = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.stat", sample=sampname_by_group['1kGen']),
+#		cov_hists = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.cov.hist", sample=sampname_by_group['1kGen']),
 	output:
 		full_report = "summaries/assembled_transcripts/trinity_assemblies.summary",
 		full_cov_hist = "summaries/assembled_transcripts/trinity_assemblies.coverage.hist",
@@ -462,10 +477,13 @@ rule summon_trinity_analytics:
 		"collecting all alignment metadata.... "
 	run:
 		shell(""" rm -f {output.full_report} {output.full_cov_hist} """)
-		for sample in sampname_by_group['all']:
-			shell("""cat summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.stat | awk '{{print "{sample}\t"$0}}' >> {output.full_report}""")
-		shell("""cat {input.cov_hists} > {output.full_cov_hist} """)
+		for sample in sampname_by_group['1kGen']:
+			shell("""cat summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.stat | awk '{{print "1kGen\t{sample}\t"$0}}' >> {output.full_report}""")
+		for sample in sampname_by_group['NHPRTR']:
+			shell("""cat summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.stat | awk '{{print "NHPRTR\t{sample}\t"$0}}' >> {output.full_report}""")
 
+		shell("""cat {input.cov_hists} > {output.full_cov_hist} """)
+### note the category of transcript!!
 
 rule trinityBlatterUp:
 	input:
@@ -492,9 +510,9 @@ rule trinityBlatterUp:
 		shell(""" cat {input.transcriptome_in} | fasta_formatter -t | grep -wFf <( cat {output.raw_transcriptome_blat} | cut -f 10 | sort | uniq ) | awk '{{print">"$0}}' | tr "\t" "\n" > {output.mappable_seqs}; """)
 		shell(""" cat {input.transcriptome_in} | fasta_formatter -t | grep -wFf <( cat {output.filtered_transcriptome_blat} | cut -f 10 | sort | uniq ) | awk '{{print">"$0}}' | tr "\t" "\n" > {output.filtered_mappable_seqs}; """)
 
-
+###################################################################################
 ##########################	TRANSCRIPTOME FILTRATION 	###########################
-
+###################################################################################
 
 rule find_direct_ILS_anomalies:
 	input:
@@ -510,14 +528,14 @@ rule find_direct_ILS_anomalies:
 		cores=8,
 		intersect_params = " -split ",
 		weirdos = "random\|alt\|Un\|fix",
-		slop_thresh =100,
+		slop_thresh =75,
 	message:
 		"excluding aligned  {wildcards.sample} transcripts from annotated genes, etc .... "
 	run:
 		shell(""" mkdir -p assembled_transcripts/{wildcards.sample}/trinity/intersects/ """)
 		shell(""" rm -f {output} """)
 		#exclude_list
-		excld = annotation_by_operation["exclude"]#["GENCODE32", "NCBIrefSeq", "cmplxRepeat", "retro9", "yalePseudo"]
+		excld = annotation_by_operation["hg38"]["exclude"]#["GENCODE32", "NCBIrefSeq", "cmplxRepeat", "retro9", "yalePseudo"]
 		listList = " "
 		fai = ref_genome_by_name[wildcards.ref_gen]["fai"]
 		for ex in excld:
@@ -548,7 +566,7 @@ rule merge_ILS:
 	run:
 		shell(""" mkdir -p utils/NotAPlaceOfHonor/ """)
 		#exclude_list
-		excld = annotation_by_operation["exclude"]#["GENCODE32", "NCBIrefSeq", "cmplxRepeat", "retro9", "yalePseudo"]
+		excld = annotation_by_operation["hg38"]["exclude"]#["GENCODE32", "NCBIrefSeq", "cmplxRepeat", "retro9", "yalePseudo"]
 		lust = " "
 		excld_str = " "
 		for ex in excld:
@@ -608,7 +626,7 @@ rule transcriptome_accumulator:
 		print("merging intervals with shared reads.... DONE!")
 
 		shell(""" mkdir -p mapped_reads/{wildcards.aligner}/{wildcards.sample}/forbidden_accumulations/ """)
-		excld = annotation_by_operation["exclude"]#["GENCODE32", "NCBIrefSeq", "cmplxRepeat", "retro9", "yalePseudo"]
+		excld = annotation_by_operation["hg38"]["exclude"]#["GENCODE32", "NCBIrefSeq", "cmplxRepeat", "retro9", "yalePseudo"]
 		listList = " "
 		for ex in excld:
 			path2gtf = annotation_by_name[ex]["gtf_path"]
@@ -681,7 +699,7 @@ rule merge_accumulants:
 #		shell(""" cat {input.indiv_forbid} | sort  -k 1,1 -k2,2n  | bedtools merge -d {params.merge_thresh} -i - > {output.full_forbid}.tmp """) 
 		shell(""" cat {input.indiv_forbid} | sort  -k 1,1 -k2,2n > {output.full_forbid}.tmp """) # removed the 2nd merge thresh - remember, these intervals have already been slopped by this ammount!
 
-		excld = annotation_by_operation["exclude"]
+		excld = annotation_by_operation["hg38"]["exclude"]
 		lust = " "
 		excld_str = " "
 		for ex in excld:
@@ -748,7 +766,7 @@ rule greedy_accumulator_indv:
 		runmem_gb=32,
 		runtime="36:00:00",
 		cores=8,
-		sloppy=100,#how many bp to slop by
+		sloppy=75,#how many bp to slop by
 	message:
 #		"excluding  {wildcards.sample}'s {wildcards.trans_aligner}-aligned transcripts from population-wide {wildcards.read_aligner}-accumulation .... "
 		"accumulating {wildcards.sample}'s {wildcards.trans_aligner}-aligned transcripts with {wildcards.read_aligner} aligned reads "
@@ -766,7 +784,7 @@ rule greedy_accumulator_indv:
 		shell(""" echo > accumulations/{wildcards.read_aligner}/{wildcards.sample}/{wildcards.sample}.{wildcards.trans_aligner}.{wildcards.read_aligner}.noForbiddenAnnot.footprints.init.bed """)
 			#for annot in forbidden:
 		annot_str = ""
-		annot = annotation_by_operation["exclude"]
+		annot = annotation_by_operation['hg38']["exclude"]
 		for egg in annot:
 			path2gtf = annotation_by_name[egg]["gtf_path"]
 			annot_str = "%s%s,%s;"%tuple([ annot_str, egg, path2gtf])
@@ -852,9 +870,9 @@ rule summarize_transcriptome_subset_FASTA:#will be used to summarize the ~~~sequ
 rule summon_transcriptome_subset_analytics:
 	input:
 #		accum_stats = lambda wildcards: expand("summaries/accumulations/{sample}/{sample}.vs_hg38.{aligner}.forbiddenAccumulation.stats", sample=sampname_by_group['all'], aligner=["mapspliceRaw"])
-		seq_stats = lambda wildcards: expand("assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_hg38.blat.{affix}.seq.stats", sample=sampname_by_group['all'], affix=["mapt", "mapt.filt", "mapt.noForbiddenAnnot", "mapt.mapspliceMulti.ILSAnom"]),
-		loc_stats = lambda wildcards: expand("assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_hg38.blat.{affix}.loc.stats", sample=sampname_by_group['all'], affix=["mapt", "mapt.filt","mapt.noForbiddenAnnot", "mapt.mapspliceMulti.ILSAnom"]),
-		direct_forbidden_rosters = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.vs_hg38.blat.mapt.forbidden.roster", sample=sampname_by_group['all']),
+		seq_stats = lambda wildcards: expand("assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_hg38.blat.{affix}.seq.stats", sample=sampname_by_group['1kGen'], affix=["mapt", "mapt.filt", "mapt.noForbiddenAnnot", "mapt.mapspliceMulti.ILSAnom","mapt.mapspliceUniq.ILSAnom", ]),
+		loc_stats = lambda wildcards: expand("assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_hg38.blat.{affix}.loc.stats", sample=sampname_by_group['1kGen'], affix=["mapt", "mapt.filt","mapt.noForbiddenAnnot", "mapt.mapspliceMulti.ILSAnom","mapt.mapspliceUniq.ILSAnom", ]),
+		direct_forbidden_rosters = lambda wildcards: expand("summaries/assembled_transcripts/trinity/{sample}/{sample}.trinity.vs_hg38.blat.mapt.forbidden.roster", sample=sampname_by_group['1kGen']),
 	output:
 		all_transcript_filt_stats = "summaries/assembled_transcripts/transcript_filtration.stats",
 		direct_forbidden_roster = "summaries/assembled_transcripts/direct_forbidden_overlaps.roster"
@@ -866,7 +884,7 @@ rule summon_transcriptome_subset_analytics:
 		"collecting all individual accumulation metadata.... "
 	run:
 		shell(""" rm -f {output} """)
-		for sample in sampname_by_group['all']:
+		for sample in sampname_by_group['1kGen']:
 			shell("""cat assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_hg38.blat.mapt.seq.stats | awk '{{print "mapped\tsequence\tblat\t{sample}\t"$0}}' >> {output.all_transcript_filt_stats}""")
 			shell("""cat assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_hg38.blat.mapt.loc.stats | awk '{{print "mapped\tlocus\tblat\t{sample}\t"$0}}' >> {output.all_transcript_filt_stats}""")
 			shell("""cat assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_hg38.blat.mapt.filt.seq.stats | awk '{{print "filtered\tsequence\tblat\t{sample}\t"$0}}' >> {output.all_transcript_filt_stats}""")
@@ -887,11 +905,11 @@ rule summon_transcriptome_subset_analytics:
 ##########################	ORF EXTRACTION 	###########################
 
 
-rule extract_transcriptionally_anomalous_orfs:#will be used to summarize the ~~~sequences~~~ of the subsets rawBlat, filtBlat, noForbiddenAnnot, ILSAnom
+rule extract_transcriptionally_anomalous_orfs:
 	input:
 		transcripts_in = "assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.mapt.{read_aligner}.ILSAnom.fa",
 	output:
-		orfs_out = "ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}."
+		orfs_out = "ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.fa"
 	params:
 		runmem_gb=8,
 		runtime="1:00:00",
@@ -899,22 +917,376 @@ rule extract_transcriptionally_anomalous_orfs:#will be used to summarize the ~~~
 		length_cutoff=75,
 		other_params = "--reverse_complement "
 	run:
-		shell(""" mkdir ORFs/precandidates/transcriptionally_anomalous/{wildcards.sample}/ """)
+		shell(""" mkdir -p  ORFs/precandidates/transcriptionally_anomalous/{wildcards.sample}/ """)
 		shell(""" python scripts/ORF_extractor.py {params.other_params} --length_cutoff {params.length_cutoff} --fasta_in {input.transcripts_in} --output_file {output.orfs_out}.list  """)
-		shell(""" samtools faidx --mark-strand sign {input.transcripts_in} --region-file  <(cat orfs.test.list | grep "(+)" | cut -f 1 -d "(" ) > {output.orfs_out} """)
-		shell(""" samtools faidx --reverse-complement --mark-strand sign {input.transcripts_in} --region-file  <(cat orfs.test.list | grep "(-)" | cut -f 1 -d "(" ) >> {output.orfs_out} """)
+		shell(""" samtools faidx --mark-strand sign {input.transcripts_in} --region-file  <(cat {output.orfs_out}.list | grep "(+)" | cut -f 1 -d "(" ) > {output.orfs_out} """)
+		shell(""" samtools faidx --reverse-complement --mark-strand sign {input.transcripts_in} --region-file  <(cat {output.orfs_out}.list | grep "(-)" | cut -f 1 -d "(" ) >> {output.orfs_out} """)
 
 
-# #rule pull_orf_from_transcript
-# #mkdir ORFs/{Source}/{indiv}/
-# #ie
-# mkdir ORFs/precandidates/HG00101/
-# #then
-# ORF_extractor.py 
+
+
+rule blastORF_vsPDB:
+	input:
+#		orfs_in = "ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.fa",
+		orfs_in = "ORFs/{prefix}.fa",
+	output:
+		blast_out = "ORFs/{prefix}.vs_PDB.blastx",
+		no_pdb_fa = "ORFs/{prefix}.vs_PDB.absent.fa",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+		evalue=10,
+	run:
+		shell(""" blastx -evalue {params.evalue} -outfmt 6 -db /nas/longleaf/data/blast/pdbaa -query {input.orfs_in} -out {output.blast_out} """)
+		shell(""" cat {input.orfs_in} | fasta_formatter -t | grep -v -wFf <( cut -f 1 {output.blast_out} | sort | uniq ) | awk '{{print">"$1; print $2;}}'  > {output.no_pdb_fa} """ )		
+
+rule blat_ORF_to_genome:
+	input:
+		orfs_in = "ORFs/{prefix}.fa",
+	output:
+#		orfs_out = "ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.fa"
+		orfBlat_psl = "ORFs/{prefix}.blat_to_{ref_gen}.psl",
+		orfBlat_bed = "ORFs/{prefix}.blat_to_{ref_gen}.bed",
+	params:		
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+		match_thresh = 50,#50 bases must match
+		match_frac = 0.5,#50% of query must align
+#		weirdos = "random\|alt\|Un\|fix",
+	wildcard_constraints:
+		ref_gen = "[0-9A-Za-z_]*"
+	run:
+		ref_gen_path = ref_genome_by_name[wildcards.ref_gen]["path"]
+		weirdos = ref_genome_by_name[wildcards.ref_gen]["scrubString"]
+		shell(""" blat -noHead {ref_gen_path} {input.orfs_in} {output.orfBlat_psl}.noFilt; """)
+		shell(""" cat {output.orfBlat_psl}.noFilt | awk '{{if(($1)>{params.match_thresh})print;}}' | awk '{{if(($13-$12)/$11>{params.match_frac})print;}}' | grep -v "{weirdos}" >  {output.orfBlat_psl} """)
+		shell(""" ~/modules/UCSC_utils/pslToBed {output.orfBlat_psl} {output.orfBlat_bed} """)
+
+
+rule findDupes:
+	input:
+#		orfs_in = "assembled_transcripts/{sample}/trinity/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.mapt.{read_aligner}.ILSAnom.fa",
+		orfBlat_in = "ORFs/{prefix}.blat_to_hg38.psl",
+	output:
+#		orfs_out = "ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.fa"
+		noDupeOrfs = "ORFs/{prefix}.noDupes.fa",
+	params:
+		runmem_gb=8,
+		runtime="1:00:00",
+		cores=8,
+		weirdos = "random\|alt\|Un\|fix",
+	wildcard_constraints:
+		ref_gen = "[0-9A-Za-z_]*"
+	run:
+		#currently accepting any mainstream blat of an ORF as valid - maybe overconservative; filter a little?
+		shell(""" cat {input.orfBlat_in} | grep -v {params.weirdos} | cut -f 10 | sort | uniq -c | tr -s " " | tr " " "\t" | cut -f 2,3 > ORFs/{wildcards.prefix}.blattings.list""" )
+		shell(""" cat ORFs/{wildcards.prefix}.fa | fasta_formatter -t | grep -v -wFf <( cat ORFs/{wildcards.prefix}.blattings.list | awk '{{if($1>1)print;}}' | cut -f 2) | awk '{{print">"$1; print$2}}' > {output.noDupeOrfs} """ )
+		try:
+			shell(""" cat ORFs/{wildcards.prefix}.fa | fasta_formatter -t | grep -v -wFf <( cat ORFs/{wildcards.prefix}.blattings.list | cut -f 2 ) | awk '{{print">"$1;print$2}}' > ORFs/{wildcards.prefix}.blat.cantFind """ )
+		except:
+			shell(""" touch ORFs/{wildcards.prefix}.blat.cantFind """)
+
+
+rule check_orfs_vs_A_genome:
+	input:
+		orfBlat_in = "ORFs/{prefix}.blat_to_{ref_gen}.bed", #ref_gen for pan, gor, leu, etc
+#		outside_ORFs = "utils/ORFomes/{ref_gen}.orfome.bed"
+	output:
+		badmaps_ORFs = "ORFs/{prefix}.blat_to_{ref_gen}.badmaps.list", #ORFs which map but not well
+		unseen_ORFs = "ORFs/{prefix}.blat_to_{ref_gen}.unseen.list", #ORFs which don't map at all
+		no_corresponding_ORF = "ORFs/{prefix}.blat_to_{ref_gen}.noCorrespondingORF.bed",
+		ILSanom_ORF = "ORFs/{prefix}.blat_to_{ref_gen}.ilsAnom.bed",
+		compPrim_clean = "ORFs/{prefix}.blat_to_{ref_gen}.compPrim_cleanGenome.list",
+	params:
+		runmem_gb=64,
+		runtime="1:00:00",
+		cores=8,
+		other_params = "--reverse_complement",
+		length_cutoff = 50,
+		overlap_frac = 0.5, #how much of the query ORF must be overlapped
+		intersect_params = "-split",
+		slop_thresh =75,
+		annot_filt = "XM_\|XR_",#(ignore predicted, curated-only 
+	run:
+		trunc_pref =  "/".join(wildcards.prefix.split("/")[:-1])
+		shell(""" mkdir -p utils/ORFomes/tmp/{trunc_pref} """)
+		#	accepts a blatting to a ref genome
+
+		#	goes back and collects ORFs which BLAT but not well
+		shell(""" cat ORFs/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.psl.noFilt | cut -f 10 | sort | uniq | grep -v -wFf <(cat {input.orfBlat_in} | cut -f 4 | sort | uniq) > {output.badmaps_ORFs} || true """)
+		shell(""" touch {output.badmaps_ORFs} """)
+
+		#	collect ORFs which don't BLAT at all
+		shell("""cat ORFs/{wildcards.prefix}.fa | grep ">" | cut -f 2 -d ">" | grep -v -wFf <( cat ORFs/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.psl.noFilt | cut -f 10 | sort | uniq ) > {output.unseen_ORFs} """)
+
+		#	collect window around the blatting; calculate a local ORFome
+		ref_gen_fai = ref_genome_by_name[wildcards.ref_gen]["fai"]
+		ref_gen_path = ref_genome_by_name[wildcards.ref_gen]["path"]
+		shell(""" cat {input.orfBlat_in} | cut -f 1,2,3 | sort | uniq | bedtools slop -b 10000 -i - -g {ref_gen_fai} > utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regions.bed """)
+		shell(""" bedtools getfasta -fi {ref_gen_path} -fo utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regions.fa -bed utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regions.bed """)
+
+		shell(""" python scripts/ORF_extractor.py {params.other_params} --length_cutoff {params.length_cutoff} --fasta_in utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regions.fa --output_file utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regionalORFs.prebed""")
+
+		shell(""" cat utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regionalORFs.prebed |  sort| uniq | sed -e 's/(-)/(~)/g' | tr ':' '\t' | tr  '-' '\t' | tr '~' '-' | tr '(' '\t' | tr -d ')' | awk '{{print$1,$2+$4-1,$2+$5,"potato",0,$6}}'  | tr " " "\t" > utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regionalORFs.bed""")
+
+		# 	compares to same-strand ORF database
+		shell(""" bedtools intersect -f {params.overlap_frac} -split -s -wa -a {input.orfBlat_in} -b utils/ORFomes/tmp/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.regionalORFs.bed | cut -f 4 | sort | uniq > ORFs/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.ORFoverlappers.list """)
+		shell(""" grep -v -wFf ORFs/{wildcards.prefix}.blat_to_{wildcards.ref_gen}.ORFoverlappers.list  {input.orfBlat_in} > {output.no_corresponding_ORF} """)
+		# # 	compare to excludes annotation_by_operation[{wildcards.ref_gen}]["exclude"]
+		excld = annotation_by_operation[wildcards.ref_gen]["exclude"]#["GENCODE32", "NCBIrefSeq", "cmplxRepeat", "retro9", "yalePseudo"]
+
+		weirdos = ref_genome_by_name[wildcards.ref_gen]["scrubString"]
+		listList = " "
+		fai = ref_genome_by_name[wildcards.ref_gen]["fai"]
+		for ex in excld:
+			path2gtf = annotation_by_name[ex]["gtf_path"]
+			nuList = "ORFs/%s.blat_to_%s.intersects_%s.list" % tuple([wildcards.prefix, wildcards.ref_gen, ex])  
+			shell(""" bedtools intersect {params.intersect_params} -a {input.orfBlat_in} -b <( cat {path2gtf} | grep -v "{weirdos}" | grep -v "{params.annot_filt}" | bedtools slop -b {params.slop_thresh} -i - -g {fai}  ) | cut -f 4 | sort | uniq > {nuList} """)
+		# 	shell(""" cat {nuList} | wc -l | awk '{{print "{ex}\t"$1}}' >> {output.forbidden_roster} """)
+			listList = "%s %s "%tuple([ listList, nuList])
+		shell(""" grep -v -wFf <( cat {listList} | sort | uniq ) {input.orfBlat_in} > {output.ILSanom_ORF} """)
+
+		shell(""" cat {output.no_corresponding_ORF} | cut -f 4 | sort | uniq | grep -wFf <( cat {output.ILSanom_ORF} | cut -f 4 | sort | uniq )  > {output.compPrim_clean} """)
+		shell("""cat {output.badmaps_ORFs} >> {output.compPrim_clean} """)
+		shell("""cat {output.unseen_ORFs} >> {output.compPrim_clean} """)
+#		shell("""cat ORFs/{prefix}.fa | fasta_formatter -t | grep -wFf {output.compPrim_clean}.list > {output.compPrim_clean}""")
+
+
+
+rule check_orfs_vs_ALL_genomeS:
+	input:
+		compPrim_clean_in =  lambda wildcards: expand("ORFs/{prefix}.blat_to_{ref_gen}.compPrim_cleanGenome.list", ref_gen = ["panTro6","gorGor5","nomLeu3","ponAbe3"], prefix = wildcards.prefix),
+	output:
+		compPrim_clean_out = "ORFs/{prefix}.compPrim_cleanGenome.fa",
+	params:
+		runmem_gb=8,
+		runtime="15:00",
+		cores=8,
+	run:
+		shell("""cat ORFs/{wildcards.prefix}.fa | fasta_formatter -t | grep -wFf <( cat ORFs/{wildcards.prefix}.blat_to_panTro6.compPrim_cleanGenome.list | grep -wFf ORFs/{wildcards.prefix}.blat_to_gorGor5.compPrim_cleanGenome.list | grep -wFf ORFs/{wildcards.prefix}.blat_to_nomLeu3.compPrim_cleanGenome.list | grep -wFf ORFs/{wildcards.prefix}.blat_to_ponAbe3.compPrim_cleanGenome.list ) | awk '{{print">"$1;print$2}}' > {output.compPrim_clean_out}""")
+
+
+
+
+
+rule nuclBlastDBbuilder:
+	input:
+		fasta_in = "{path2fasta}.f{asta}",
+	output:
+		blastDBindicator = "{path2fasta}.f{asta}.ndb",
+	params:
+		runmem_gb=8,
+		runtime="15:00",
+		cores=8,
+	run:
+		shell(""" makeblastdb -in {input.fasta_in} -dbtype nucl  """)
+
+
+
+rule check_A_outgroup_transcriptome:
+	input:
+		db_in = "assembled_transcripts/{primate}/trinity/{primate}.trinity.fasta.ndb",
+		orfs_in = "ORFs/{prefix}.fa",
+	output:
+		blastHits = "ORFs/{prefix}.{primate}_hits.out",
+#		blastORFs = "ORFs/{prefix}.{primate}_ORFs.out",
+	params:
+		runmem_gb=8,
+		runtime="15:00",
+		cores=8,
+		evalue = 2,
+	run:
+		shell(""" blastn -db assembled_transcripts/{primate}/trinity/{primate}.trinity.fasta -query {input.orfs_in} -evalue {params.evalue} -out {output.blastHits} """)
+
+
+
+rule individual_transcriptome_lookback:
+	input:
+		db_in = "assembled_transcripts/{target_indv}/trinity/{target_indv}.trinity.fasta.ndb",
+		orfs_in = "ORFs/precandidates/transcriptionally_anomalous/{query_indv}/{query_indv}.trinity.vs_hg38.blat.{read_aligner}.anomORFs.fa",
+	output:
+		blastHits = "ORFs/precandidates/transcriptionally_anomalous/{query_indv}/lookback/{target_indv}/{target_indv}.{read_aligner}.blastOut",
+		noBlasts = "ORFs/precandidates/transcriptionally_anomalous/{query_indv}/lookback/{target_indv}/{target_indv}.{read_aligner}.noBlast",
+#		noORF = "ORFs/precandidates/transcriptionally_anomalous/{query_indv}/lookback/{target_indv}/{target_indv}.{read_aligner}.noORF",
+#		badScripts = "ORFs/precandidates/transcriptionally_anomalous/{query_indv}/lookback/{target_indv}/{target_indv}.{read_aligner}.badScripts",
+#		rediscovered = "ORFs/precandidates/transcriptionally_anomalous/{query_indv}/lookback/{target_indv}/{target_indv}.{read_aligner}.rediscovered",
+	params:
+		runmem_gb=8,
+		runtime="15:00",
+		cores=8,
+		evalue = 10,
+		other_params = "--reverse_complement",
+		length_cutoff = 50,
+	run:
+		shell(""" mkdir -p ORFs/precandidates/transcriptionally_anomalous/{wildcards.query_indv}/lookback/{wildcards.target_indv} """)
+		shell(""" blastn -db assembled_transcripts/{wildcards.target_indv}/trinity/{wildcards.target_indv}.trinity.fasta -query {input.orfs_in} -outfmt "6 qseqid sseqid pident length mismatch gapopen qstart qend sstart send evalue bitscore sstrand" -evalue {params.evalue} -out {output.blastHits} """)
+		#check the blasts ... are they ORFs?
+		#	#for orf o in orfs_in...
+
+		#	#	#is o missing from blast? if so, mark that in .noBlast
+		shell(""" cat  {input.orfs_in} | grep ">" | cut -f 2 -d ">" | grep -v -wFf <( cat {output.blastHits} | cut -f 1 | sort | uniq ) > {output.noBlasts} """)
+
+		#	#	#blast quality filter??
+
+		shell(""" samtools faidx --region-file <( cat {output.blastHits} | cut -f 2 | sort | uniq ) assembled_transcripts/{wildcards.target_indv}/trinity/{wildcards.target_indv}.trinity.fasta > {output.blastHits}.fa """)
+		shell(""" python scripts/ORF_extractor.py {params.other_params} --length_cutoff {params.length_cutoff} --fasta_in {output.blastHits}.fa --output_file ORFs/precandidates/transcriptionally_anomalous/{wildcards.query_indv}/lookback/{wildcards.target_indv}/{wildcards.target_indv}.{wildcards.read_aligner}.blastHitTranscriptORFs.list """)
+		shell(""" cat ORFs/precandidates/transcriptionally_anomalous/{wildcards.query_indv}/lookback/{wildcards.target_indv}/{wildcards.target_indv}.{wildcards.read_aligner}.blastHitTranscriptORFs.list | grep "(+)" | tr ":" "\t" | tr "-" "\t" | tr "(" "\t" | tr -d ")" | awk '{{print$1,$2,$3,"potato",0,$4}}' | tr " " "\t" >  ORFs/precandidates/transcriptionally_anomalous/{wildcards.query_indv}/lookback/{wildcards.target_indv}/{wildcards.target_indv}.{wildcards.read_aligner}.blastHitTranscriptORFs.bed """)
+		shell(""" cat ORFs/precandidates/transcriptionally_anomalous/{wildcards.query_indv}/lookback/{wildcards.target_indv}/{wildcards.target_indv}.{wildcards.read_aligner}.blastHitTranscriptORFs.list |grep "(-)" | tr ":" "\t" | tr "(" "\t" | sed -e 's/-)/~/g' | tr "-" "\t" | tr "~" "-" | awk '{{print$1,$2,$3,"potato",0,$4}}' | tr " " "\t" >>  ORFs/precandidates/transcriptionally_anomalous/{wildcards.query_indv}/lookback/{wildcards.target_indv}/{wildcards.target_indv}.{wildcards.read_aligner}.blastHitTranscriptORFs.bed """)
+
+ 
+		shell(""" cat {output.blastHits} |  cut -f 1,2,9,10,12,13 | sed -e 's/plus/+/g' | sed -e 's/minus/-/g' | awk '{{print$2,$3<$4?$3:$4,$3<$4?$4:$3,"|"$1"|",$5,$6}}' | tr " " "\t" | tr '|' '"' >  {output.blastHits}.bed""")
+
+		#	#	#is any hit an ORF? if no, mark that in .noORF
+		#	#	#for the ORF hits... is the transcript bad? if so, mark that in .badScripts
+		#	#	#finally, an ORF hit to a clean transcript is marked in .rediscovered
+
+
+#		shell(""" samtools faidx --mark-strand sign {input.transcripts_in} --region-file  <(cat {output.orfs_out}.list | grep "(+)" | cut -f 1 -d "(" ) > {output.orfs_out} """)
+#		shell(""" samtools faidx --reverse-complement --mark-strand sign {input.transcripts_in} --region-file  <(cat {output.orfs_out}.list | grep "(-)" | cut -f 1 -d "(" ) >> {output.orfs_out} """)
+
+
+# rule all_indv_lookbacks:
+# 	input:
+# 		lookbacks =  lambda wildcards: expand("ORFs/precandidates/transcriptionally_anomalous/{query_indv}/lookback/{target_indv}/{target_indv}.badScripts", query_indv = wildcards.query_indv, target_indv =sampname_by_group['1kGen']),
+# 	output:
+# 		compPrim_clean_out = "ORFs/{prefix}.compPrim_cleanGenome.fa",
+# 	params:
+# 		runmem_gb=8,
+# 		runtime="15:00",
+# 		cores=8,
+# 	run:
+# 		shell("""cat ORFs/{wildcards.prefix}.fa | fasta_formatter -t | grep -wFf <( cat ORFs/{wildcards.prefix}.blat_to_panTro6.compPrim_cleanGenome.list | grep -wFf ORFs/{wildcards.prefix}.blat_to_gorGor5.compPrim_cleanGenome.list | grep -wFf ORFs/{wildcards.prefix}.blat_to_nomLeu3.compPrim_cleanGenome.list | grep -wFf ORFs/{wildcards.prefix}.blat_to_ponAbe3.compPrim_cleanGenome.list ) | awk '{{print">"$1;print$2}}' > {output.compPrim_clean_out}""")
+
+
+
+
+
+# rule check_compPrime_ortho:
+# 	input:
+# 		orfBlat_in = "ORFs/{prefix}.blat_to_hg38.bed", #ref_gen for pan, gor, leu, etc
+# #		outside_ORFs = "utils/ORFomes/{ref_gen}.orfome.bed"
+# 	output:
+# 		# unseen_ORFs = "ORFs/{prefix}.blat_to_{ref_gen}.unseen.list", 
+# 		# no_corresponding_ORF = "ORFs/{prefix}.blat_to_{ref_gen}.noCorrespondingORF.bed",
+# 		# ILSanom_ORF = "ORFs/{prefix}.blat_to_{ref_gen}.ilsAnom.bed",
+# 	params:
+# 		runmem_gb=16,
+# 		runtime="1:00:00",
+# 		cores=8,
+# 		primates = "hg38,panTro5,gorGor5,ponAbe3,nomLeu3",
+# 		# other_params = "--reverse_complement",
+# 		# length_cutoff = 75,
+# 		# overlap_frac = 0.75, #how much of the query ORF must be overlapped
+# 		# intersect_params = "-split",
+# 		# slop_thresh =75,
+# 	run:
+# 		trunc_pref =  "/".join(wildcards.prefix.split("/")[:-1])
+# 		shell(""" mkdir -p ORFs/{trunc_pref}/orthology/ """)
+
+
+
+# 		for contig in chr 1..22, x, y, m:
+# 			~/modules/phast/bin/maf_parse --seqs {params.primates} --features <( grep -w chr$contig {input.orfBlat_in} ) /proj/cdjones_lab/Genomics_Data_Commons/orthology/multiz30way/hg38/chr$contig.maf > ORFs/{trunc_pref}/orthology/chr$contig.raw.maf
+# 			python Is_this_an_ORF.py -i  ORFs/{trunc_pref}/orthology/chr$contig.raw.maf --yes  ORFs/{trunc_pref}/orthology/chr$contig.ortho_ORFs.maf --no ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.maf
+# 			python what_sort_of_nonORF_is_it.py -i  ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.maf --trunc ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.earlyTerm.maf --frameshift ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.frameshift.maf --nostart ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.startCodonWipeout.maf --mangled ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.mangled.maf --missing ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.missing.maf
+# 			#upstream rescue routine: is there an in-frame start codon upstream, before a stop? is there an anystream?
+# 				#ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.startCodonWipeout.maf ---   ---> ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.startCodonWipeout.rescue.maf and ORFs/{trunc_pref}/orthology/chr$contig.no_ortho_ORFs.startCodonWipeout.noRescue.maf
+# 				# maf header (needed for UCSC) ##maf version=1 scoring=tba.v8
+# 				~/modules/UCSC_utils/mafRanges out.maf gorGor5 maf.bed
+# 				bedtools flank -l 1000 -s -i maf.bed -g gorGor5.fa.fai > upstreams.bed
+# 				bedtools getfasta -bed upstreams.bed -fi gorGor5.fa > upstreams.fa
+# 				python starts_and_stops.py --fasta_in upstreams.fa --bed_out starts_and_stops.bed
+# 				#coord transform to absolute genomic from relative-to-flank 
+# 				bedtools closest -id -s -a maf.bed -b  <(cat starts_and_stops | awk if $2 mod 3 == stop_codon_pos mod 3 print;) | grep STOP > no_rescue.inFrame
+# 				## do other mod-3's for no_rescue.anyFrame
+
+### also check the frame shifts, make sure it isn't just extending the ORF
+
+
+
+
+# reporter script for anomORFs?
+rule trivial_ORF_facts:
+	input:
+		orfs_in = "ORFs/{prefix}.fa",
+	output:
+		report_out = "summaries/ORFs/{prefix}.basics.summary"
+	params:
+		runmem_gb=8,
+		runtime="10:00",
+		cores=8,
+	run:
+		trunc_pref =  "/".join(wildcards.prefix.split("/")[:-1])
+		shell(""" mkdir -p summaries/ORFs/{trunc_pref} """)
+		shell(""" cat {input.orfs_in} | fasta_formatter  -t | wc -l | awk '{{print"total_count\t"$1;}}' > {output.report_out} """) 
+		shell(""" cat {input.orfs_in} | fasta_formatter  -t | tr -d ")"  | tr "(" "\t" | awk '{{if($2=="+")print;}}' | wc -l | awk '{{print "sense_count\t"$1}}' >> {output.report_out} """) 
+		shell(""" cat {input.orfs_in} | fasta_formatter  -t | tr -d ")"  | tr "(" "\t" | awk '{{if($2=="-")print;}}' | wc -l | awk '{{print "antisense_count\t"$1}}' >> {output.report_out} """)
+		shell(""" cat {input.orfs_in} | fasta_formatter  -t | tr -d ")"  | tr "(" "\t" 	| wc -l | awk '{{print "unique_transcripts\t"$1}}' >> {output.report_out} """)
+
+# reporter script for anomORFs?
+rule summon_all_basic_ORF_facts:
+	input:
+		ilsAnom_ORFs = lambda wildcards: expand("summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.basics.summary", ref_genome="hg38",trans_aligner="blat",read_aligner=["mapspliceMulti",  ],sample=sampname_by_group['1kGen']),
+		noDupe_ORFs = lambda wildcards: expand("summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.noDupes.basics.summary", ref_genome="hg38",trans_aligner="blat",read_aligner=["mapspliceMulti",  ],sample=sampname_by_group['1kGen']),
+		noPDB_ORFs = lambda wildcards: expand("summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.vs_PDB.absent.basics.summary", ref_genome="hg38",trans_aligner="blat",read_aligner=["mapspliceMulti",  ],sample=sampname_by_group['1kGen']),
+		compPrimGen_ORFs = lambda wildcards: expand("summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.compPrim_cleanGenome.basics.summary", ref_genome="hg38",trans_aligner="blat",read_aligner=["mapspliceMulti",  ],sample=sampname_by_group['1kGen']),
+		badMap_ORFs = lambda wildcards: expand("ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.blat_to_{ref_gen}.{degreeMissing}.list", ref_genome="hg38", ref_gen=["gorGor5","panTro6","ponAbe3","nomLeu3"],trans_aligner="blat",read_aligner=["mapspliceMulti",  ],sample=sampname_by_group['1kGen'], degreeMissing=["badmaps","unseen"]),
+	output:
+		report_out = "summaries/basic_ORF_facts.summary"
+	params:
+		runmem_gb=8,
+		runtime="10:00",
+		cores=8,
+	run:
+		shell(""" rm -rf {output.report_out} """)
+		ref_genome="hg38"
+		trans_aligner="blat"
+		for read_aligner in ["mapspliceMulti"]:#, "mapspliceUniq"]:
+			for sample in sampname_by_group['1kGen']:
+				shell( """ cat summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.basics.summary | awk '{{print "ilsAnom\t{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}\t"$0}}' >> {output.report_out} """)
+				shell( """ cat summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.noDupes.basics.summary | awk '{{print "noDupe\t{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}\t"$0}}' >> {output.report_out} """)
+				shell( """ cat summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.vs_PDB.absent.basics.summary | awk '{{print "noPDB\t{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}\t"$0}}' >> {output.report_out} """)
+				shell( """ cat summaries/ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.compPrim_cleanGenome.basics.summary | awk '{{print "cleanGenome\t{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}\t"$0}}' >> {output.report_out} """)
+
+				for refGen in ["gorGor5","panTro6","ponAbe3","nomLeu3"]:
+					shell( """ cat ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.blat_to_{refGen}.badmaps.list | wc -l | awk '{{print "badmap_{refGen}\t{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}\t"$0}}' >> {output.report_out} """)
+					shell( """ cat ORFs/precandidates/transcriptionally_anomalous/{sample}/{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}.anomORFs.blat_to_{refGen}.unseen.list | wc -l | awk '{{print "unseen_{refGen}\t{sample}.trinity.vs_{ref_genome}.{trans_aligner}.{read_aligner}\t"$0}}' >> {output.report_out} """)
+
+
+
+
+
+
+
 
 
 ##########################	BACKGROUND DATA 	###########################
 
+rule extract_referenceGenome_ORFome:
+	output:
+		orfome_bed = "utils/ORFomes/{ref_gen}.orfome.bed"
+	params:
+		runmem_gb=16,
+		runtime="12:00:00",
+		cores=8,
+		other_params = "--reverse_complement",
+		length_cutoff = 75,
+	run:
+		ref_gen_path = ref_genome_by_name[wildcards.ref_gen]["path"]
+		ref_gen_fai = ref_genome_by_name[wildcards.ref_gen]["fai"]
+		shell(""" mkdir -p utils/ORFomes/tmp/ """)
+		shell(""" bedtools makewindows -w 100000 -s 50000 -g {ref_gen_fai} | bedtools getfasta -fi {ref_gen_path} -bed - > utils/ORFomes/tmp/{wildcards.ref_gen}.fragmented.fa """)
+		# shell(""" 
+		# 	for contig in $(grep ">" {ref_gen_path} | tr -d ">" ); do 
+		# 		samtools faidx {ref_gen_path} $contig > utils/ORFomes/tmp/{wildcards.ref_gen}.tmp.fa
+		shell(""" python scripts/ORF_extractor.py {params.other_params} --length_cutoff {params.length_cutoff} --fasta_in utils/ORFomes/tmp/{wildcards.ref_gen}.fragmented.fa --output_file {output.orfome_bed}.list """)
+		# 		cat {output.orfome_bed}.list.tmp > {output.orfome_bed}.list;
+		# 		rm utils/ORFomes/tmp/{wildcards.ref_gen}.tmp.fa {output.orfome_bed}.list.tmp
+		# 		done;""")
+		shell(""" cat {output.orfome_bed}.list | sort| uniq | sed -e 's/(-)/(~)/g' | tr ':' '\t' | tr  '-' '\t' | tr '~' '-' | tr '(' '\t' | tr -d ')'  | awk '{print$1,$2+$4,$2+$5,"potato",0,$6}'  | tr " " "\t" > {output.orfome_bed}""")
+		shell(""" rm {output.orfome_bed}.list utils/ORFomes/tmp/{wildcards.ref_gen}.fragmented.fa """)
 
 ##########################	WRITE RESULTS 	###########################
 
