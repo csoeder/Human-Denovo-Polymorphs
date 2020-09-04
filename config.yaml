@@ -63,27 +63,34 @@ reference_genomes:
       source: UCSC Genome Browser
       scrubString: random\|Un
 
+reference_transcriptomes:
+    - name: chimp
+      species: pan troglodytes
+      path: /proj/cdjones_lab/Genomics_Data_Commons/transcriptomes/pan_troglodytes/Chimpanzee_NHPRT_Trinity.fa
+    - name: gorilla
+      species: gorilla gorilla
+      path: /proj/cdjones_lab/Genomics_Data_Commons/transcriptomes/gorilla_gorilla/Gorilla_NHPRT_Trinity.fa
 
 annotations:
     - name: GENCODE32
       genome: hg38
-      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/GENCODEv32.hg38.bed12
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/GENCODEv32.hg38.bed
       gtf_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/GENCODEv32.hg38.gtf
       link: https://genome.ucsc.edu/cgi-bin/hgTables
       instructions: group:genes;track:GENCODE32;table:knownGene
       source: UCSC Genome Browser
-      operations: [exclude,]
+      operations: [none,]
     - name: NCBIrefSeq
       genome: hg38
-      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/ncbiRefSeq.hg38.bed12
-      gtf_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/ncbiRefSeq.hg38.gtf
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/ncbiRefSeqCurated.hg38.bed
+      gtf_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/ncbiRefSeqCurated.hg38.gtf
       link: https://genome.ucsc.edu/cgi-bin/hgTables
-      instructions: group:genes;track:NCBI RefSeq;table:ncbiRefSeq
+      instructions: group:genes;track:NCBI RefSeq;table:ncbiRefSeqCurated
       source: UCSC Genome Browser
       operations: [exclude,]
     - name: cmplxRepeat
       genome: hg38
-      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/repeatMasker.complex.hg38.bed12
+      bed_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/repeatMasker.complex.hg38.bed
       gtf_path: /proj/cdjones_lab/Genomics_Data_Commons/annotations/homo_sapiens/repeatMasker.complex.hg38.gtf
       link: https://genome.ucsc.edu/cgi-bin/hgTables
       instructions: group:repeats;track:repeatMasker;table:rmsk;filter out Unknown/Simple_repeat/Low_complexity
@@ -247,7 +254,12 @@ software:
       purpose: multi-sequence alignment manipulation 
       link: http://compgen.cshl.edu/phast/
       bibtex: Hubisz2011
-
+    - name: IUPRED
+      version:  2a
+      path: ~/modules/iupred2a/iupred2a.py
+      purpose: detection of intrinsically disordered domains
+      link: https://iupred2a.elte.hu/
+      bibtex: Meszaros2018;Erdos2020
 
 
 
@@ -6268,7 +6280,7 @@ data_sets:
       readsfile2: SRR832915_2.fastq
       phase1Geno: 1
       readLen: 75
-      subgroups: [NHPRTR,all,]
+      subgroups: [NHPRTR,]
       nominalLen: 280
       SRA: SRR832915
     - name: chimp2
@@ -6280,19 +6292,19 @@ data_sets:
       readsfile2: SRR832916_2.fastq
       phase1Geno: 1
       readLen: 75
-      subgroups: [NHPRTR,all,]
+      subgroups: [NHPRTR,]
       nominalLen: 280
       SRA: SRR832916
     - name: gorilla1
       path: FASTQ/RNAseq/gorilla1/
       paired: True
       stranded: True
-      species: gorilla gorilla1
+      species: gorilla
       readsfile1: SRR832926_1.fastq
       readsfile2: SRR832926_2.fastq
       phase1Geno: 1
       readLen: 75
-      subgroups: [NHPRTR,all,]
+      subgroups: [NHPRTR,]
       nominalLen: 280
       SRA: SRR832926
     - name: gorilla2
@@ -6304,6 +6316,6 @@ data_sets:
       readsfile2: SRR832925_2.fastq
       phase1Geno: 1
       readLen: 75
-      subgroups: [NHPRTR,all,]
+      subgroups: [NHPRTR,]
       nominalLen: 280
       SRA: SRR832925

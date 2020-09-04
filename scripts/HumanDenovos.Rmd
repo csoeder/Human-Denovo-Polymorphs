@@ -3,8 +3,11 @@ title: "Human Denovo Genes"
 author: "Charlie Soeder"
 date: "`r Sys.Date()`"
 output:
-  html_document: default
   pdf_document: 
+    number_sections: yes
+    toc: yes
+    toc_depth: 5
+  html_document:
     number_sections: yes
     toc: yes
     toc_depth: 5
@@ -14,7 +17,7 @@ bibliography: references.bib
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = TRUE)
 #knitr::opts_knit$set(root.dir = '/proj/cdjones_lab/csoeder/Human-Denovo-Polymorphs')
-knitr::opts_knit$set(root.dir = '/Users/csoeder/Research/Human_deNovo/Human-Denovo-Polymorphs')
+knitr::opts_knit$set(root.dir = '/Users/csoeder/Research/Human-Denovo-Polymorphs')
 #knitr::opts_knit$set(root.dir=peaDubDee)
 #library("ggbio")
 #library("biomaRt")
@@ -27,6 +30,8 @@ library("bib2df")
 library("magrittr")
 library("UpSetR")
 library("grid")
+
+library("ComplexHeatmap")
 
 ```
 
@@ -47,7 +52,7 @@ library("grid")
 
 
 # fig_cnt <- fig_cnt + 1
-# thing.gg <- asdfasdfasd
+# thing.gg <- asdfasdfasd + labs(title = paste("Figure ",fig_cnt, ". Percent of Reads with a mean QUAL > 30", sep = ""), y="Percent QUAL > 30", x="") + theme_bw() 
 # thing.gg
 # png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
 # thing.gg
@@ -103,7 +108,7 @@ tbl_cnt <- 0
 
 
 
-## Introduction
+# Introduction
 
 New protein-coding genes have traditionally been thought to arise from pre-existing genetic structures, through processes such as gene duplication, retrotransposition, and lateral gene transfer. [@Chen2013] An alternative process would require the formation of new peptides from previously non-coding sequences. This has traditionally been regarded as rare or impossible; [go right to 1970’s Ohno/Jacobs? @Carvunis2012a; @Wu2011] however, a growing abundance of genomic data are raising questions about this viewpoint. Typically through annotation-based comparative genomics backed up with wetlab assays, de novo origination of coding genes has been detected in viruses [@Sabath2012, @Pavesi2013 ] Sacchromyces [@Cai2008, @Li2010, @Carvunis2012a], Oryza [@Xiao2009], Arabidopsis [@Li2016], Drosophila [@Levine2006; @Begun2007; @Reinhardt2013; @Zhao2014], and primates [@Knowles2009; @Li2010a; @Wu2011, @Chen2015, @Ruiz-Orera2015, @Guerzoni2016], including clinically relevant genes specific to human tumors [@Samusik2013;@Suenaga2014]. 
 
@@ -112,16 +117,16 @@ Next-generation sequencing technology [@Metzker2010] has made it possible to acc
 
 In order to search for candidate de novo gene originations in the human genome, a software pipeline was built to process  RNA-Seq datasets from the 1000 Genomes Project. These were assembled into personal transcriptomes and then aggressively filtered using published data sets to exclude RNA associated with known annotations The remaining portion is combed to collect all open reading frames (ORFs). These candidate genetic sites were used to populate a database, and the database was queried for information regarding the structure of the human population and relationships between primate genomes at these sites. 
 
-## Materials, Data, and Software
+# Materials, Data, and Software
 ```{r include=FALSE}
 
 trammel <- read_yaml("config.yaml")
 #trammel <- read_yaml("config.smol.yaml")
 ```
 
-### Data Sources
+## Data Sources
 
-#### Reference Genomes
+### Reference Genomes
 
 
 
@@ -151,8 +156,9 @@ refGenomes_summary.gt
 
 
 ```{r include=FALSE, echo = FALSE, message=FALSE}
-refGenomes_detail <- read_delim(trammel$reference_genomes[[1]]$fai, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+#refGenomes_detail <- read_delim(trammel$reference_genomes[[1]]$fai, "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 
+refGenomes_detail <- read_delim("utils/hg38.fa.fai", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
 names(refGenomes_detail) <- c("contig","size","cumulative","dummy1", "dummy2")
 refGenomes_detail %<>% select(c("contig","size")) %>% mutate(mainline = !grepl("_", contig))
 
@@ -170,7 +176,7 @@ refGenomes_consol.gt <- refGenomes_detail %>% group_by(mainline) %>% summarise(c
 	
 refGenomes_consol.gt
 
-write(refGenomes_consol.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeConsolidation.html", sep=""))
+#write(refGenomes_consol.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_refGenomeConsolidation.html", sep=""))
 
 ```
 
@@ -178,7 +184,7 @@ Chromosomes 1-22, X, Y, and M
 
 
 
-#### Reference Annotations
+### Reference Annotations
 
 
 The UCSC Genome Browser was a data source for annotation tracks, which were downloaded from the table browser as BED files. Several collections of annotations were downloaded as BED files from UCSC; in particular
@@ -214,13 +220,13 @@ ref_ann.stats.gt
 
 load, talk about trammel$annotations and summaries/reference_annotations.summary
 
-#### Orthology
+### Orthology
 
 Synteny was investigated using multiz 30 way alignment across 27 primates and 3 other mammals:
 http://hgdownload.soe.ucsc.edu/goldenPath/hg38/multiz30way/maf/
 
 
-#### Next-Gen Sequencing
+### Next-Gen Sequencing
 
 A major source of data was the 1000 Genomes Project. This is a database of deep-sequenced genomes from geographically diverse human populations. (The Thousand Genomes Project 2010, 2012) The genomes were accessed as Variant Call Format files relative to the hg19 reference genome, available for download from EBI or NCBI. 
 
@@ -250,7 +256,7 @@ rnaSeq_indiv_demog_counts.gt
 
 ```
 
-### Software Used 
+## Software Used 
 ```{r echo=FALSE, message=FALSE, warning=FALSE}
 softwareUsed.df <- plyr::ldply(trammel$software, data.frame)
 #bibdf <- bib2df("scripts/references.bib",separate_names = TRUE)
@@ -315,15 +321,15 @@ softwareUsed.beeg.gt
 
 
 
-## Procedure: Identifying Candidate De Novos
+# Procedure: Identifying Candidate De Novos
 
-### Workflow Overview
+## Workflow Overview
 
 A SnakeMake pipeline [@Rahmann2017] was used to shepherd the data through. 
 
 RNA-Seq reads were mapped to the human genome (hg19) using MapSplice2 (Wang et al. 2010) for splice-aware alignment. The reads were also assembled (without the use of a reference genome to eliminate spurious alignments) using Trinity (Grabherr et al. 2011). The resulting transcripts were aligned to hg19 using BLAT (Kent 2002), and these were given a first-pass filter which excluded alignments whose length was less than 90% of the transcript. Once aligned, a transcript was rejected as 'known' if any quality alignment overlapped an annotated gene (refSeq,/UCSC), pseudogene (Yale), retroelement (UCSC) or complex repetitive element (repeatmasker). Simple repetitive regions were not filtered out, having been involved in previously identified peptide origination (Chen et al. 1997), though attention was paid during curation for ambiguity in mapping. The remaining transcripts were considered to be 'anomalous'.
 
-### Read Pre-Processing
+## Read Pre-Processing
 
 These reads were preprocessed with FASTP [@Chen2018] for quality control and analytics. 
 
@@ -405,7 +411,7 @@ dupeStats.gg
 ```
 
 
-### Read Mapping
+## Read Mapping
 
 RNA-Seq reads were mapped to the human genome (hg38) using MapSplice2 (Wang et al. 2010) for splice-aware alignment
 
@@ -527,18 +533,18 @@ breadthStats.raw.gg
 
 
 
-#### Filtered Alignments (Multi)
+### Filtered Alignments (Multi)
 
 
 From the raw MapSplice output, three filtered alignments were produced. The first, mapspliceMulti, has had duplicates marked and removed, and has been filtered to require proper pairing and a minimum mapping quality (SAM flags "-q 20 -F 0x0200 -F 0x04 -f 0x0002"; markdup flags "-rS"). Thus, mapspliceMulti is a filtered alignment that retains all locii for multimapped reads. 
 
 
-#### Downsampled Alignments (Rando)
+### Downsampled Alignments (Rando)
 
 
 mapspliceRando is a downsampled alignment constructed by selecting at random a single location for each multimapped read, then merging the unambiguously located reads with mapspliceUniq. 
 
-#### Uniquely Mapped Alignments (Uniq)
+### Uniquely Mapped Alignments (Uniq)
 
 
 mapspliceUniq is derived from mapspliceMulti by completely filtering out all multimapped reads and keeping only those which map uniquely. 
@@ -547,7 +553,7 @@ mapspliceUniq is derived from mapspliceMulti by completely filtering out all mul
 
 
 
-### Transcriptome Assembly
+## Transcriptome Assembly
  reads were also assembled (without the use of a reference genome to eliminate spurious alignments) using Trinity (Grabherr et al. 2011). Transcriptome qualities were assessed using the TrinityStats.pl utility ( https://github.com/trinityrnaseq/trinityrnaseq/wiki/Transcriptome-Contig-Nx-and-ExN50-stats )
 
 
@@ -645,7 +651,7 @@ Do this with amount of transcriptome covered??
 
 
 
-### Transcript Alignment & Filtration
+## Transcript Alignment & Filtration
 
 
 
@@ -711,7 +717,7 @@ transcript_filtration.filt.gt
 
 
 
-#### Direct
+### Direct
 
 Once aligned, a transcript was rejected as 'known' if any quality alignment overlapped an annotated gene (refSeq,/UCSC), pseudogene (Yale), retroelement (UCSC) or complex repetitive element (repeatmasker). Simple repetitive regions were not filtered out, having been involved in previously identified peptide origination (Chen et al. 1997), though attention was paid during curation for ambiguity in mapping.
 
@@ -834,7 +840,7 @@ transcriptCount_assembliesPerRead.gg
 
 
 
-#### Contagious
+### Contagious
 
 Mapped transcripts not directly overlapping annotations were then compared to mapped RNA-Seq reads. Exons from mapped transcripts were collected and slopped by a read length (75bp) to create regions. Then, the following process was used to aggressively associate reads with transcripts, in order to see if a "trail of breadcrumbs" led back to a forbidden annotation:
 
@@ -924,7 +930,7 @@ write(forbiddenAccumulation_populationWide.main.gt %>%  as_raw_html(), paste("re
 
 These remaining transcripts were called "anomalous". 
 
-#### Anomalous Transcripts Summary
+### Anomalous Transcripts Summary
 
 
 ```{r echo=FALSE, warning=FALSE, message=FALSE}
@@ -975,7 +981,7 @@ transcript_filtration.counts.progress.gg
 
 
 
-### ORFome
+## ORFome
 
 
 
@@ -1007,7 +1013,7 @@ ORFome_filtration.init<- ORFome_filtration.init %>% mutate(orfBearing_frac = uni
 ORFs were extracted from the anomalous transcripts; because the 1000 Genomes RNA-Seq used an unstranded protocol both the forard reading and the reverse complement were scanned. In cases where a stop codon had multiple upstream starts, the longest ORF was selected. A length threshold of 75 codons (not including start and stop) was used to ignore small ORFs.  (see Hashimoto 2001 in Ruiz-Orera 2014)
 
 
-From the $`r sum( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti) %>% select(transcript_count) ) %>% human_readable_croncher() `$ total anomalous transcripts considered across $`r count( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti %>% select(indv) %>% unique() ) `$ samples, $`r sum( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti") %>% select(total_count) ) %>% human_readable_croncher() `$ ORFs meeting these criteria were found. On average, $`r mean(ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti) %>% select(orfBearing_frac) )*100 `$ % of the anomalous transcripts contained at least one such ORF. 
+From the $`r sum( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti") %>% select(transcript_count) ) %>% human_readable_croncher() `$ total anomalous transcripts considered across $`r count( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti") %>% select(indv) %>% unique() ) `$ samples, $`r sum( ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti") %>% select(total_count) ) %>% human_readable_croncher() `$ ORFs meeting these criteria were found. On average, $`r mean(ORFome_filtration.init %>% filter(read_algn=="mapspliceMulti") %>% select(orfBearing_frac) )*100 `$ % of the anomalous transcripts contained at least one such ORF. 
 
 
 
@@ -1025,7 +1031,7 @@ ORFome_filtration.init.retentionRates.gt
 
 
 
-#### Duplicate Exclusion
+### Duplicate Exclusion
 
 The identified ORFs were BLATed against the human genome. Hits were retained if they included at least 50 base pairs and at least 50% of the query sequence; hits to unconsolidated sequence (random, alt, and Un) were discarded. ORFs with more than one such quality hit were flagged as having genomic duplicates. 
 
@@ -1060,7 +1066,7 @@ ORFome_filtration.noDupe.retentionRates.gt
 
 
 
-#### Covert Protein Homology Exclusion
+### Covert Protein Homology Exclusion
 
 ORFs were BLASTed against the Protein Database to exclude known proteins. (e-value cutoff: 10)
 
@@ -1090,14 +1096,16 @@ ORFome_filtration.noPDB.retentionRates.gt
 
 ```
 
-#### Homologous Genome ORF Exclusion
+### Homologous Genome ORF Exclusion
 
 ORFs were BLATted vs reference genome
 orthologyDB
 
-ORFs were also BLATed against the reference genomes of four other closely related primates (chimpanzee panTro6, gorilla gorGor5, orangutan ponAbe2, gibbon nomLeu3) to establish possible sites of homology. These genomic locations were then given a first-order scan for coding sequence by enumerating all the same-strand ORFs in the site and the 10kb surrounding it. If one of these ORFs overlapped 75% or more the homologous site, it was flagged as having a homologous coding sequence in the primate in question. (h/t Jeremy Wang) Although we will later look at the definitive orthologies determined through syntenic multiplice sequence alignment, this approach is used because it is more aggressive in eliminating candidates since it can only increase the number of sites examined, and thus the opportunities for an ORF to be excluded (consider a situation in which an ORF has been duplicated in the primate lineage with a human-specific loss of copy A. The true orthologous site for copy B may be deactivated in other primates, which would lead an orthology-only scan to incorrectly accept the ORF as having no related ORF in non-human primates).
+ORFs were also BLATed against the reference genomes of four other closely related primates (chimpanzee panTro6, gorilla gorGor5, orangutan ponAbe2, gibbon nomLeu3) to establish possible sites of homology. These genomic locations were then given a first-order scan for coding sequence by enumerating all the same-strand ORFs in the site and the 10kb surrounding it. If one of these ORFs overlapped 75% or more the homologous site, it was flagged as having a homologous coding sequence in the primate in question. (h/t Jeremy Wang) Although we will later look at the definitive orthologies determined through syntenic multiple sequence alignment, this approach is used because it is more aggressive in eliminating candidates since it can only increase the number of sites examined, and thus the opportunities for an ORF to be excluded (consider a situation in which an ORF has been duplicated in the primate lineage with a human-specific loss of copy A. The true orthologous site for copy B may be deactivated in other primates, which would lead an orthology-only scan to incorrectly accept the ORF as having no related ORF in non-human primates).
 
+```
 Some candidate ORFs could not be identified in the chimp and/or gorilla genomes at all. These were BLASTed against the relevant TRACE archives using the NCBI web portal.
+```
 
 
 Currently accepting XR_* genes; is this good? No
@@ -1130,11 +1138,11 @@ ORFome_filtration.cleanGenome.retentionRates.gt
 
 ```
 
-##### non-human primate genome scan example
+#### non-human primate genome scan example
 
 
 
-```{r echo=FALSE, warning=FALSE, message=FALSE}
+```{r echo=FALSE, warning=FALSE, message=FALSE, include=FALSE}
 
 d00d <- "HG00096"
 
@@ -1156,14 +1164,14 @@ names(ORFome_filtration.example.nom) <- c("transcripts")
 
 
 
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE}
 
 cleanGenomes.list <- list(pan = ORFome_filtration.example.pan$transcripts, gor = ORFome_filtration.example.gor$transcripts, pon = ORFome_filtration.example.pon$transcripts, nom = ORFome_filtration.example.nom$transcripts)
 
 upset(fromList(cleanGenomes.list),empty.intersections = "on", order.by = "freq", queries = list(list(query = intersects, params = list("pan", "gor", "nom", "pon"), color = "red", active = T, query.name = "No analogous ORF in any other primate examined")), mainbar.y.label = "# ORFs with No Analog in Subset of Primates", sets.x.label = "# ORFs with No Analog\nin Nonhuman Primate",  query.legend = "bottom")
 
 grid.text(paste("Figure ", fig_cnt, ". # ORFs Lacking an Analogous ORF\nin Non-Human Primates\n(",d00d," taken as example)"), x = 0.70, y=0.90, gp=gpar(fontsize=10))
-#dev.off()
+
 
 
 # fig_cnt <- fig_cnt + 1
@@ -1177,22 +1185,23 @@ grid.text(paste("Figure ", fig_cnt, ". # ORFs Lacking an Analogous ORF\nin Non-H
 ```
 
 
-##### ORFs which BLAT badly or not at all
+#### ORFs which BLAT badly or not at all
 
 When sequences are mapped to a reference, they might map badly (eg, ~25 bp hits like you'd get from BLATTing, highly fragmented mappings) or it might be that no similarity can be detected at all. These are retained for the time being but such sequences will be reexamined later. 
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 
-ORFome_filtration.compPrim.badmaps <- ORFome_filtration.summary %>% filter( startsWith(filter, "badmap") ) %>% separate(col=filter, into=c("maptype","genome")) %>% mutate(count = as.numeric(measure) ) %>% select(-c("value", "measure")) 
+ORFome_filtration.compPrim.badmaps <- ORFome_filtration.summary %>% filter( endsWith(filter, "badmap") ) %>% separate(col=filter, into=c("maptype","genome")) %>% mutate(count = as.numeric(value), genome=measure ) %>% select(-c("value", "measure")) 
 
 ORFome_filtration.compPrim.badmaps <- inner_join(ORFome_filtration.compPrim.badmaps, ORFome_filtration.init %>% select(c("indv","assembler","ref_gen","ass_algn","read_algn","total_count")), by=c("indv"="indv","assembler"="assembler","ref_gen"="ref_gen","ass_algn"="ass_algn","read_algn"="read_algn")) %>% mutate(missing_rate= count/total_count)
 
+ORFome_filtration.compPrim.badmaps$genome <- factor(ORFome_filtration.compPrim.badmaps$genome, levels = c("panTro6", "gorGor5", "ponAbe3", "nomLeu3"))
 
 ```
 
 
 
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE}
 
 
 fig_cnt <- fig_cnt + 1
@@ -1208,7 +1217,7 @@ ORFome_filtration.compPrim.badmaps.counts.gg
 
 
 
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE}
 
 
 fig_cnt <- fig_cnt + 1
@@ -1227,16 +1236,24 @@ ORFome_filtration.compPrim.badmaps.frac.gg
 
 ```{r echo=FALSE, include=FALSE, message=FALSE}
 
-ORFome_filtration.compPrim.unseen <- ORFome_filtration.summary %>% filter( startsWith(filter, "unseen") ) %>% separate(col=filter, into=c("maptype","genome")) %>% mutate(count = as.numeric(measure) ) %>% select(-c("value", "measure")) 
+#ORFome_filtration.compPrim.unseen <- ORFome_filtration.summary %>% filter( startsWith(filter, "unseen") ) %>% separate(col=filter, into=c("maptype","genome")) %>% mutate(count = as.numeric(measure) ) %>% select(-c("value", "measure")) 
+
+
+ORFome_filtration.compPrim.unseen <- ORFome_filtration.summary %>% filter( endsWith(filter, "unseen") ) %>% separate(col=filter, into=c("maptype","genome")) %>% mutate(count = as.numeric(value), genome=measure ) %>% select(-c("value", "measure")) 
+
+
+#ORFome_filtration.compPrim.unseen <- inner_join(ORFome_filtration.compPrim.unseen, ORFome_filtration.init %>% select(c("indv","assembler","ref_gen","ass_algn","read_algn","total_count")), by=c("indv"="indv","assembler"="assembler","ref_gen"="ref_gen","ass_algn"="ass_algn","read_algn"="read_algn")) %>% mutate(missing_rate= count/total_count)
 
 ORFome_filtration.compPrim.unseen <- inner_join(ORFome_filtration.compPrim.unseen, ORFome_filtration.init %>% select(c("indv","assembler","ref_gen","ass_algn","read_algn","total_count")), by=c("indv"="indv","assembler"="assembler","ref_gen"="ref_gen","ass_algn"="ass_algn","read_algn"="read_algn")) %>% mutate(missing_rate= count/total_count)
+
+ORFome_filtration.compPrim.unseen$genome <- factor(ORFome_filtration.compPrim.unseen$genome, levels = c("panTro6", "gorGor5", "ponAbe3", "nomLeu3"))
 
 
 ```
 
 
 
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE}
 
 
 fig_cnt <- fig_cnt + 1
@@ -1252,7 +1269,7 @@ ORFome_filtration.compPrim.unseen.counts.gg
 
 
 
-```{r echo=FALSE, include=FALSE, message=FALSE}
+```{r echo=FALSE, include=TRUE, message=FALSE}
 
 
 fig_cnt <- fig_cnt + 1
@@ -1276,18 +1293,566 @@ ORFome_filtration.compPrim.unseen.frac.gg
 
 
 
-#### Homologous Transcriptome ORF Exclusion
+### Analogous Transcriptome ORF Exclusion
 
-@Pipes2013 
+The genomic scan is a reasonable first-pass filter, but could be fooled by eg splicing in the outgroup primate. The raw reads from the Non-Human Primate Reference Transcriptome Resource (NHPRTR) [@Pipes2013 ], for chimpanzee and gorilla. These are strand-aware(?) RNA_Seq libraries from pooled tissues. 
 
+two each assembled from published RNA-Seq data (???Scally et al. 2012???) 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE  }
+
+
+data_sets.df.NHPRTR.sparse <- data_sets.df %>% filter(subgroups=='NHPRTR') %>%  select(c(name,species,sex))
+
+
+```
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=F}
+
+tbl_cnt <- tbl_cnt + 1
+
+rnaSeq_NHPRTR_counts.gt <- data_sets.df.NHPRTR.sparse  %>% group_by(species) %>% summarise(count=n()) %>% ungroup() %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Number of NHPRTR RNA-Seq Samples Available", sep = ""), subtitle="by species") %>% grand_summary_rows(columns = vars(count),fns = list(total = ~sum(.)),formatter = fmt_number, decimals=0) #%>% cols_label(population = " ",)
+	
+rnaSeq_NHPRTR_counts.gt
+
+#write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_rnaSeq_indiv_demog.html", sep=""))
+
+
+```
+```
+These reads were pushed through the QC/Trinity pipeline to yield transcriptome assemblies. 
+```
+
+Thusfar intractable... instead using assembled transcriptome files obtained from L. Pipes (personal communication, 19 Jan 2016)
+
+
+For both the chimp and the gorilla transcriptomes, forward and reverse stranded ORFs longer than 50 nt were called. For each individual, the anomalous ORFs were BLASTed against the chimp and gorilla transcriptomes. Hits were collected and noted. Intersections with a transcriptome ORF were given the same filter as the genomic ORFs (ie, it must overlap 50%+ of the query sequence), with the additional requirement that it be a forward-strand map to a forward-strand ORF (it would be interesting if there was reverse-strand transcription in outgroups which flip direction, and not reason to consider it an exclusion criterion)
+
+
+If such an intersection was found, the ORF was considered to be transcribed as such in the outgroup primate, and thus marked for exclusion.
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ORFome_filtration.outgroupTranscriptomeClean.byPrimate <- read_delim("summaries/ORFs/precandidates/transcriptionally_anomalous/trinity.vs_hg38.blat.compPrim_transcripts.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(ORFome_filtration.outgroupTranscriptomeClean.byPrimate ) <- c("indv", "read_algn", "primate", "measure", "value")
+
+ORFome_filtration.outgroupTranscriptomeClean.byPrimate <- rbind(ORFome_filtration.outgroupTranscriptomeClean.byPrimate, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count, ref_gen, assembler, ass_algn,orfPerTranscript)) %>% gather(key="measure", value="value", startingORFcount) %>% mutate(primate="chimp") %>% select(names(ORFome_filtration.outgroupTranscriptomeClean.byPrimate )))
+
+
+ORFome_filtration.outgroupTranscriptomeClean.byPrimate <- rbind(ORFome_filtration.outgroupTranscriptomeClean.byPrimate, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count, ref_gen, assembler, ass_algn,orfPerTranscript)) %>% gather(key="measure", value="value", startingORFcount) %>% mutate(primate="gorilla") %>% select(names(ORFome_filtration.outgroupTranscriptomeClean.byPrimate )))
+
+```
+
+
+
+```{r echo=FALSE, include=FALSE, message=FALSE}
+
+
+fig_cnt <- fig_cnt + 1
+
+ORFome_filtration.outgroupTranscriptomeClean.byPrimate.gg <- ggplot(ORFome_filtration.outgroupTranscriptomeClean.byPrimate) + geom_line(aes(x=measure, y=value, group=paste(indv,primate,read_algn), color=primate)) + geom_point(data = . %>% filter(measure != "startingORFcount"), aes(x=measure, y=value, color=primate)) + geom_point(data = . %>% filter(measure == "startingORFcount"), aes(x=measure, y=value), color="black") + scale_y_log10() + labs(title = paste("Figure ",fig_cnt, ". Transcriptionally Anomalous ORFs\nwith Sequence Similarity Detected in NonHuman Primate Transcriptomes\n(grouped by individual)", sep = ""), y="number of ORFs", x="") + theme_bw() 
+
+ORFome_filtration.outgroupTranscriptomeClean.byPrimate.gg 
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.cleanOutgroupTranscriptome.byPrimate.retentionRates.gt <- 	ORFome_filtration.outgroupTranscriptomeClean.byPrimate %>% spread(key=measure, value=value) %>% mutate(transcript_detected = transcriptHitFound/startingORFcount, ORF_detected = transcriptOrfFound/startingORFcount, filter_retention = 1-ORF_detected) %>% select(c("read_algn","primate","transcript_detected", "ORF_detected", "filter_retention")) %>% gather(key="measure", value="value", transcript_detected, ORF_detected, filter_retention) %>% group_by(read_algn, primate, measure)  %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn, primate) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". ORFs from Anomalous Transcripts With No Corresponding ORF in Non-Human Transcriptome", sep = ""), subtitle="no analogous ORF detected in chimp or gorilla") %>% fmt_percent(columns=vars(maximum,minimum,average,median), decimals=1)  %>% cols_label(measure=" ")
+
+ORFome_filtration.cleanOutgroupTranscriptome.byPrimate.retentionRates.gt
+
+#write( ORFome_filtration.cleanGenome.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ORFome_filtration.outgroupTranscriptomeClean <- ORFome_filtration.summary %>% filter(filter == "outgroupTranscriptomeClean") %>% spread(key=measure, value = value) %>% mutate(outgroupTranscriptomeCleanORFcount = total_count) %>% select(-c(total_count))
+
+ORFome_filtration.outgroupTranscriptomeClean <- inner_join(ORFome_filtration.outgroupTranscriptomeClean, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count))  , by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration.outgroupTranscriptomeClean  %<>% mutate(outgroupTranscriptomeClean_frac = outgroupTranscriptomeCleanORFcount/startingORFcount)
+
+
+```
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.cleanOutgroupTranscriptome.retentionRates.gt <- ORFome_filtration.outgroupTranscriptomeClean %>% select(read_algn, startingORFcount, outgroupTranscriptomeCleanORFcount, outgroupTranscriptomeClean_frac) %>% gather(key="measure", value="value", -c(read_algn)) %>% mutate(measure=case_when(measure=="outgroupTranscriptomeClean_frac" ~ "percent ORFs human-specific", T ~measure))  %>% group_by(read_algn, measure) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". ORFs from Anomalous Transcripts With No Corresponding ORF in Non-Human Transcriptome", sep = ""), subtitle="no analogous ORF detected in chimp or gorilla") %>% fmt_number(columns=vars(maximum,minimum,average,median), decimals=1, suffixing = T)  %>% fmt_percent(columns=vars(maximum,minimum,average,median), rows = measure=="percent ORFs human-specific", decimals=1, )  %>% cols_label(measure=" ")
+
+ORFome_filtration.cleanOutgroupTranscriptome.retentionRates.gt
+
+#write( ORFome_filtration.cleanGenome.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
 
 ### Looking Back at the MetaTranscriptome
 
-Candidate sequences were then BLASTed against all the assembled transcriptomes. This identified false positives which were among the candidates because they passed filters in at least one individual but also failed them in at least one individual. Fragmentary BLAST hits, in which a non-ORF subsequence was identified in the transcriptomes, were tallied.
+Anomalous ORFs were then BLASTed against all the assembled transcriptomes. This identified false positives which were among the candidates because they passed filters in at least one individual but also failed them in at least one individual. Fragmentary BLAST hits, in which a non-ORF subsequence was identified in the transcriptomes, were tallied; these can include interesting cases such as transcripts from individuals whose genome contains a variant removing the ORF. 
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE  }
+populationWideLookback.pre <- read_delim("summaries/ORFs/precandidates/transcriptionally_anomalous/trinity.vs_hg38.blat.mapspliceMulti.lookback.summary",  "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(populationWideLookback.pre) <- c("query","redundant","target","measure","value")
+
+#populationWideLookback.pre %>% filter(target %in% c("all","clean")) %>%  mutate(total=as.numeric(measure)) %>% select(c(query, total))
+#populationWideLookback.pre %>% filter(target %in% c("all","clean")) %>%  mutate(total=as.numeric(value)) %>% select(c(query, total))
+#populationWideLookback.pre %>% filter(!(target %in% c("all","clean")))
+
+
+populationWideLookback <- inner_join(populationWideLookback.pre %>% filter(!(target %in% c("all","clean"))),populationWideLookback.pre %>% filter(target %in% c("all","clean")) %>%  mutate(total=as.numeric(measure)) %>% select(c(query, total)),by=c("query"="query")) %>% select(-c("redundant")) %>% mutate(fraction=value/total)
+
+
+example_indv = "HG00100"
 
 
 
-### Aggregation
+```
+
+Here is an example: the `r (populationWideLookback %>% filter(query==example_indv) %>% group_by(query) %>% summarise(total=unique(total)))$total `  anomalous ORFs derived from the `r example_indv ` transcriptome were BLASTed against every transcriptome in the population, including its own. If no sequence similarity detected, this was noted as "noBlast". If sequence similarity was detected, the transcript(s) containing it were examined. If any such transcript had been flagged as overlapping or accumulating onto a forbidden region, that ORF was noted as a "badScript" and put on a ban list. An ORF which had sequence similarity identified (ie, not noBlast) and was not a badScript, was noted as a "goodScript" and considered further. The ORFs were extracted for the goodScript transcripts (both strands, size threshold > 50 nt) If a BLAST hit overlapped such an ORF (currently any overlap - narrow this down some?), it was considered to be a second transcribed example of the query ORF, and it was called "rediscovered". Otherwise (eg, spurious hits, a transcribed variant in which the ORF is missing) it is called "noORF"
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=T}
+#%>% gather(key="type", value = "value", value, fraction)
+
+
+
+tbl_cnt <- tbl_cnt + 1
+
+populationWideLookback.exampleSummary.gt <- populationWideLookback %>% filter(query==example_indv & target != example_indv)  %>% group_by(query,measure) %>% summarise( max_val=max(value), med_val= median(value), avg_val = mean(value), min_val = min(value), max_frac=max(fraction), med_frac= median(fraction), avg_frac = mean(fraction), min_frac = min(fraction) ) %>% ungroup() %>% group_by(query) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Example Lookback Summary ", sep = ""), subtitle=paste("query individual ( ",example_indv,") excluded as outlier",sep="")) %>% tab_spanner(label="maximum", columns = starts_with("max_"))  %>% tab_spanner(label="median", columns = starts_with("med_")) %>% tab_spanner(label="mean", columns = starts_with("avg_")) %>% tab_spanner(label="minimum", columns = starts_with("min_")) %>% cols_label(max_val = "value", med_val = "value",avg_val = "value",min_val = "value",max_frac = "fraction", med_frac = "fraction",avg_frac = "fraction",min_frac = "fraction", measure=" " ) %>% fmt_percent(ends_with("_frac"), decimals = 1) %>% fmt_number(ends_with("_val"), suffixing = T, drop_trailing_zeros = T, decimals=1)
+	
+populationWideLookback.exampleSummary.gt
+
+#write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_rnaSeq_indiv_demog.html", sep=""))
+
+
+```
+When these ORFs were BLASTed against all 1kGen transcriptomes, the fraction for which there was no hit detected at all varied from ~16% to the overwhelming majority (~85%); these are retained by default. ORFs which have sequence similarity detected but never on banned transcripts range from ~12% to almost ~33% , with an overall rejection rate by the lookback filter ranging from ~3% to ~60%. Rediscovery rates ranged higher than noORF rates. 
+
+```{r echo=FALSE, include=TRUE, message=FALSE}
+#library("ggalluvial")
+
+fig_cnt <- fig_cnt + 1
+populationWideLookback.example.coarse.gg <- ggplot(populationWideLookback %>% filter(query==example_indv, measure %in% c("noBlast","goodScripts","badScripts")) ) + geom_bar(position="stack", stat="identity", aes(x=target, y=value, fill=measure, color=measure))  + geom_bar(data = . %>% select(-c("fraction","total")) %>% spread(key=measure, value=value) %>% mutate(retained=goodScripts+noBlast) %>% select(-c("goodScripts","noBlast", "badScripts")),aes(x=target, y=retained), stat="identity", fill="white", color="black", alpha=0)  + labs(title=paste("Figure ",fig_cnt, "a. Coarse Distribution of Lookback Filter Results\nfor Anomalous ORFs from ", example_indv,  sep = ""), x="target transcriptome searched", y="# ORFs from query")+  scale_x_discrete(breaks=c(example_indv), guide=guide_axis(angle=90))  + theme_bw()
+
+populationWideLookback.example.coarse.gg
+
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+```{r echo=FALSE, include=TRUE, message=FALSE}
+#library("ggalluvial")
+
+fig_cnt <- fig_cnt + 1
+populationWideLookback.example.fine.gg <- ggplot(populationWideLookback %>% filter(query==example_indv, measure %in% c("noBlast","noORF","rediscovered","badScripts")) ) + geom_bar(position="stack", stat="identity", aes(x=target, y=value, fill=measure, color=measure)) + geom_bar(data = . %>% select(-c("fraction","total")) %>% spread(key=measure, value=value) %>% mutate(retained=noORF+rediscovered+noBlast) %>% select(-c("noBlast", "badScripts", "noORF", "rediscovered")),aes(x=target, y=retained), stat="identity", fill="white", color="black", alpha=0)  + labs(title=paste("Figure ",fig_cnt, "b. Fine Distribution of Lookback Filter Results\nfor Anomalous ORFs from ", example_indv,  sep = ""), x="target transcriptome searched", y="# ORFs from query") +  scale_x_discrete(breaks=c(example_indv), guide=guide_axis(angle=90)) + theme_bw() 
+
+
+
+
+
+populationWideLookback.example.fine.gg
+
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+
+```
+
+Across all non-self targets, `r example_indv ` anomalous ORFs had a retention rate (ie, were not classified as badScript) of ~ 78%, though taken together it is the minimum of ~ 41% which sets a ceiling on the overall retention rate. 
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=T}
+#%>% gather(key="type", value = "value", value, fraction)
+
+tbl_cnt <- tbl_cnt + 1
+
+populationWideLookback.exampleSummary.retention.gt <- populationWideLookback %>% filter(query==example_indv & target != example_indv & measure =="badScripts" )  %>% mutate(retention_percent = 1-fraction) %>% group_by(query) %>% summarise( max_frac=max(retention_percent), med_frac= median(retention_percent), avg_frac = mean(retention_percent), min_frac = min(retention_percent) ) %>% ungroup()  %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Example Lookback Overall Retention ", sep = ""), subtitle=paste("query individual ( ",example_indv,") excluded as outlier",sep="")) %>% tab_spanner(label="maximum", columns = starts_with("max_"))  %>% tab_spanner(label="median", columns = starts_with("med_")) %>% tab_spanner(label="mean", columns = starts_with("avg_")) %>% tab_spanner(label="minimum", columns = starts_with("min_")) %>% cols_label(max_frac = " ", med_frac = " ",avg_frac = " ",min_frac = " " ) %>% fmt_percent(ends_with("_frac"), decimals = 1)
+	
+populationWideLookback.exampleSummary.retention.gt
+
+#write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_rnaSeq_indiv_demog.html", sep=""))
+
+
+```
+
+
+The lookback check of a query against itself has been omitted from these statistics but is important to examine by itself. For one thing, it's conceivable that an ORF could appear on two transcripts in an individual,  with one touching a forbidden zone. It's worth knowing the false negative rate for the BLAST search (noBlast), and the overall rate at which ORFs will be rediscovered. 
+
+
+
+```{r echo=FALSE, message=FALSE, warning=FALSE, eval=T}
+
+tbl_cnt <- tbl_cnt + 1
+
+populationWideLookback.selfSearch.gt <- populationWideLookback %>% filter(query== target) %>% select(-c(total, value)) %>% spread(key=measure, value=fraction) %>% mutate(retention = 1-badScripts ) %>% gather(key="measure", value="fraction", badScripts:retention)  %>% group_by(measure) %>% summarise( max_frac=max(fraction), med_frac= median(fraction), avg_frac = mean(fraction), min_frac = min(fraction) ) %>% ungroup() %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Self-Lookback Summary ", sep = ""), subtitle=paste(" ",sep=""))  %>% cols_label(max_frac = "maximum", med_frac = "median",avg_frac = "mean",min_frac = "minimum", measure=" " ) %>% fmt_percent(ends_with("_frac"), decimals = 1) 
+	
+populationWideLookback.selfSearch.gt
+
+#write(rnaSeq_indiv_demog_counts.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_rnaSeq_indiv_demog.html", sep=""))
+
+
+```
+
+
+
+
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+ORFome_filtration.lookbackClean <- ORFome_filtration.summary %>% filter(filter=="lookbackClean") %>% spread(key=measure, value = value) %>% mutate(lookbackCleanORFcount = total_count) %>% select(-c(total_count))
+
+ORFome_filtration.lookbackClean <- inner_join(ORFome_filtration.lookbackClean, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count))  , by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration.lookbackClean %<>% mutate(lookbackCleanORF_frac = lookbackCleanORFcount/startingORFcount)
+
+
+```
+
+
+
+eval vvv
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, eval=F}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.lookbackClean.retentionRates.gt <- ORFome_filtration.lookbackClean %>% select(read_algn, startingORFcount, lookbackCleanORFcount, lookbackCleanORF_frac) %>% gather(key="measure", value="value", -c(read_algn)) %>% mutate(measure=case_when(measure=="lookbackCleanORF_frac" ~ "percent ORFs w/o lookback badScript", T ~measure))  %>% group_by(read_algn, measure) %>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". ORFs from Anomalous Transcripts which are Lookback Clean", sep = ""), subtitle="no BLAST hit to a problematic trascript in any 1kGen transrtiptome") %>% fmt_number(columns=vars(maximum,minimum,average,median), decimals=1, suffixing = T)  %>% fmt_percent(columns=vars(maximum,minimum,average,median), rows = measure=="percent ORFs w/o lookback badScript", decimals=1, )  %>% cols_label(measure=" ")
+
+ORFome_filtration.lookbackClean.retentionRates.gt 
+
+#write( ORFome_filtration.noDupe.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+
+
+
+
+## Aggregation
+
+For each individual transcriptome, a collection of "precandidate" ORFs were called which met the following criteria:
+
+•	No duplicate in the "mainstream" hg38 reference genome.
+•	No BLAST hit to anything in the NR PDB
+•	No analogous ORF can be found in the reference genome of any other primate examined (chimp, gorilla, gibbon, orangutan)
+•	No analogous ORF can be found in the reference transcriptome of any other primate examined (chimp, gorilla)
+•	No analogous ORF analogous ORF can be found on on a "forbidden" transcript in any other individual in the 1kGen population
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+
+ORFome_filtration.precand <- ORFome_filtration.summary %>% filter(filter=="precandidate") %>% spread(key=measure, value = value) %>% mutate(precandidateORFcount = total_count) %>% select(-c(total_count))
+
+ORFome_filtration.precand <- inner_join(ORFome_filtration.precand, ORFome_filtration.init %>% mutate(startingORFcount = total_count) %>% select(-c(filter, sense_count, antisense_count, unique_transcripts, transcript_count,orfBearing_frac, total_count))  , by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration.precand %<>% mutate(precandidateORF_frac = precandidateORFcount/startingORFcount)
+
+ORFome_filtration <- ORFome_filtration.init %>% mutate(startingORFcount=total_count) %>%  select(c(indv, assembler, ref_gen, ass_algn, read_algn, startingORFcount))
+	
+ORFome_filtration <- inner_join(ORFome_filtration, ORFome_filtration.nodupe%>%  select(c(indv, assembler, ref_gen, ass_algn, read_algn, noDupORFcount, noDupe_frac)), by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration <- inner_join(ORFome_filtration, ORFome_filtration.noPDB %>%  select(c(indv, assembler, ref_gen, ass_algn, read_algn, noPDBORFcount, noPDB_frac)), by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+
+ORFome_filtration <- inner_join(ORFome_filtration, ORFome_filtration.cleanGenome %>%  select(c(indv, assembler, ref_gen, ass_algn, read_algn, cleanGenomeORFcount, cleanGenome_frac)), by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+ORFome_filtration <- inner_join(ORFome_filtration, ORFome_filtration.outgroupTranscriptomeClean %>%  select(c(indv, assembler, ref_gen, ass_algn, read_algn, outgroupTranscriptomeClean_frac, outgroupTranscriptomeCleanORFcount)), by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+
+ORFome_filtration <- inner_join(ORFome_filtration, ORFome_filtration.lookbackClean %>% select(c(indv, assembler, ref_gen, ass_algn, read_algn, lookbackCleanORF_frac, lookbackCleanORFcount)), by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+
+
+ORFome_filtration <- inner_join(ORFome_filtration, ORFome_filtration.precand %>%  select(c(indv, assembler, ref_gen, ass_algn, read_algn, precandidateORF_frac, precandidateORFcount)), by=c("indv"="indv", "assembler"="assembler", "ref_gen"="ref_gen", "ass_algn" = "ass_algn", "read_algn"="read_algn"))
+
+
+
+
+```
+
+
+
+
+eval vvv
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, eval=F}
+tbl_cnt <- tbl_cnt + 1
+
+ORFome_filtration.gath <- ORFome_filtration  %>% select(c(indv, assembler, ref_gen, ass_algn, read_algn, ends_with("_frac") )) %>% gather(key="measure", value="value", ends_with("_frac"))
+
+ORFome_filtration.gath$measure <- factor(ORFome_filtration.gath$measure, levels = c("noDupe_frac" , "lookbackCleanORF_frac", "outgroupTranscriptomeClean_frac", "noPDB_frac","cleanGenome_frac" ,"precandidateORF_frac"))
+
+ORFome_filtration.retentionRates.gt <- ORFome_filtration.gath %>% group_by(assembler, ref_gen, ass_algn, read_algn,measure)%>%  summarise(minimum = min(value), average=mean(value), median=median(value) , maximum = max(value)) %>% ungroup() %>% group_by(read_algn) %>% gt() %>% tab_header(title=paste("Table ",tbl_cnt, ". Overall Retention Rates at Different Steps of Precandidate Screening", sep = ""), subtitle="percent of anomalous ORFs retained by filter")%>% fmt_percent(columns=vars(maximum,minimum,average,median))  %>% cols_label(measure=" ") %>% cols_hide(c("assembler", "ref_gen","ass_algn"))
+
+ORFome_filtration.retentionRates.gt
+
+#write( ORFome_filtration.noDupe.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+
+Across $`r nrow( ORFome_filtration  %>% select(indv) %>% unique() ) %>% human_readable_croncher() `$  individual transcriptomes queried, a total of $`r sum( ORFome_filtration %>% filter(read_algn == "mapspliceMulti") %>% select(precandidateORFcount) ) %>% human_readable_croncher() `$ precandidate ORFs were identified in the mapspliceMulti alignment. This includes  $`r nrow( ORFome_filtration %>% filter(read_algn == "mapspliceMulti") %>% filter(precandidateORFcount ==0) ) %>% human_readable_croncher() `$ individuals in which no such candidates were identified. 
+
+These precandidate ORFs were aggregated into precandidate genes by two different methods: by genomic location and by sequence similarity discovered in individual transcriptomes. 
+
+### Genomic Location Mapping
+
+First, the mapped locations were compared for all precandidate ORFs across all individual transcriptomes sampled. The requirement that ORFs have no duplicates in the genome means that these locii can be easily compared. Pairwise overlaps were merged iteratively to form collections of ORFs representing observed transcription at the same genomic locus. 
+
+### Transcriptome Lookback Rediscovery
+
+Second, the BLAST results from searching individual transcriptomes were reexamined. Specifically, pairwise overlaps of matched query ORFs and transcriptomic ORFs were collected and merged iteratively. Because the query sequences are recognized precandidates, each aggregate contains at least one such precandidate. The rediscovery process has the potential to associate a query ORF with an unrelated ORF in the target sequence, so the ORFs in the resulting categories were subdivided into those whose transcriptomic coordinates are a recognized precandidate, and "hop-ons" which were not for some reason. (the rediscovery process will also drop precandidates from aggregation if they are not rediscovered during self-lookback, but this rarely happens). 
+
+### Compare and Merge the Glomps
+
+These two clustering strategies were compared by examining the pairwise set identity of the clusters generated in each. 
+
+```{r echo=FALSE, include=TRUE, message=FALSE}
+
+precandidates_blat_mapspliceMulti_glomp_by_location <- read_table2("ORFs/precandidates/precandidates.blat.mapspliceMulti.glomp_by_location.list", col_names = FALSE)
+names(precandidates_blat_mapspliceMulti_glomp_by_location) <- c("aggregate","instance")
+
+precandidates_blat_mapspliceMulti_glomp_by_rediscovery <- read_table2("ORFs/precandidates/precandidates.blat.mapspliceMulti.glomp_by_rediscovery.list", col_names = FALSE)
+names(precandidates_blat_mapspliceMulti_glomp_by_rediscovery) <- c("aggregate","instance")
+
+df.tmp <- as.data.frame(c())
+for (seqGlmp in unique(precandidates_blat_mapspliceMulti_glomp_by_rediscovery$aggregate) ) {
+	
+	precandidates_blat_mapspliceMulti_glomp_by_rediscovery.agg.list <-(precandidates_blat_mapspliceMulti_glomp_by_rediscovery %>% filter(aggregate == seqGlmp) %>% as.list())$instance
+	
+	
+	for (locGlmp in unique(precandidates_blat_mapspliceMulti_glomp_by_location$aggregate) ) {
+	
+		precandidates_blat_mapspliceMulti_glomp_by_location.agg.list <-(precandidates_blat_mapspliceMulti_glomp_by_location %>% filter(aggregate == locGlmp) %>% as.list())$instance
+		num_seq <- length(precandidates_blat_mapspliceMulti_glomp_by_rediscovery.agg.list)
+		num_loc <- length(precandidates_blat_mapspliceMulti_glomp_by_location.agg.list)
+		insect = length(intersect(precandidates_blat_mapspliceMulti_glomp_by_rediscovery.agg.list,precandidates_blat_mapspliceMulti_glomp_by_location.agg.list))
+		iww = length(union(precandidates_blat_mapspliceMulti_glomp_by_rediscovery.agg.list,precandidates_blat_mapspliceMulti_glomp_by_location.agg.list))
+		df.tmp <- rbind(df.tmp, c(seqGlmp,locGlmp,num_seq,num_loc,insect, iww))
+		
+
+	}
+	
+}
+names(df.tmp) <-c("sequenceGlomp", "locationGlomp", "sequenceGlomp_size", "locationGlomp_size", "intersection", "union" )
+precandidates.blat.mapspliceMulti.aggregation.glompComparison <- df.tmp %>% as_tibble() %>% mutate(intersection = as.numeric(intersection) , union = as.numeric(union), similarity = intersection/union)
+
+
+
+precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt <- precandidates.blat.mapspliceMulti.aggregation.glompComparison %>% select(ends_with("Glomp") | similarity) %>% spread(key=locationGlomp, value = similarity)
+
+
+#rownames(precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt) <- precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt$sequenceGlomp
+
+rho_names <- precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt$sequenceGlomp
+
+precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt %<>% select(-c("sequenceGlomp")) 
+
+
+acc <- c()
+for (nom in names(precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt) ){
+	mack = 1
+	acc<- c(acc, seq(1,nrow(precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt))[(precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt %>% select(nom)) ==mack])
+	
+}
+
+for (j in seq(1,nrow(precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt))){
+	if (!is.element(j,acc)){
+	acc<- c(acc, j)
+	}
+}
+
+precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt %<>% as.matrix() 
+
+rownames(precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt) <- rho_names
+
+precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt<-precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt[acc,]
+
+
+
+
+#precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt[0,]
+library("circlize")
+precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt <- precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt*100
+
+col_fun = colorRamp2(c( 0, 100), c("white", "black"))
+fig_cnt <- fig_cnt + 1
+
+precandidates.blat.mapspliceMulti.aggregation.glompComparison.ht <- Heatmap(precandidates.blat.mapspliceMulti.aggregation.glompComparison.matt, col = col_fun, show_row_dend = F, show_column_dend = F, heatmap_legend_param = list(title = "Similarity %",  border = "black"), column_title = paste("Figure ", fig_cnt , ". Consolidating the Precandidates:\nshared groupings under 2 glomping strategies", sep="") )
+precandidates.blat.mapspliceMulti.aggregation.glompComparison.ht
+
+```
+
+sequenceGlomp_0 refers to a single ORF sighting which doesn't map well to hg38. The locationGlomp precandidates with no overlap to the sequenceGlomps are often repetitive and don't blast well to other transcriptomes, including the source transcriptome.
+
+So there are a few cases where sequences are being retained partly because they don't align easily. However, where they overlap the two aggregation strategies agree completely. 
+
+For now, we'll concentrate on the cases which are both easily localized in the genome and easily detected in the transcriptome (ie, a simple inner-join).
+
+
+### Unscreened Precandidates
+
+```{r echo=FALSE, include=TRUE, message=FALSE}
+precandidates_basicFacts <- read_delim("summaries/precandidates.basicFacts.summary", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(precandidates_basicFacts) <- c("qual","read_aligner", "measure", "value")
+
+
+```
+
+eval vvv
+```{r echo=FALSE, warning=FALSE, message=FALSE,eval=F}
+tbl_cnt <- tbl_cnt + 1
+
+
+precandidates_basicFacts.gt <- precandidates_basicFacts %>% spread(key=measure, value=value)%>% group_by(qual) %>%  gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Precandidate Merging Process", sep = ""), subtitle="precandidate glomps retained/excluded") %>% tab_spanner(label = "excluded from merge", columns = c("distillationGhosts_glompcount","distillationGhosts_ORFcount")) %>% cols_label(distillationGhosts_glompcount = "# glomps", distillationGhosts_ORFcount = "# ORFs", expresser_count	= "# ORF expressers", locusCount = "# gene models", orf_count = "# examples", precandidate_count = "# precandidates", read_aligner = " ")
+
+
+precandidates_basicFacts.gt
+
+#write( ORFome_filtration.noDupe.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+```
+
+
+This joining process merged 10 ORFs from 4 expressing individuals into 7 precandidates for further examination.  15 previously identified precandidate ORFs were excluded on the basis of unreliable mappability. Each precandidate had a single gene model associated.
+
+
+eval vvv
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, eval=F}
+precandidates_mapspliceMulti <- read_delim("precandidates/unscreened/mapspliceMulti/precandidates.mapspliceMulti.roster", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(precandidates_mapspliceMulti) <- c("glomp","example","precandidate")
+
+#
+
+#precandidates_mapspliceMulti %>% mutate(stage="unscreened", read_algn = "mapspliceMulti") %>% separate(col=example, into=c("individual", "ORF"), sep = ";") %>% select(-c("glomp"),"precandidate", "individual", "ORF") %>% gt()
+
+tbl_cnt <- tbl_cnt + 1
+
+precandidates_mapspliceMulti.gt <- precandidates_mapspliceMulti  %>% separate(col=example, into=c("individual", "ORF"), sep = ";") %>% select(-c("glomp"),"precandidate", "individual", "ORF") %>% group_by(precandidate) %>% gt()  %>% tab_header(title=paste("Table ",tbl_cnt, ". Precandidates Called", sep = ""), subtitle="unscreened, mapspliceMulti alignment")%>% cols_label( precandidate = " ")
+
+
+precandidates_mapspliceMulti.gt
+
+
+#write( ORFome_filtration.noDupe.retentionRates.gt %>%  as_raw_html(), paste("results/tables/tbl",tbl_cnt,"_orfomeFiltration_init.html", sep=""))
+
+
+```
+
+How frequently are the precandidates transcribed? First, here are the number of individual ORF sightings from which the precandidate clusters were derived. Since each precandidate comes from at least one sighting, this distribution has a floor of 1. 
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+unscreened_expressorsPerPre <- read_delim("summaries/precandidates/unscreened.expressorsPerPre.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(unscreened_expressorsPerPre) <- c("read_algn", "null", "count", "precandidate")
+unscreened_expressorsPerPre %<>% select(-c("null")) 
+
+
+hist_size <- max(unscreened_expressorsPerPre$count)
+
+fig_cnt <- fig_cnt + 1
+unscreened_expressorsPerPre.gg <- ggplot(unscreened_expressorsPerPre ) + geom_histogram(breaks=seq(0.5,hist_size+0.5,1), aes(x=count)) + labs(title=paste("Figure ",fig_cnt, "a. Detection Frequency Histogram for Precandidates:\nSource ORFs per Precandidate",  sep = ""), x="# individuals with ORF in transcriptome", y="# precandidates") + theme_bw() 
+
+unscreened_expressorsPerPre.gg
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+```
+
+
+The precandidates also had instances of sequence similarity identified in the queried transcriptomes, but which were not open reading frames. Upon closer examination, these appeared to be truncated transcripts in which the ORF sequence was clipped. Including these:
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+
+unscreened_nonORFHits_PerPre <- read_delim("summaries/precandidates/unscreened.nonORFHits_PerPre.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+
+names(unscreened_nonORFHits_PerPre) <- c("read_algn", "precandidate","null", "count")
+#unscreened_nonORFHits_PerPre %<>% select(-c("null")) 
+
+
+unscreened_allXprsrs_PerPre <- rbind(unscreened_expressorsPerPre %>% mutate(type = "ORF"),unscreened_nonORFHits_PerPre %>% select("read_algn", "count" ,"precandidate") %>% mutate(type="nonORF"))
+
+unscreened_allXprsrs_PerPre <- rbind(unscreened_allXprsrs_PerPre, unscreened_allXprsrs_PerPre %>% group_by(precandidate, read_algn) %>% summarise(count=sum(count), type="total"))
+
+
+
+hist_size <- max(unscreened_allXprsrs_PerPre$count)
+
+#fig_cnt <- fig_cnt + 1
+unscreened_allXprsrs_PerPre.gg <- ggplot(unscreened_allXprsrs_PerPre ) + geom_histogram(breaks=seq(0.5,hist_size+0.5,1), aes(x=count,fill=type), position = "stack") + labs(title=paste("Figure ",fig_cnt, "b. Detection Frequency Histogram for Precandidates:\nAll Sequence Similarity Hits per Precandidate",  sep = ""), x="# individuals with non-ORF sequence similarity in transcriptome", y="# precandidates") + theme_bw() 
+
+unscreened_allXprsrs_PerPre.gg
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+```
+
+
+
+We can also ask, how many precandidates are sighted per transcriptome examined? In most cases, none:
+
+
+```{r echo=FALSE, warning=FALSE, message=FALSE}
+
+unscreened_prePerExpressor <- read_delim("summaries/precandidates/unscreened.prePerExpressor.hist", "\t", escape_double = FALSE, col_names = FALSE, trim_ws = TRUE)
+names(unscreened_prePerExpressor) <- c("read_algn", "null", "count", "individual")
+unscreened_prePerExpressor %<>% select(-c("null")) 
+
+
+unscreened_prePerIndv <- full_join(data_sets.df.sparse %>% select(name), unscreened_prePerExpressor, by = c("name"="individual") ) %>% mutate(count=case_when(is.na(count)~0, T~count))
+
+
+
+
+hist_size <- max(unscreened_prePerIndv$count)
+
+fig_cnt <- fig_cnt + 1
+unscreened_prePerIndv.gg <- ggplot(unscreened_prePerIndv ) + geom_histogram(breaks=seq(-0.5,hist_size+0.5,1), aes(x=count)) + labs(title=paste("Figure ",fig_cnt, "a. Number of Precandidates Detected per Transcriptome",  sep = ""), x="# precandidates per individual", y="# individuals") + theme_bw() 
+
+unscreened_prePerIndv.gg
+
+# png(height =  500, width = 800, filename = paste("results/figures/fig",fig_cnt,"_ong.png", sep=""))
+# thing.gg
+# dev.off()
+# 
+```
+(go back and gather the # of individual with non-ORF transcriptome hits??)
+
+Number of precandidates per transcriptome examined... roll in the partial results as above
+
+```{r echo=FALSE, warning=FALSE, message=FALSE, eval=F}
 
 Candidate sequences were then BLASTed against all the assembled transcriptomes. This identified false positives which were among the candidates because they passed filters in at least one individual but also failed them in at least one individual. Fragmentary BLAST hits, in which a non-ORF subsequence was identified in the transcriptomes, were tallied.  The candidates were also BLASTed against three chimp transcriptomes and three gorilla transcriptomes, two each assembled from published RNA-Seq data (???Scally et al. 2012???) and one each from the Non-Human Primate Reference Transcriptome Resource (Pipes et al. 2013). If the candidate sequence aligned to an ORF in a primate transcriptome, it was flagged. 
 
@@ -1303,6 +1868,8 @@ The candidate set was then refined; a locus was retained if:
 * the homologous regions in chimp and gorilla, when they can be identified, do not contain an ORF overlapping 75%+ of the sequence
 * there is only one instance of the ORF found in the human genome.
 * it did not BLAST to an ORF in any non-human primate transcriptome
+```
+
 
 These candidates were visualized in IGV (Robinson 2011) and the UCSC Genome Browser (Kent et al, 2002), and hand-curated for ORFs which screened for:
 •	Sensibility of mappings
@@ -1321,23 +1888,41 @@ A stricter subset of this used as the AA-grade candidates:
 •	RNA-seq mates were checked for overlap with forbidden regions
 •	Overlap with forbidden regions was checked across all sequenced RNA
 
+Meszaros2018
+
+# Procedure: Followup Data
+
+## Control Transcripts & ORFs
+
+To collect representative non-genic ORFs, the annotations used to exclude mapped transcripts were broken up into exons; these were slopped by the same amount (75 bp) and then subtracted from the mainstream chromosomes of the hg38 reference genome. These remaining intervals were downsampled by selecting 2500 at random, and from the sequence in these intervals ORFs were called using both strands and the same length cutoff as with the 1kGen transcriptome (75bp). These ORFs are referred to as "non-exonic".
+
+This process was repeated using the annotation locus as the interval of exclusion rather than the exon; this is to say, no ORFs are called from intronic regions in this control set. These ORFs are referred to as "intergenic".
 
 
-## Procedure: Control Data
 
-### Auxiliary ORFs
 
+
+```
 To collect representative non-genic ORFs, the human genome was windowed into 2.5kb regions, sliding by 1kb. A non-exonic subset of windows was collected, which did not overlap an annotated exon. A further intergenic subset was collected, which did not overlap an annotated gene, repeat, retroelement, or pseudogene locus, introns included. ORFs in these windows were filtered for length and 2000 selected at random from each subset. A collection of 2000 random length-filtered sequences from the Ensembl CDS collection was used as representative coding ORFs. 
+```
 
 To collect representative transcripts, 2000 Trinity assemblies each were collected randomly from those which had been classified as ILS_known or ILS_anomalies by the pipeline. 2.5 kb stretches of the genome were also collected, 2000 each of strictly intergenic and non-exonic chunks. 1500 RefSeq mRNA sequences were also chosen at random, and the transcripts used to test CPAT were also collected.  
 
-### Followup data
+## Scrambled ORFs
+
+One interesting question about a given peptide is: how typical are its properties, given its composition? This can be investigated by scrambling its sequence. One approach is to shuffle the codons in between the start and stop; the other is to shuffle the underlying nucleotides. These measure slightly different things: the former can test for interesting structural interactions between AAs which are broken up by shuffling while the latter can test for unusual codon usage given a GC%.
+
+Shuffling nucleotides has the added complexity that it can generate new stop codons within the sequence, and simple reshuffling is prohibitively inefficient at finding unobstructed ORFs for realistic sequence lengths. To get around this, an interative reshuffling was applied: if a stop codon interrupts the generated sequence, the sequence from the first such stop on is permuted, popping the first nucleotide from the sequence and appended to the end, thus necessarily removing that first stop while preserving length and content. The process is then applied on the altered sequence until no stops remain.
+
+25 scrambled replicates were generated for each ORF in each category (candidate, intergenic, nonexonic, mRNA)
+
+
+## Followup data
 
 To investigate biased tissue expression, RNA-Seq reads from tissues (brain, heart, kidney, liver, testis) across 6 humans (5 male, 1 female) (Brawand et al 2011) were downloaded and processed with Trinity and MapSplice. 
 
-### Scrambled ORFs
 
-## Procedure: Candidate Analyses
+# Procedure: Candidate Analyses
 
 Biochemical properties of the ORFs under investigation were calculated using the BioPython (Cock et al. 2009). Codon bias was calculated with data tabulated in (Nakamura et al 1999).  The transcripts were analyzed for coding potential with CPAT. (Wang et al 2013). RNA-Seq coverage at the candidate sites was measured with the FeatureCounts utility in the Subread package .(Liao et al 2014). RiboSeq data was taken from GWIPS (Michel et al. 2014) [AND RPFdb??? http://sysbio.sysu.edu.cn/rpfdb/browse.html ]. Candidates were also compared to the sORFs (Olexiouk et al 2015), LNCipedia (Volders et al 2015), and ____ databases. Variant annotations from 1000 Genomes (Abecasis et al 2012) were collected and processed with PyVCF (https://pyvcf.readthedocs.org/en/latest/). 
 
@@ -1345,6 +1930,9 @@ Biochemical properties of the ORFs under investigation were calculated using the
 
 
 ## Results
+
+recap the ORF discovery process & compare/contrast with the control ORFs..
+
 
 ## Discussion
 
@@ -1366,6 +1954,7 @@ De novo candidates uncovered here had a GC% which ranged from ~20 to ~55%, cente
 
 [Casola 2018] sez GC content is positively correlated with transcriptional activity in mammals, citing Kudla &c 2006
 
+CpG depletion f_CG/(f_C*f_G)
 
 #### Codon Usage Bias
 
@@ -1428,7 +2017,7 @@ One example of this approach in drosophila is [@Zhao2014], in which the transcri
 another: not phylostratigraphic, don't need to worry about phylostratigraphy bias
 mention: moyers & zhange 2015, 2016, 2017, Casola 2018
 
-One example of conflicting annotations in this project comes from the internal distinction between an expresser of a candidate (which is an individual in whose Trinity-assembled transcripts the candidate ORF could be found) and an individual with nonzero expression at a candidate site (as measured by MapSplice2 + featureCount). Given the discrete nature of reads and the small read count due to low expression, the former is especially false-negative prone. Thus, although the gene annotated most frequently only has 7 expressers, MapSplice assigns at least one read to the ORF in at least 7 individuals, for `r sum(expression_stats.allPop.meta.counted$fraction_expressing  > tail(peeps_per_gene, n=1)$number_expressers/num_rna$count) ` gene candidates ( `r 100*sum(expression_stats.allPop.meta.counted$fraction_expressing  > tail(peeps_per_gene, n=1)$number_expressers/num_rna$count)/length(expression_stats.allPop.meta.counted$fraction_expressing) ` %)
+One example of conflicting annotations in this project comes from the internal distinction between an expresser of a candidate (which is an individual in whose Trinity-assembled transcripts the candidate ORF could be found) and an individual with nonzero expression at a candidate site (as measured by MapSplice2 + featureCount). Given the discrete nature of reads and the small read count due to low expression, the former is especially false-negative prone. Thus, although the gene annotated most frequently only has 7 expressers, MapSplice assigns at least one read to the ORF in at least 7 individuals, for "r sum(expression_stats.allPop.meta.counted$fraction_expressing  > tail(peeps_per_gene, n=1)$number_expressers/num_rna$count) ` gene candidates ( `r 100*sum(expression_stats.allPop.meta.counted$fraction_expressing  > tail(peeps_per_gene, n=1)$number_expressers/num_rna$count)/length(expression_stats.allPop.meta.counted$fraction_expressing) " %)
 (UPDATE THIS IN LIGHT OF PCR RESULTS ^^^)
 
 
@@ -1569,3 +2158,4 @@ Compare de novo ORF to control ORFs from the genome to randomized ORFs.
 
 bibtex::write_bib ? 
 
+citation("ComplexHeatmap")
